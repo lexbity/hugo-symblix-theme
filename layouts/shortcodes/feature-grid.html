@@ -1,0 +1,13 @@
+{{- $columns := .Get "columns" | default "auto" -}}
+{{- $variant := .Get "variant" | default "default" -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict
+  "Base" (slice "docs-feature-grid" (printf "docs-feature-grid--%s" $variant))
+  "Extra" (.Get "class" | default "")
+) -}}
+{{- $style := "" -}}
+{{- if and (ne $columns "auto") ($columns) -}}
+  {{- $style = printf "grid-template-columns: repeat(%s, minmax(0, 1fr));" $columns -}}
+{{- end -}}
+<div class="{{ $classes }}"{{ with $style }} style="{{ . }}"{{ end }}>
+  {{ .Inner }}
+</div>

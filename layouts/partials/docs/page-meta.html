@@ -1,0 +1,19 @@
+<section class="docs-page-meta" aria-label="Page metadata">
+  {{ partial "docs/components/lifecycle-badges.html" (dict
+    "DocType" .Params.docType
+    "Since" .Params.since
+    "Deprecated" .Params.deprecated
+    "Removed" .Params.removed
+    "Experimental" .Params.experimental
+  ) }}
+  {{ $updated := .Lastmod }}
+  {{ if eq $updated.Year 1 }}
+    {{ $updated = .Date }}
+  {{ end }}
+  {{ if ne $updated.Year 1 }}
+    <span class="docs-page-meta-item">
+      <strong>{{ i18n "last_updated" | default "Last updated" }}:</strong>
+      <time datetime="{{ $updated.Format "2006-01-02" }}">{{ $updated.Format "Jan 2, 2006" }}</time>
+    </span>
+  {{ end }}
+</section>

@@ -1,0 +1,32 @@
+@layer components {
+  .docs-details {
+    margin: var(--docs-density-component-gap) 0;
+    padding: calc(var(--docs-density-component-padding) * 0.75) var(--docs-density-component-padding);
+    border: 1px solid var(--docs-border);
+    border-radius: 0;
+    background: color-mix(in srgb, var(--docs-bg) 94%, var(--docs-border));
+  }
+
+  .docs-details__summary {
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  .docs-details__body {
+    margin-top: calc(var(--docs-density-component-gap) * 0.75);
+  }
+
+  .docs-details__print {
+    display: none;
+  }
+
+  .docs-details__body > :first-child,
+  .docs-details__print > :first-child {
+    margin-top: 0;
+  }
+
+  .docs-details__body > :last-child,
+  .docs-details__print > :last-child {
+    margin-bottom: 0;
+  }
+}

@@ -1,0 +1,98 @@
+@layer components {
+  .docs-child-pages,
+  .docs-section-map,
+  .docs-related-grid {
+    margin-block: var(--docs-density-component-gap);
+  }
+
+  .docs-child-pages__title,
+  .docs-section-map__title,
+  .docs-related-grid__title {
+    margin: 0 0 var(--docs-density-component-gap);
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+
+  .docs-child-pages__grid,
+  .docs-related-grid__cards {
+    margin-top: 0;
+  }
+
+  .docs-child-pages__list,
+  .docs-related-grid__list,
+  .docs-section-map__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .docs-child-pages__list,
+  .docs-related-grid__list {
+    display: grid;
+    gap: var(--docs-density-component-gap);
+  }
+
+  .docs-child-pages__item,
+  .docs-related-grid__item {
+    padding: var(--docs-density-component-gap) 0;
+    border-top: 1px solid var(--docs-border);
+  }
+
+  .docs-child-pages__item:first-child,
+  .docs-related-grid__item:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .docs-child-pages__link,
+  .docs-related-grid__link,
+  .docs-section-map__link {
+    color: var(--docs-text);
+    font-weight: 700;
+  }
+
+  .docs-child-pages__description,
+  .docs-related-grid__description,
+  .docs-section-map__description {
+    margin: calc(var(--docs-density-component-gap) * 0.35) 0 0;
+    color: var(--docs-muted);
+  }
+
+  .docs-child-pages__meta,
+  .docs-related-grid__meta {
+    margin-top: calc(var(--docs-density-component-gap) * 0.5);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .docs-section-map__list {
+    display: grid;
+    gap: calc(var(--docs-density-component-gap) * 0.75);
+    padding-inline-start: 1rem;
+    border-inline-start: 1px solid var(--docs-border);
+  }
+
+  .docs-section-map__item {
+    position: relative;
+    padding-inline-start: 0.5rem;
+  }
+
+  .docs-section-map__item--current > .docs-section-map__link {
+    color: var(--docs-accent);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .docs-section-map__list--level-2,
+  .docs-section-map__list--level-3,
+  .docs-section-map__list--level-4 {
+    margin-block-start: calc(var(--docs-density-component-gap) * 0.75);
+  }
+
+  .docs-child-pages__empty {
+    color: var(--docs-muted);
+    font-style: italic;
+  }
+}

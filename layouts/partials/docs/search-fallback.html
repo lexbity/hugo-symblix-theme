@@ -1,0 +1,16 @@
+{{ $searchLabel := i18n "search_docs" | default "Search docs" }}
+<section class="docs-sidebar-search" aria-labelledby="docs-sidebar-search-title">
+  <h2 id="docs-sidebar-search-title" class="docs-sidebar-heading">{{ i18n "search" | default "Search" }}</h2>
+  <label class="docs-sidebar-search-label" for="docs-sidebar-search-input">{{ $searchLabel }}</label>
+  <input
+    id="docs-sidebar-search-input"
+    class="docs-sidebar-search-input"
+    type="search"
+    inputmode="search"
+    autocomplete="off"
+    spellcheck="false"
+    placeholder="{{ $searchLabel }}"
+    aria-controls="docs-sidebar-nav"
+    data-sidebar-search
+  >
+</section>

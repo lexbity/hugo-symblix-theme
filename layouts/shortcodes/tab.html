@@ -1,0 +1,18 @@
+{{- $title := .Get "title" | default "Tab" -}}
+{{- $subtitle := .Get "subtitle" | default "" -}}
+{{- $badge := .Get "badge" | default "" -}}
+{{- $class := .Get "class" | default "" -}}
+{{- $id := .Get "id" | default (partial "docs/helpers/stable-id.html" (dict "Prefix" "tab" "Value" $title)) -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict "Base" (slice "docs-choice-group__panel" "docs-choice-group__panel--tab" "docs-tab") "Extra" $class) -}}
+<section class="{{ $classes }}" data-choice-panel data-choice-title="{{ $title }}" data-choice-id="{{ $id }}">
+  <header class="docs-choice-group__header">
+    <h3 class="docs-choice-group__title">{{ $title }}</h3>
+    {{- with $badge }}
+      {{ partial "docs/components/badge.html" (dict "Label" . "Variant" "default" "Class" "docs-choice-group__badge") }}
+    {{- end -}}
+  </header>
+  {{- with $subtitle }}
+    <p class="docs-choice-group__subtitle">{{ . }}</p>
+  {{- end -}}
+  <div class="docs-choice-group__body">{{ .InnerDeindent | markdownify }}</div>
+</section>

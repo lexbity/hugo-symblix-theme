@@ -1,0 +1,13 @@
+{{- $title := .Get "title" | default "Feature" -}}
+{{- $href := .Get "href" | default "" -}}
+{{- $icon := .Get "icon" | default "" -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict "Base" (slice "docs-feature") "Extra" (.Get "class" | default "")) -}}
+<article class="{{ $classes }}">
+  <h3 class="docs-feature__title">
+    {{ if $href }}<a class="docs-feature__link" href="{{ $href | relURL }}">{{ end }}
+    {{ with $icon }}{{ partial "docs/helpers/icon.html" (dict "Name" . "Class" "docs-feature__icon") }}{{ end -}}
+    {{- $title -}}
+    {{ if $href }}</a>{{ end }}
+  </h3>
+  <div class="docs-feature__body">{{ .InnerDeindent | markdownify }}</div>
+</article>

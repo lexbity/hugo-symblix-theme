@@ -1,0 +1,8 @@
+{{ $currentSlug := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
+{{ $currentVersion := hugo.Data.docs_versions.current | default "latest" }}
+
+{{ if ne $currentSlug $currentVersion }}
+  <aside class="docs-version-warning" role="note" aria-label="{{ i18n "warning_old_version" (dict "Current" $currentSlug "Latest" $currentVersion) }}">
+    <strong>{{ i18n "warning_old_version" (dict "Current" $currentSlug "Latest" $currentVersion) }}</strong>
+  </aside>
+{{ end }}

@@ -1,0 +1,42 @@
+{{- $items := slice -}}
+{{- with .Method -}}
+  {{- $items = $items | append (dict "Label" (i18n "method" | default "Method") "Value" .) -}}
+{{- end -}}
+{{- with .Path -}}
+  {{- $items = $items | append (dict "Label" (i18n "path" | default "Path") "Value" .) -}}
+{{- end -}}
+{{- with .Auth -}}
+  {{- $items = $items | append (dict "Label" (i18n "auth" | default "Auth") "Value" .) -}}
+{{- end -}}
+{{- with .Type -}}
+  {{- $items = $items | append (dict "Label" (i18n "type" | default "Type") "Value" .) -}}
+{{- end -}}
+{{- with .Code -}}
+  {{- $items = $items | append (dict "Label" (i18n "code" | default "Code") "Value" .) -}}
+{{- end -}}
+{{- with .Label -}}
+  {{- $items = $items | append (dict "Label" (i18n "label" | default "Label") "Value" .) -}}
+{{- end -}}
+{{- with .Default -}}
+  {{- $items = $items | append (dict "Label" (i18n "default" | default "Default") "Value" .) -}}
+{{- end -}}
+{{- if ne (printf "%v" (.Required | default false)) "false" -}}
+  {{- $required := partial "docs/helpers/boolean.html" (dict "Value" .Required) -}}
+  {{- $items = $items | append (dict "Label" (i18n "required" | default "Required") "Value" (cond (eq $required "true") (i18n "yes" | default "Yes") (i18n "no" | default "No"))) -}}
+{{- end -}}
+{{- with .Since -}}
+  {{- $items = $items | append (dict "Label" (i18n "since" | default "Since") "Value" .) -}}
+{{- end -}}
+{{- with .Deprecated -}}
+  {{- $items = $items | append (dict "Label" (i18n "deprecated" | default "Deprecated") "Value" .) -}}
+{{- end -}}
+{{- with .Removed -}}
+  {{- $items = $items | append (dict "Label" (i18n "removed" | default "Removed") "Value" .) -}}
+{{- end -}}
+{{- if .Experimental -}}
+  {{- $items = $items | append (dict "Label" (i18n "experimental" | default "Experimental") "Value" (i18n "yes" | default "Yes")) -}}
+{{- end -}}
+{{- with .Status -}}
+  {{- $items = $items | append (dict "Label" (i18n "status" | default "Status") "Value" .) -}}
+{{- end -}}
+{{- return $items -}}

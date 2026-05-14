@@ -1,0 +1,71 @@
+@layer components {
+  .docs-reference-item {
+    margin-block: var(--docs-density-component-gap);
+    padding: var(--docs-density-component-padding);
+    border: 1px solid var(--docs-border);
+    border-radius: 0;
+    background: color-mix(in srgb, var(--docs-bg) 96%, var(--docs-border));
+  }
+
+  .docs-reference-item__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--docs-density-component-gap);
+  }
+
+  .docs-reference-item__name {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.35;
+  }
+
+  .docs-reference-item__name code {
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    padding: 0;
+  }
+
+  .docs-reference-item__badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .docs-reference-item__meta {
+    margin-top: var(--docs-density-component-gap);
+    display: grid;
+    gap: 0.5rem 0.75rem;
+    grid-template-columns: max-content minmax(0, 1fr);
+    font-size: 0.95rem;
+  }
+
+  .docs-reference-item__meta dt {
+    margin: 0;
+    font-weight: 700;
+    color: var(--docs-muted);
+  }
+
+  .docs-reference-item__meta dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .docs-reference-item__body {
+    margin-top: var(--docs-density-component-gap);
+    font-size: 0.98rem;
+    line-height: 1.7;
+  }
+
+  .docs-reference-item__body > :first-child {
+    margin-top: 0;
+  }
+
+  .docs-reference-item__body > :last-child {
+    margin-bottom: 0;
+  }
+}

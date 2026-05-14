@@ -1,0 +1,72 @@
+{{- $node := .Node -}}
+{{- $current := .Current -}}
+{{- $depth := int (.Depth | default 2) -}}
+{{- $level := int (.Level | default 1) -}}
+{{- $showCurrent := partial "docs/helpers/boolean.html" (dict "Value" (.ShowCurrent | default true)) -}}
+{{- $showDescriptions := partial "docs/helpers/boolean.html" (dict "Value" (.ShowDescriptions | default false)) -}}
+{{- $maxItems := int (.MaxItems | default 0) -}}
+{{- $count := 0 -}}
+
+{{- if and $node (gt $depth 0) -}}
+  {{- $children := slice -}}
+  {{- range $node.Sections -}}
+    {{- $hidden := false -}}
+    {{- with .Params.nav -}}
+      {{- $hidden = (.hidden | default false) -}}
+    {{- end -}}
+    {{- if not $hidden -}}
+      {{- $children = $children | append . -}}
+    {{- end -}}
+  {{- end -}}
+  {{- range $node.RegularPages -}}
+    {{- $hidden := false -}}
+    {{- with .Params.nav -}}
+      {{- $hidden = (.hidden | default false) -}}
+    {{- end -}}
+    {{- if not $hidden -}}
+      {{- $children = $children | append . -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- $sorted := slice -}}
+  {{- range $children -}}
+    {{- $weight := .Weight | default 0 -}}
+    {{- $label := .LinkTitle | default .Title | lower -}}
+    {{- with .Params.nav.title -}}
+      {{- $label = lower . -}}
+    {{- end -}}
+    {{- $path := .RelPermalink | lower -}}
+    {{- $sorted = $sorted | append (dict "page" . "sortKey" (printf "%09d|%s|%s" $weight $label $path)) -}}
+  {{- end -}}
+
+  {{- if gt (len $sorted) 0 -}}
+    <ol class="docs-section-map__list docs-section-map__list--level-{{ $level }}">
+      {{- range (sort $sorted "sortKey") -}}
+        {{- if and $maxItems (ge $count $maxItems) -}}
+          {{- break -}}
+        {{- end -}}
+        {{- $count = add $count 1 -}}
+        {{- $page := .page -}}
+        {{- $isCurrent := eq $page.RelPermalink $current.RelPermalink -}}
+        <li class="docs-section-map__item{{ if $isCurrent }} docs-section-map__item--current{{ end }}">
+          <a class="docs-section-map__link{{ if $isCurrent }} docs-section-map__link--current{{ end }}" href="{{ $page.RelPermalink }}"{{ if and $showCurrent $isCurrent }} aria-current="page"{{ end }}>{{ $page.LinkTitle }}</a>
+          {{- if and $showDescriptions $page.Description -}}
+            <p class="docs-section-map__description">{{ $page.Description }}</p>
+          {{- end -}}
+          {{- if lt $depth 1 -}}
+          {{- else -}}
+            {{- partial "docs/components/section-map-node.html" (dict
+              "Node" $page
+              "Current" $current
+              "Depth" (sub $depth 1)
+              "Level" (add $level 1)
+              "ShowCurrent" $showCurrent
+              "ShowDescriptions" $showDescriptions
+              "MaxItems" $maxItems
+            ) -}}
+          {{- end -}}
+        </li>
+      {{- end -}}
+    </ol>
+  {{- end -}}
+{{- end -}}

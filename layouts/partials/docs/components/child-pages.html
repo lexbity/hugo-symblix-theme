@@ -1,0 +1,93 @@
+{{- $page := .Page -}}
+{{- if not $page -}}
+  {{- $page = .CurrentSection -}}
+{{- end -}}
+{{- if and (not $page) .Root -}}
+  {{- $page = site.GetPage .Root -}}
+{{- end -}}
+{{- if not $page -}}
+  {{- $page = .Page.CurrentSection -}}
+{{- end -}}
+{{- if and $page (not $page.IsSection) -}}
+  {{- with $page.CurrentSection -}}
+    {{- $page = . -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $title := .Title | default (i18n "child_pages" | default "Child pages") -}}
+{{- $style := .Style | default "cards" -}}
+{{- $showDescriptions := partial "docs/helpers/boolean.html" (dict "Value" (.ShowDescriptions | default true)) -}}
+{{- $showDocType := partial "docs/helpers/boolean.html" (dict "Value" (.ShowDocType | default true)) -}}
+{{- $emptyMessage := .EmptyMessage | default "" -}}
+{{- $maxItems := int (.MaxItems | default 0) -}}
+
+{{- $items := slice -}}
+{{- with $page -}}
+  {{- $children := slice -}}
+  {{- range .Sections -}}
+    {{- $children = $children | append . -}}
+  {{- end -}}
+  {{- range .RegularPages -}}
+    {{- $children = $children | append . -}}
+  {{- end -}}
+
+  {{- $sorted := slice -}}
+  {{- range $children -}}
+    {{- $hidden := false -}}
+    {{- with .Params.nav -}}
+      {{- $hidden = (.hidden | default false) -}}
+    {{- end -}}
+    {{- if not $hidden -}}
+      {{- $weight := .Weight | default 0 -}}
+      {{- $label := .LinkTitle | default .Title | lower -}}
+      {{- with .Params.nav.title -}}
+        {{- $label = lower . -}}
+      {{- end -}}
+      {{- $path := .RelPermalink | lower -}}
+      {{- $sorted = $sorted | append (dict "page" . "sortKey" (printf "%09d|%s|%s" $weight $label $path)) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- range (sort $sorted "sortKey") -}}
+    {{- $items = $items | append .page -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if and $maxItems (gt (len $items) $maxItems) -}}
+  {{- $items = first $maxItems $items -}}
+{{- end -}}
+
+{{- if gt (len $items) 0 -}}
+<nav class="docs-child-pages docs-child-pages--{{ $style }}" aria-label="{{ $title }}">
+  <h2 class="docs-child-pages__title">{{ $title }}</h2>
+  {{- if eq $style "cards" -}}
+    <div class="docs-card-grid docs-child-pages__grid">
+      {{- range $items -}}
+        {{- partial "docs/page-card.html" (dict "Page" . "Current" $page "ShowDescription" $showDescriptions "ShowDocType" $showDocType) -}}
+      {{- end -}}
+    </div>
+  {{- else -}}
+    <ul class="docs-child-pages__list docs-child-pages__list--{{ $style }}">
+      {{- range $items -}}
+        <li class="docs-child-pages__item">
+          <a class="docs-child-pages__link" href="{{ .RelPermalink }}"{{ if eq .RelPermalink $page.RelPermalink }} aria-current="page"{{ end }}>{{ .LinkTitle }}</a>
+          {{- if and $showDescriptions .Description -}}
+            <p class="docs-child-pages__description">{{ .Description }}</p>
+          {{- end -}}
+          {{- if $showDocType -}}
+            <div class="docs-child-pages__meta">
+              {{- with .Params.docType -}}
+                {{ partial "docs/components/badge.html" (dict "Label" (printf "%s: %s" (i18n "type" | default "Type") .) "Variant" "default" "Status" "info") }}
+              {{- end -}}
+              {{- with .Language.Label -}}
+                {{ partial "docs/components/badge.html" (dict "Label" . "Variant" "default") }}
+              {{- end -}}
+            </div>
+          {{- end -}}
+        </li>
+      {{- end -}}
+    </ul>
+  {{- end -}}
+</nav>
+{{- else if $emptyMessage -}}
+<p class="docs-child-pages__empty">{{ $emptyMessage }}</p>
+{{- end -}}

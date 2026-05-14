@@ -1,0 +1,89 @@
+@layer components {
+  .docs-codeblock__header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+
+  .docs-codeblock__title,
+  .docs-codeblock__filename {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid var(--docs-border);
+    border-radius: 0;
+    background: color-mix(in srgb, var(--docs-surface) 96%, var(--docs-bg));
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .docs-codeblock {
+    position: relative;
+    margin: var(--docs-density-component-gap) 0;
+  }
+
+  .docs-heading-anchor {
+    display: inline-flex;
+    align-items: center;
+    margin-inline-end: 0.4rem;
+    color: var(--docs-muted);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .docs-heading-anchor:hover,
+  .docs-heading-anchor:focus-visible {
+    color: var(--docs-accent);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .docs-external-link {
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.15em;
+  }
+
+  .docs-external-link__icon {
+    margin-inline-start: 0.25rem;
+    font-size: 0.85em;
+    vertical-align: super;
+  }
+
+  .docs-content code:not(pre code) {
+    padding: 0.15rem 0.35rem;
+    border: 1px solid var(--docs-border);
+    border-radius: 0;
+    background: color-mix(in srgb, var(--docs-surface) 90%, var(--docs-bg));
+    color: var(--docs-text);
+    font-size: 0.95em;
+    word-break: break-word;
+  }
+
+  .docs-content pre {
+    overflow-x: auto;
+    padding: 1rem;
+    border: 1px solid var(--docs-border);
+    border-radius: 0;
+    background: color-mix(in srgb, var(--docs-surface) 90%, var(--docs-bg));
+    max-width: 100%;
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+
+  .docs-content pre code {
+    display: block;
+    min-width: max-content;
+    color: inherit;
+    background: transparent;
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+
+  .docs-content :is(pre, code) {
+    tab-size: 2;
+  }
+}

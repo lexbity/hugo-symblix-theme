@@ -1,0 +1,66 @@
+baseURL = "http://localhost:1313/"
+title = "Docworkbench Example"
+theme = "hugo-theme-docworkbench"
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = true
+
+[taxonomies]
+tag = "tags"
+topic = "topics"
+
+[markup.goldmark.renderer]
+unsafe = true
+
+[params.docs]
+root = "docs"
+logo = ""
+logoAlt = "Docworkbench"
+editURLBase = "https://example.com/edit/"
+rightToc = true
+versions = { noindexArchived = true }
+
+[params.docs.validation]
+showAuthorWarnings = false
+
+[params.docs.components.reference]
+headingLevel = 3
+showLifecycleBadges = true
+
+[params.docs.nav]
+mode = "manual"
+data = "docs_nav"
+
+[params.features]
+themeSwitcher = true
+
+[params.seo]
+openGraph = true
+twitterCards = true
+
+[languages.en]
+label = "English"
+locale = "en-US"
+direction = "ltr"
+weight = 1
+contentDir = "content/en"
+
+[languages.fr]
+label = "Français"
+locale = "fr-FR"
+direction = "ltr"
+weight = 2
+contentDir = "content/fr"
+
+[languages.ja]
+label = "日本語"
+locale = "ja-JP"
+direction = "ltr"
+weight = 3
+contentDir = "content/ja"
+
+[languages.ar]
+label = "العربية"
+locale = "ar"
+direction = "rtl"
+weight = 4
+contentDir = "content/ar"

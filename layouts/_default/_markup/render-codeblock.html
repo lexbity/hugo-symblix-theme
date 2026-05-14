@@ -1,0 +1,28 @@
+{{- $lang := .Type | default "" -}}
+{{- $attrs := .Attributes -}}
+{{- $title := "" -}}
+{{- with $attrs.title -}}
+  {{- $title = . -}}
+{{- end -}}
+{{- $filename := "" -}}
+{{- with $attrs.filename -}}
+  {{- $filename = . -}}
+{{- end -}}
+{{- $codeClass := "text" -}}
+{{- with $lang -}}
+  {{- $codeClass = . -}}
+{{- end -}}
+
+<figure class="docs-codeblock docs-codeblock--{{ $codeClass }}">
+  {{- if or $title $filename -}}
+    <figcaption class="docs-codeblock__header">
+      {{- with $title -}}
+        <span class="docs-codeblock__title">{{ . }}</span>
+      {{- end -}}
+      {{- with $filename -}}
+        <span class="docs-codeblock__filename">{{ . }}</span>
+      {{- end -}}
+    </figcaption>
+  {{- end -}}
+  <pre><code{{ with $lang }} class="language-{{ . }}"{{ end }}>{{ .Inner | strings.TrimSuffix "\n" | htmlEscape }}</code></pre>
+</figure>

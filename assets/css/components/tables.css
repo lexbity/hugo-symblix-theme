@@ -1,0 +1,33 @@
+@layer components {
+  .docs-content .table-wrap {
+    overflow-x: auto;
+    max-width: 100%;
+    margin: 1.5rem 0;
+    border: 1px solid var(--docs-border);
+    border-radius: 0;
+    box-shadow: var(--docs-shadow);
+  }
+
+  .docs-content table {
+    width: 100%;
+    min-width: 40rem;
+    border-collapse: collapse;
+  }
+
+  .docs-content th,
+  .docs-content td {
+    padding: 0.75rem;
+    border: 1px solid var(--docs-border);
+    text-align: start;
+    vertical-align: top;
+  }
+
+  .docs-content thead th {
+    background: color-mix(in srgb, var(--docs-surface) 92%, var(--docs-bg));
+    font-weight: 700;
+  }
+
+  .docs-content tbody tr:nth-child(even) td {
+    background: color-mix(in srgb, var(--docs-surface) 96%, var(--docs-bg));
+  }
+}

@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@import "./theme.css";
+@import "./components/shortcodes.css";
+@import "./components/badges.css";
+@import "./components/shell.css";
+@import "./components/nav.css";
+@import "./components/sidebar.css";
+@import "./components/toc.css";
+@import "./components/browse.css";
+@import "./components/content.css";
+@import "./components/code.css";
+@import "./components/tables.css";
+@import "./components/callouts.css";
+@import "./components/details.css";
+@import "./components/figures.css";
+@import "./components/steps.css";
+@import "./components/cards.css";
+@import "./components/landing.css";
+@import "./components/reference.css";
+@import "./components/navigation-components.css";
+@import "./components/choice-groups.css";
+@import "./components/print-components.css";
+@import "./components/print.css";

@@ -1,0 +1,54 @@
+{{ $node := .Node }}
+{{ $current := .Current }}
+{{ $sections := sort $node.Sections "Weight" "asc" }}
+{{ $pages := sort $node.RegularPages "Weight" "asc" }}
+
+{{ $visibleSectionCount := 0 }}
+{{ range $sections }}
+  {{ $hidden := false }}
+  {{ with .Params.nav }}
+    {{ $hidden = (.hidden | default false) }}
+  {{ end }}
+  {{ if not $hidden }}
+    {{ $visibleSectionCount = add $visibleSectionCount 1 }}
+  {{ end }}
+{{ end }}
+
+{{ $visiblePageCount := 0 }}
+{{ range $pages }}
+  {{ $hidden := false }}
+  {{ with .Params.nav }}
+    {{ $hidden = (.hidden | default false) }}
+  {{ end }}
+  {{ if not $hidden }}
+    {{ $visiblePageCount = add $visiblePageCount 1 }}
+  {{ end }}
+{{ end }}
+
+{{ if or (gt $visibleSectionCount 0) (gt $visiblePageCount 0) }}
+  <ul class="docs-browse-list">
+    {{ range $sections }}
+      {{ $hidden := false }}
+      {{ with .Params.nav }}
+        {{ $hidden = (.hidden | default false) }}
+      {{ end }}
+      {{ if not $hidden }}
+        <li class="docs-browse-item docs-browse-section">
+          {{ partial "docs/page-card.html" (dict "Page" . "Current" $current) }}
+          {{ partial "docs/browse-tree.html" (dict "Node" . "Current" $current) }}
+        </li>
+      {{ end }}
+    {{ end }}
+    {{ range $pages }}
+      {{ $hidden := false }}
+      {{ with .Params.nav }}
+        {{ $hidden = (.hidden | default false) }}
+      {{ end }}
+      {{ if not $hidden }}
+        <li class="docs-browse-item docs-browse-page">
+          {{ partial "docs/page-card.html" (dict "Page" . "Current" $current) }}
+        </li>
+      {{ end }}
+    {{ end }}
+  </ul>
+{{ end }}

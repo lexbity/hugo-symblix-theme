@@ -1,0 +1,29 @@
+{{- $src := .Get "src" -}}
+{{- $alt := .Get "alt" | default "" -}}
+{{- $caption := .Get "caption" | default "" -}}
+{{- $class := .Get "class" | default "" -}}
+{{- $decorative := partial "docs/helpers/boolean.html" (dict "Value" (.Get "decorative" | default false)) -}}
+{{- $loading := .Get "loading" | default "lazy" -}}
+{{- $decoding := .Get "decoding" | default "async" -}}
+{{- $width := .Get "width" | default "" -}}
+{{- $height := .Get "height" | default "" -}}
+{{- $id := partial "docs/helpers/stable-id.html" (dict "ID" (.Get "id" | default "") "Title" $caption) -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict "Base" (slice "docs-figure") "Extra" $class) -}}
+{{- $showWarnings := site.Params.docs.validation.showAuthorWarnings | default false -}}
+{{- $missingAlt := and (ne $decorative "true") (not $alt) -}}
+
+<figure class="{{ $classes }}"{{ with $id }} id="{{ . }}"{{ end }}>
+  <img
+    class="docs-figure__image"
+    src="{{ $src | relURL }}"
+    {{ if eq $decorative "true" }}alt=""{{ else }}alt="{{ $alt }}"{{ end }}
+    loading="{{ $loading }}"
+    decoding="{{ $decoding }}"
+    {{ with $width }}width="{{ . }}"{{ end }}
+    {{ with $height }}height="{{ . }}"{{ end }}
+  >
+  {{ with $caption }}<figcaption class="docs-figure__caption">{{ . | markdownify }}</figcaption>{{ end }}
+  {{ if and $missingAlt $showWarnings }}
+    <p class="docs-figure__warning">{{ i18n "figure_missing_alt" | default "Missing alt text for figure." }}</p>
+  {{ end }}
+</figure>

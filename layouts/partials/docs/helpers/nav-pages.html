@@ -1,0 +1,29 @@
+{{ $page := .Page }}
+{{ $items := slice }}
+
+{{ with $page }}
+  {{ range .Pages }}
+    {{ $hidden := false }}
+    {{ with .Params.nav }}
+      {{ $hidden = (.hidden | default false) }}
+    {{ end }}
+    {{ if not $hidden }}
+      {{ $weight := .Weight | default 0 }}
+      {{ $title := .LinkTitle | default .Title | lower }}
+      {{ with .Params.nav.title }}
+        {{ $title = lower . }}
+      {{ end }}
+      {{ $path := .RelPermalink | lower }}
+      {{ $sortKey := printf "%09d|%s|%s" $weight $title $path }}
+      {{ $items = $items | append (dict "page" . "sortKey" $sortKey) }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ $sorted := sort $items "sortKey" }}
+{{ $pages := slice }}
+{{ range $sorted }}
+  {{ $pages = $pages | append .page }}
+{{ end }}
+
+{{ return $pages }}

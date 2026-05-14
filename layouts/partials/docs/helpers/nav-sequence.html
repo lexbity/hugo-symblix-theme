@@ -1,0 +1,33 @@
+{{ $node := .Node }}
+{{ $sequence := slice }}
+
+{{ with $node }}
+  {{ $items := slice }}
+  {{ range .Pages }}
+    {{ $hidden := false }}
+    {{ with .Params.nav }}
+      {{ $hidden = (.hidden | default false) }}
+    {{ end }}
+    {{ if not $hidden }}
+      {{ $weight := .Weight | default 0 }}
+      {{ $title := .LinkTitle | default .Title | lower }}
+      {{ with .Params.nav.title }}
+        {{ $title = lower . }}
+      {{ end }}
+      {{ $path := .RelPermalink | lower }}
+      {{ $sortKey := printf "%09d|%s|%s" $weight $title $path }}
+      {{ $items = $items | append (dict "page" . "sortKey" $sortKey) }}
+    {{ end }}
+  {{ end }}
+
+  {{ range (sort $items "sortKey") }}
+    {{ $page := .page }}
+    {{ $sequence = $sequence | append $page }}
+    {{ $descendants := partial "docs/helpers/nav-sequence.html" (dict "Node" $page) }}
+    {{ range $descendants }}
+      {{ $sequence = $sequence | append . }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ return $sequence }}

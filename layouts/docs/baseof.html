@@ -1,0 +1,18 @@
+<!doctype html>
+<html
+  lang="{{ .Site.Language.Locale }}"
+  dir="{{ or .Site.Language.Direction "ltr" }}"
+  {{ with site.Params.docs.theme.density }}data-docs-density="{{ . }}"{{ end }}
+  {{ with site.Params.docs.theme.preset }}data-docs-preset="{{ . }}"{{ end }}
+>
+  <head>
+    {{ partial "head.html" . }}
+  </head>
+  <body class="docs">
+    {{ block "main" . }}{{ end }}
+    {{ partial "footer.html" . }}
+    <footer class="site-footer">
+      <p>{{ .Site.Title }}</p>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+{{ $show := true }}
+{{ if isset .Params "rightToc" }}
+  {{ $show = .Params.rightToc }}
+{{ else if isset .Params "toc" }}
+  {{ $show = .Params.toc }}
+{{ else if isset site.Params.docs "rightToc" }}
+  {{ $show = site.Params.docs.rightToc }}
+{{ end }}
+
+{{ $toc := .TableOfContents }}
+{{ $hasTOC := gt (len (findRE "<a href=" $toc)) 0 }}
+{{ if and $show $hasTOC }}
+  <aside class="docs-toc docs-toc-desktop" aria-label="{{ i18n "on_this_page" | default "On this page" }}">
+    <h2 class="docs-toc-title">{{ i18n "on_this_page" | default "On this page" }}</h2>
+    <nav class="docs-toc-nav">
+      {{ $toc | safeHTML }}
+    </nav>
+  </aside>
+  <details class="docs-toc docs-toc-mobile">
+    <summary class="docs-toc-summary">{{ i18n "on_this_page" | default "On this page" }}</summary>
+    <nav class="docs-toc-nav">
+      {{ $toc | safeHTML }}
+    </nav>
+  </details>
+{{ end }}

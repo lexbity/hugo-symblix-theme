@@ -1,0 +1,13 @@
+{{ define "main" }}
+  <article class="docs-taxonomy">
+    <h1>{{ .Title }}</h1>
+    {{ with .Description }}<p>{{ . }}</p>{{ end }}
+    {{ with .Pages }}
+      <div class="docs-taxonomy-list">
+        {{ range .ByWeight }}
+          {{ partial "docs/page-card.html" (dict "Page" .) }}
+        {{ end }}
+      </div>
+    {{ end }}
+  </article>
+{{ end }}

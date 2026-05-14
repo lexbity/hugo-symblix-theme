@@ -1,0 +1,22 @@
+{{- $page := .Page -}}
+{{- $site := .Site | default site -}}
+{{- $rootName := $site.Params.docs.root | default "docs" -}}
+{{- $docsRoot := index (where $site.Home.Sections "Section" $rootName) 0 -}}
+{{- $currentSlug := .VersionSlug | default (partial "docs/helpers/current-version.html" $page) -}}
+{{- $rootPermalink := "" -}}
+{{- if $docsRoot -}}
+  {{- range $docsRoot.Sections -}}
+    {{- $segment := strings.TrimSuffix "/" (strings.TrimPrefix $docsRoot.RelPermalink .RelPermalink) -}}
+    {{- if eq $segment $currentSlug -}}
+      {{- $rootPermalink = .RelPermalink -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $rootPermalink -}}
+  {{- if and $docsRoot (eq $currentSlug (hugo.Data.docs_versions.current | default "latest")) -}}
+    {{- $rootPermalink = $docsRoot.RelPermalink -}}
+  {{- else if $docsRoot -}}
+    {{- $rootPermalink = $docsRoot.RelPermalink -}}
+  {{- end -}}
+{{- end -}}
+{{- $rootPermalink -}}

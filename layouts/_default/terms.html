@@ -1,0 +1,16 @@
+{{ define "main" }}
+  <article class="docs-terms">
+    <h1>{{ .Title }}</h1>
+    {{ with .Description }}<p>{{ . }}</p>{{ end }}
+    {{ with .Data.Terms.ByCount }}
+      <ul class="docs-terms-list">
+        {{ range . }}
+          <li class="docs-terms-item">
+            <a class="docs-terms-link" href="{{ .Page.RelPermalink }}">{{ .Page.LinkTitle }}</a>
+            <span class="docs-terms-count">{{ .Count }}</span>
+          </li>
+        {{ end }}
+      </ul>
+    {{ end }}
+  </article>
+{{ end }}

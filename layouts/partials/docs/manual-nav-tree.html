@@ -1,0 +1,118 @@
+{{ $items := .Items | default slice }}
+{{ $current := .Current }}
+{{ $site := .Site | default site }}
+{{ $currentLang := $site.Language.Lang | default "en" }}
+
+{{ $rendered := slice }}
+{{ range $items }}
+  {{ $item := . }}
+  {{ $hidden := $item.hidden | default false }}
+  {{ $title := $item.title | default "" }}
+  {{ $pagePath := $item.page | default "" }}
+  {{ $url := $item.url | default "" }}
+  {{ $children := $item.children | default slice }}
+
+  {{ if and (not $hidden) (or $title $pagePath $url) }}
+    {{ $link := "" }}
+    {{ $resolvedPage := false }}
+    {{ if $pagePath }}
+      {{ $link = $pagePath }}
+      {{ $translatedPath := replaceRE "^/[^/]+/" (printf "/%s/" $currentLang) $pagePath }}
+      {{ with where $site.Pages "RelPermalink" $translatedPath }}
+        {{ $resolvedPage = index . 0 }}
+        {{ $link = $resolvedPage.RelPermalink }}
+      {{ else }}
+        {{ with where $site.Pages "RelPermalink" $pagePath }}
+          {{ $resolvedPage = index . 0 }}
+          {{ $link = $resolvedPage.RelPermalink }}
+        {{ end }}
+      {{ end }}
+    {{ else if $url }}
+      {{ $link = $url }}
+    {{ end }}
+
+    {{ $isExternal := or ($item.external | default false) (hasPrefix $link "http") }}
+    {{ $currentRel := $current.RelPermalink | default "" }}
+    {{ $normalizedLink := strings.TrimSuffix "/" $link }}
+    {{ $normalizedCurrent := strings.TrimSuffix "/" $currentRel }}
+    {{ $isCurrent := and (not $isExternal) (or (eq $normalizedLink $normalizedCurrent) (and $resolvedPage (eq $resolvedPage.RelPermalink $currentRel))) }}
+
+    {{ $hasCurrentDescendant := false }}
+    {{ if gt (len $children) 0 }}
+      {{ range $children }}
+        {{ $childPage := .page | default "" }}
+        {{ $childURL := .url | default "" }}
+        {{ $childLink := "" }}
+        {{ if $childPage }}
+          {{ $childLink = $childPage }}
+          {{ $translatedChildPath := replaceRE "^/[^/]+/" (printf "/%s/" $currentLang) $childPage }}
+          {{ with where $site.Pages "RelPermalink" $translatedChildPath }}
+            {{ $childLink = (index . 0).RelPermalink }}
+          {{ else }}
+            {{ with where $site.Pages "RelPermalink" $childPage }}
+              {{ $childLink = (index . 0).RelPermalink }}
+            {{ end }}
+          {{ end }}
+        {{ else if $childURL }}
+          {{ $childLink = $childURL }}
+        {{ end }}
+        {{ $childNormalized := strings.TrimSuffix "/" $childLink }}
+        {{ if and (not $isExternal) (hasPrefix $normalizedCurrent $childNormalized) }}
+          {{ $hasCurrentDescendant = true }}
+        {{ end }}
+      {{ end }}
+    {{ end }}
+
+    {{ $isOpen := or $isCurrent $hasCurrentDescendant (and (not $isExternal) (hasPrefix $normalizedCurrent $normalizedLink)) }}
+    {{ $label := $title }}
+    {{ if and $resolvedPage (ne $currentLang "en") }}
+      {{ $label = $resolvedPage.LinkTitle | default $resolvedPage.Title }}
+    {{ end }}
+    {{ if not $label }}
+      {{ if $resolvedPage }}
+        {{ $label = $resolvedPage.LinkTitle | default $resolvedPage.Title }}
+      {{ else }}
+        {{ $label = $link }}
+      {{ end }}
+    {{ end }}
+
+    {{ $rendered = $rendered | append (dict
+      "item" $item
+      "link" $link
+      "label" $label
+      "isExternal" $isExternal
+      "isCurrent" $isCurrent
+      "isOpen" $isOpen
+      "children" $children
+    ) }}
+  {{ end }}
+{{ end }}
+
+{{ if gt (len $rendered) 0 }}
+  <ul class="docs-nav-list">
+    {{ range $rendered }}
+      <li class="docs-nav-item">
+        {{ $children := .children | default slice }}
+        {{ if gt (len $children) 0 }}
+          <details class="docs-nav-group" open data-nav-group data-nav-path="{{ .link }}">
+            <summary class="docs-nav-summary">
+              <span class="docs-nav-summary-label">{{ .label }}</span>
+            </summary>
+            {{ if .isExternal }}
+              <a class="docs-nav-link docs-nav-group-link" href="{{ .link }}" rel="external noopener" data-nav-link{{ if .isCurrent }} data-nav-current="true" aria-current="page"{{ end }}>{{ .label }}</a>
+            {{ else }}
+              <a class="docs-nav-link docs-nav-group-link" href="{{ .link }}" data-nav-link{{ if .isCurrent }} data-nav-current="true" aria-current="page"{{ end }}>{{ .label }}</a>
+            {{ end }}
+            {{ partial "docs/manual-nav-tree.html" (dict "Items" $children "Current" $current "Site" $site) }}
+          </details>
+        {{ else }}
+          {{ if .isExternal }}
+            <a class="docs-nav-link" href="{{ .link }}" rel="external noopener" data-nav-link{{ if .isCurrent }} data-nav-current="true" aria-current="page"{{ end }}>{{ .label }}</a>
+          {{ else }}
+            <a class="docs-nav-link" href="{{ .link }}" data-nav-link{{ if .isCurrent }} data-nav-current="true" aria-current="page"{{ end }}>{{ .label }}</a>
+          {{ end }}
+        {{ end }}
+      </li>
+    {{ end }}
+  </ul>
+{{ end }}

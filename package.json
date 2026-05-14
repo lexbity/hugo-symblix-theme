@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "@tailwindcss/cli": "^4.3.0",
+    "tailwindcss": "^4.3.0"
+  },
+  "scripts": {
+    "dev": "hugo server --source exampleSite --theme hugo-theme-docworkbench",
+    "serve:test": "hugo server --source exampleSite --theme hugo-theme-docworkbench --bind 127.0.0.1 --port 1313 --disableFastRender --buildDrafts --buildFuture",
+    "build": "hugo --source exampleSite --theme hugo-theme-docworkbench --cleanDestinationDir",
+    "check": "hugo --source exampleSite --theme hugo-theme-docworkbench --panicOnWarning --cleanDestinationDir",
+    "test": "playwright test",
+    "test:install": "playwright install --with-deps chromium"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.4",
+    "@playwright/test": "^1.60.0"
+  }
+}

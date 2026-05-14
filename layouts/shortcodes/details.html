@@ -1,0 +1,13 @@
+{{- $title := .Get "title" | default (.Get "summary" | default "Details") -}}
+{{- $open := partial "docs/helpers/boolean.html" (dict "Value" (.Get "open" | default false)) -}}
+{{- $id := partial "docs/helpers/stable-id.html" (dict "ID" (.Get "id" | default "") "Title" $title) -}}
+{{- $class := .Get "class" | default "" -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict "Base" (slice "docs-details") "Modifiers" (cond (eq $open "true") (slice "docs-details--open") (slice)) "Extra" $class) -}}
+
+<details class="{{ $classes }}"{{ if eq $open "true" }} open{{ end }}{{ with $id }} id="{{ . }}"{{ end }}>
+  <summary class="docs-details__summary">{{ $title }}</summary>
+  <div class="docs-details__body">{{ .InnerDeindent | markdownify }}</div>
+</details>
+<div class="docs-details__print"{{ with $id }} id="{{ printf "%s-print" . }}"{{ end }}>
+  {{ .InnerDeindent | markdownify }}
+</div>

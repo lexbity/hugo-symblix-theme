@@ -1,0 +1,20 @@
+@layer components {
+  .docs-shortcode {
+    margin-block: 1.5rem;
+  }
+
+  .docs-shortcode__title {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .docs-shortcode__body > :first-child {
+    margin-top: 0;
+  }
+
+  .docs-shortcode__body > :last-child {
+    margin-bottom: 0;
+  }
+}

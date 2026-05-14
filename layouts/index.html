@@ -1,0 +1,15 @@
+{{ define "main" }}
+  <section class="docs-home">
+    {{ .Content }}
+  </section>
+  {{ if not .Content }}
+    <section class="docs-hero">
+      <p class="docs-hero__eyebrow">Documentation</p>
+      <h1 class="docs-hero__title">{{ .Site.Title }}</h1>
+      <p class="docs-hero__subtitle">Documentation example site.</p>
+      <div class="docs-hero__actions">
+        <a class="docs-button docs-button--primary" href="{{ "/en/docs/latest/" | relURL }}">Open the latest docs</a>
+      </div>
+    </section>
+  {{ end }}
+{{ end }}

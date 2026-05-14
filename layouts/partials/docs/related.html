@@ -1,0 +1,27 @@
+{{ $items := slice }}
+{{ with .Params.related }}
+  {{ range . }}
+    {{ $ref := . }}
+    {{ $matches := where site.Pages "RelPermalink" $ref }}
+    {{ with $matches }}
+      {{ $page := index . 0 }}
+      {{ if ne $page.RelPermalink $.RelPermalink }}
+        {{ $items = $items | append $page }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ if gt (len $items) 0 }}
+  <section class="docs-related" aria-label="{{ i18n "related" | default "Related pages" }}">
+    <h2 class="docs-related-title">{{ i18n "related" | default "Related pages" }}</h2>
+    <ul class="docs-related-list">
+      {{ range $items }}
+        <li class="docs-related-item">
+          <a class="docs-related-link" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+          {{ with .Description }}<p class="docs-related-description">{{ . }}</p>{{ end }}
+        </li>
+      {{ end }}
+    </ul>
+  </section>
+{{ end }}

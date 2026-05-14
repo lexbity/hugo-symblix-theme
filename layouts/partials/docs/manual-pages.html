@@ -1,0 +1,49 @@
+{{ $node := .Node }}
+{{ $current := .Current }}
+{{ $depth := .Depth | default 1 }}
+
+{{ with $node }}
+  {{ $sections := sort .Sections "Weight" "asc" }}
+  {{ $pages := sort .RegularPages "Weight" "asc" }}
+
+  {{ range $sections }}
+    {{ $hidden := false }}
+    {{ with .Params.nav }}
+      {{ $hidden = (.hidden | default false) }}
+    {{ end }}
+    {{ if and (not $hidden) (ne .RelPermalink $current.RelPermalink) }}
+      <section class="docs-manual-section docs-manual-section-depth-{{ $depth }}">
+        <header class="docs-manual-header">
+          <h{{ add $depth 1 }} id="{{ anchorize .LinkTitle }}">
+            <a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+          </h{{ add $depth 1 }}>
+          {{ with .Description }}<p>{{ . }}</p>{{ end }}
+        </header>
+        <div class="docs-manual-content">
+          {{ .Content }}
+        </div>
+        {{ partial "docs/manual-pages.html" (dict "Node" . "Current" $current "Depth" (add $depth 1)) }}
+      </section>
+    {{ end }}
+  {{ end }}
+
+  {{ range $pages }}
+    {{ $hidden := false }}
+    {{ with .Params.nav }}
+      {{ $hidden = (.hidden | default false) }}
+    {{ end }}
+    {{ if and (not $hidden) (ne .RelPermalink $current.RelPermalink) }}
+      <section class="docs-manual-section docs-manual-section-depth-{{ $depth }}">
+        <header class="docs-manual-header">
+          <h{{ add $depth 1 }} id="{{ anchorize .LinkTitle }}">
+            <a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+          </h{{ add $depth 1 }}>
+          {{ with .Description }}<p>{{ . }}</p>{{ end }}
+        </header>
+        <div class="docs-manual-content">
+          {{ .Content }}
+        </div>
+      </section>
+    {{ end }}
+  {{ end }}
+{{ end }}

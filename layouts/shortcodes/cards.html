@@ -1,0 +1,15 @@
+{{- $columns := .Get "columns" | default "auto" -}}
+{{- $variant := .Get "variant" | default "default" -}}
+{{- $compact := partial "docs/helpers/boolean.html" (dict "Value" (.Get "compact" | default false)) -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict
+  "Base" (slice "docs-card-grid" (printf "docs-card-grid--%s" $variant))
+  "Modifiers" (cond (eq $compact "true") (slice "docs-card-grid--compact") (slice))
+  "Extra" (.Get "class" | default "")
+) -}}
+{{- $style := "" -}}
+{{- if and (ne $columns "auto") ($columns) -}}
+  {{- $style = printf "grid-template-columns: repeat(%s, minmax(0, 1fr));" $columns -}}
+{{- end -}}
+<div class="{{ $classes }}"{{ with $style }} style="{{ . }}"{{ end }}>
+  {{ .Inner }}
+</div>

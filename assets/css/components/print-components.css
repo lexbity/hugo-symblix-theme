@@ -1,0 +1,17 @@
+@layer components {
+  .docs-callout,
+  .docs-details,
+  .docs-figure {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .docs-details[open] > .docs-details__body,
+  .docs-details__print {
+    display: block !important;
+  }
+
+  .docs-details__summary {
+    display: none;
+  }
+}

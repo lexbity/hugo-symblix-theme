@@ -1,0 +1,106 @@
+- id: search_docs
+  translation: Search docs
+- id: language
+  translation: Language
+- id: version
+  translation: Version
+- id: on_this_page
+  translation: On this page
+- id: edit_this_page
+  translation: Edit this page
+- id: improve_this_translation
+  translation: Improve this translation
+- id: last_updated
+  translation: Last updated
+- id: previous
+  translation: Previous
+- id: next
+  translation: Next
+- id: related
+  translation: Related pages
+- id: warning_old_version
+  translation: "You are viewing {{ .Current }}. The latest docs are {{ .Latest }}."
+- id: warning_outdated_translation
+  translation: "This translation is marked {{ .Status }} and may be out of date."
+- id: translation_warning
+  translation: Translation warning
+- id: skip_to_content
+  translation: Skip to content
+- id: menu
+  translation: Menu
+- id: documentation_navigation
+  translation: Documentation navigation
+- id: sidebar_placeholder
+  translation: Sidebar placeholder
+- id: archived
+  translation: Archived
+- id: type
+  translation: Type
+- id: required
+  translation: Required
+- id: optional
+  translation: Optional
+- id: method
+  translation: Method
+- id: path
+  translation: Path
+- id: auth
+  translation: Auth
+- id: code
+  translation: Code
+- id: label
+  translation: Label
+- id: since
+  translation: Since
+- id: deprecated
+  translation: Deprecated
+- id: removed
+  translation: Removed
+- id: experimental
+  translation: Experimental
+- id: browse_docs_home
+  translation: Browse the docs home
+- id: browse_all_pages
+  translation: Browse all pages
+- id: child_pages
+  translation: Child pages
+- id: section_map
+  translation: Section map
+- id: search_unavailable
+  translation: Search is unavailable without JavaScript.
+- id: search_loading
+  translation: Loading search…
+- id: search_empty
+  translation: Type to search
+- id: search_no_results
+  translation: No results found
+- id: search_error
+  translation: Search failed
+- id: search_scope
+  translation: Scope
+- id: search_results_for
+  translation: Results for
+- id: search_results
+  translation: Search results
+- id: search_clear
+  translation: Clear
+- id: search_filters
+  translation: Filters
+- id: search_filter_version
+  translation: Version
+- id: search_filter_docType
+  translation: Type
+- id: search_filter_topic
+  translation: Topic
+- id: search_all_versions
+  translation: All versions
+- id: search_all_types
+  translation: All types
+- id: search_all_topics
+  translation: All topics
+- id: copy_code
+  translation: Copy code
+- id: copied
+  translation: Copied
+- id: copy_failed
+  translation: Copy failed

@@ -1,0 +1,7 @@
+{{- $value := .Value | default false -}}
+{{- $normalized := printf "%v" $value | lower -}}
+{{- if or (eq $normalized "true") (eq $normalized "1") (eq $normalized "yes") (eq $normalized "on") -}}
+true
+{{- else -}}
+false
+{{- end -}}

@@ -1,0 +1,80 @@
+{{ $node := .Node }}
+{{ $current := .Current }}
+
+{{ with $node }}
+  {{ $items := slice }}
+  {{ range .Pages }}
+    {{ $hidden := false }}
+    {{ with .Params.nav }}
+      {{ $hidden = (.hidden | default false) }}
+    {{ end }}
+    {{ if not $hidden }}
+      {{ $weight := .Weight | default 0 }}
+      {{ $title := .LinkTitle | default .Title | lower }}
+      {{ with .Params.nav.title }}
+        {{ $title = lower . }}
+      {{ end }}
+      {{ $path := .RelPermalink | lower }}
+      {{ $sortKey := printf "%09d|%s|%s" $weight $title $path }}
+      {{ $items = $items | append (dict "page" . "sortKey" $sortKey) }}
+    {{ end }}
+  {{ end }}
+
+  {{ $children := slice }}
+  {{ range (sort $items "sortKey") }}
+    {{ $children = $children | append .page }}
+  {{ end }}
+
+  {{ if gt (len $children) 0 }}
+    <ul class="docs-nav-list">
+      {{ range $children }}
+        {{ $page := . }}
+        {{ if eq $page.RelPermalink $node.RelPermalink }}
+          {{ continue }}
+        {{ end }}
+        {{ $label := $page.LinkTitle | default $page.Title }}
+        {{ with $page.Params.nav.title }}
+          {{ $label = . }}
+        {{ end }}
+        {{ $grandchildren := slice }}
+        {{ range $page.Pages }}
+          {{ $hidden := false }}
+          {{ with .Params.nav }}
+            {{ $hidden = (.hidden | default false) }}
+          {{ end }}
+          {{ if not $hidden }}
+            {{ $weight := .Weight | default 0 }}
+            {{ $title := .LinkTitle | default .Title | lower }}
+            {{ with .Params.nav.title }}
+              {{ $title = lower . }}
+            {{ end }}
+            {{ $path := .RelPermalink | lower }}
+            {{ $sortKey := printf "%09d|%s|%s" $weight $title $path }}
+            {{ $grandchildren = $grandchildren | append (dict "page" . "sortKey" $sortKey) }}
+          {{ end }}
+        {{ end }}
+
+        {{ $sortedGrandchildren := slice }}
+        {{ range (sort $grandchildren "sortKey") }}
+          {{ $sortedGrandchildren = $sortedGrandchildren | append .page }}
+        {{ end }}
+
+        {{ $isCurrent := eq $page.RelPermalink $current.RelPermalink }}
+        {{ $isOpen := or $isCurrent (hasPrefix $current.RelPermalink $page.RelPermalink) }}
+        <li class="docs-nav-item">
+          {{ if gt (len $sortedGrandchildren) 0 }}
+            <details class="docs-nav-group" open data-nav-group data-nav-path="{{ $page.RelPermalink }}">
+              <summary class="docs-nav-summary">
+                <span class="docs-nav-summary-label">{{ $label }}</span>
+              </summary>
+              <a class="docs-nav-link docs-nav-group-link" href="{{ $page.RelPermalink }}" data-nav-link{{ if $isCurrent }} data-nav-current="true" aria-current="page"{{ end }}>{{ $label }}</a>
+              {{ partial "docs/nav-tree.html" (dict "Node" $page "Current" $current) }}
+            </details>
+          {{ else }}
+            <a class="docs-nav-link" href="{{ $page.RelPermalink }}" data-nav-link{{ if $isCurrent }} data-nav-current="true" aria-current="page"{{ end }}>{{ $label }}</a>
+          {{ end }}
+        </li>
+      {{ end }}
+    </ul>
+  {{ end }}
+{{ end }}

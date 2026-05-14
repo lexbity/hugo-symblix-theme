@@ -1,0 +1,10 @@
+{{ $logo := site.Params.docs.logo | default "" }}
+{{ $logoAlt := site.Params.docs.logoAlt | default site.Title }}
+
+<a class="docs-logo" href="{{ site.Home.RelPermalink }}">
+  {{ if $logo }}
+    <img class="docs-logo-image" src="{{ $logo | relURL }}" alt="{{ $logoAlt }}">
+  {{ else }}
+    <span class="docs-logo-text">{{ $logoAlt }}</span>
+  {{ end }}
+</a>

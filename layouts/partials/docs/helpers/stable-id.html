@@ -1,0 +1,11 @@
+{{- $id := .ID | default "" -}}
+{{- if not $id -}}
+  {{- $value := .Value | default .Title | default "" -}}
+  {{- if $value -}}
+    {{- $id = anchorize $value -}}
+    {{- with .Prefix -}}
+      {{- $id = printf "%s-%s" . $id -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $id -}}

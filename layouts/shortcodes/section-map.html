@@ -1,0 +1,11 @@
+{{- $content := .InnerDeindent -}}
+{{- partial "docs/components/section-map.html" (dict
+  "Page" .Page
+  "Root" (.Get "root" | default "")
+  "Title" (.Get "title" | default "")
+  "Depth" (.Get "depth" | default 2)
+  "Style" (.Get "style" | default "tree")
+  "ShowCurrent" (.Get "showCurrent" | default true)
+  "ShowDescriptions" (.Get "showDescriptions" | default false)
+  "MaxItems" (.Get "maxItems" | default 0)
+) -}}

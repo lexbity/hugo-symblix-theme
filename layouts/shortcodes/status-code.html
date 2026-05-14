@@ -1,0 +1,23 @@
+{{- $code := .Get "code" | default "" -}}
+{{- $label := .Get "label" | default "" -}}
+{{- $heading := trim (printf "%s %s" $code $label) " " -}}
+{{- partial "docs/components/reference-item.html" (dict
+  "Kind" "status-code"
+  "Name" $code
+  "Heading" $heading
+  "Code" $code
+  "Label" $label
+  "Type" (.Get "type" | default "")
+  "Default" (.Get "default" | default "")
+  "Required" (.Get "required" | default "")
+  "Since" (.Get "since" | default "")
+  "Deprecated" (.Get "deprecated" | default "")
+  "Removed" (.Get "removed" | default "")
+  "Experimental" (.Get "experimental" | default "")
+  "Status" (.Get "status" | default "")
+  "ID" (.Get "id" | default "")
+  "Class" (.Get "class" | default "")
+  "HeadingLevel" (site.Params.docs.components.reference.headingLevel | default 3)
+  "ShowLifecycleBadges" (site.Params.docs.components.reference.showLifecycleBadges | default true)
+  "Body" .InnerDeindent
+) -}}

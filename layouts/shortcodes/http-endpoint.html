@@ -1,0 +1,24 @@
+{{- $method := .Get "method" | default "" -}}
+{{- $path := .Get "path" | default "" -}}
+{{- $heading := trim (printf "%s %s" (upper $method) $path) " " -}}
+{{- partial "docs/components/reference-item.html" (dict
+  "Kind" "http-endpoint"
+  "Name" $heading
+  "Heading" $heading
+  "Method" $method
+  "Path" $path
+  "Auth" (.Get "auth" | default "")
+  "Type" (.Get "type" | default "")
+  "Default" (.Get "default" | default "")
+  "Required" (.Get "required" | default "")
+  "Since" (.Get "since" | default "")
+  "Deprecated" (.Get "deprecated" | default "")
+  "Removed" (.Get "removed" | default "")
+  "Experimental" (.Get "experimental" | default "")
+  "Status" (.Get "status" | default "")
+  "ID" (.Get "id" | default "")
+  "Class" (.Get "class" | default "")
+  "HeadingLevel" (site.Params.docs.components.reference.headingLevel | default 3)
+  "ShowLifecycleBadges" (site.Params.docs.components.reference.showLifecycleBadges | default true)
+  "Body" .InnerDeindent
+) -}}

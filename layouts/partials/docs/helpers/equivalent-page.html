@@ -1,0 +1,32 @@
+{{- $page := .Page -}}
+{{- $currentRoot := .CurrentRoot -}}
+{{- $targetRoot := .TargetRoot -}}
+{{- $site := .Site | default site -}}
+{{- $equivalent := "" -}}
+{{- if and $page $currentRoot $targetRoot $site -}}
+  {{- $relPath := strings.TrimPrefix $currentRoot.RelPermalink $page.RelPermalink -}}
+  {{- $candidate := printf "%s%s" $targetRoot.RelPermalink $relPath -}}
+  {{- with where $site.Pages "RelPermalink" $candidate -}}
+    {{- $equivalent = (index . 0).RelPermalink -}}
+  {{- end -}}
+  {{- if not $equivalent -}}
+    {{- $parent := $page.Parent -}}
+    {{- if and $parent (ne $parent.RelPermalink $currentRoot.RelPermalink) -}}
+      {{- $parentRel := strings.TrimPrefix $currentRoot.RelPermalink $parent.RelPermalink -}}
+      {{- $targetParentPermalink := printf "%s%s" $targetRoot.RelPermalink $parentRel -}}
+      {{- with where $site.Pages "RelPermalink" $targetParentPermalink -}}
+        {{- $targetParent := index . 0 -}}
+        {{- $base := $page.File.BaseFileName -}}
+        {{- range $targetParent.Pages -}}
+          {{- if eq .File.BaseFileName $base -}}
+            {{- $equivalent = .RelPermalink -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if not $equivalent -}}
+    {{- $equivalent = $targetRoot.RelPermalink -}}
+  {{- end -}}
+{{- end -}}
+{{- $equivalent -}}

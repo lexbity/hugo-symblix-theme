@@ -1,0 +1,13 @@
+{{- $items := partial "docs/helpers/lifecycle-badges.html" . -}}
+{{- if $items -}}
+<div class="docs-lifecycle-badges">
+  {{- range $items -}}
+    {{- if .Value -}}
+      {{- partial "docs/components/badge.html" (dict "Label" .Label "Status" .Status "Variant" "default" "Class" "docs-lifecycle-badge") -}}
+      {{- partial "docs/components/badge.html" (dict "Label" .Value "Status" .Status "Variant" "default" "Class" "docs-lifecycle-badge-value") -}}
+    {{- else -}}
+      {{- partial "docs/components/badge.html" (dict "Label" .Label "Status" .Status "Variant" "default" "Class" "docs-lifecycle-badge") -}}
+    {{- end -}}
+  {{- end -}}
+</div>
+{{- end -}}

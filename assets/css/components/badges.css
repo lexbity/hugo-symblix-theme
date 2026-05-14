@@ -1,0 +1,45 @@
+@layer components {
+  .docs-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--docs-border);
+    border-radius: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.4;
+    vertical-align: middle;
+  }
+
+  .docs-badge--neutral,
+  .docs-badge-default {
+    background: color-mix(in srgb, var(--docs-bg) 92%, var(--docs-border));
+  }
+
+  .docs-badge--info,
+  .docs-badge-info {
+    background: color-mix(in srgb, var(--docs-bg) 82%, #3b82f6);
+  }
+
+  .docs-badge--warning,
+  .docs-badge-warning {
+    background: color-mix(in srgb, var(--docs-bg) 82%, #f59e0b);
+  }
+
+  .docs-badge--success,
+  .docs-badge-success {
+    background: color-mix(in srgb, var(--docs-bg) 82%, #22c55e);
+  }
+
+  .docs-badge--danger,
+  .docs-badge-danger {
+    background: color-mix(in srgb, var(--docs-bg) 82%, #ef4444);
+  }
+
+  .docs-lifecycle-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}

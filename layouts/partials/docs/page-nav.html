@@ -1,0 +1,45 @@
+{{ $rootName := site.Params.docs.root | default "docs" }}
+{{ $docsRoot := false }}
+{{ with where site.Home.Sections "Section" $rootName }}
+  {{ $docsRoot = index . 0 }}
+{{ end }}
+
+{{ $versionRoot := $docsRoot }}
+{{ with $docsRoot }}
+  {{ range .Sections }}
+    {{ if hasPrefix $.RelPermalink .RelPermalink }}
+      {{ $versionRoot = . }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ with $versionRoot }}
+  {{ $sequence := partial "docs/helpers/nav-sequence.html" (dict "Node" .) }}
+  {{ $currentIndex := -1 }}
+  {{ range $i, $page := $sequence }}
+    {{ if eq $page.RelPermalink $.RelPermalink }}
+      {{ $currentIndex = $i }}
+    {{ end }}
+  {{ end }}
+
+  {{ if ge $currentIndex 0 }}
+    <nav class="docs-page-nav" aria-label="Previous and next">
+      <ul class="docs-page-nav-list">
+        {{ if gt $currentIndex 0 }}
+          {{ $prev := index $sequence (sub $currentIndex 1) }}
+          <li class="docs-page-nav-item docs-page-nav-prev">
+            <span class="docs-page-nav-label">{{ i18n "previous" | default "Previous" }}</span>
+            <a class="docs-page-nav-link" href="{{ $prev.RelPermalink }}">{{ $prev.LinkTitle }}</a>
+          </li>
+        {{ end }}
+        {{ if lt (add $currentIndex 1) (len $sequence) }}
+          {{ $next := index $sequence (add $currentIndex 1) }}
+          <li class="docs-page-nav-item docs-page-nav-next">
+            <span class="docs-page-nav-label">{{ i18n "next" | default "Next" }}</span>
+            <a class="docs-page-nav-link" href="{{ $next.RelPermalink }}">{{ $next.LinkTitle }}</a>
+          </li>
+        {{ end }}
+      </ul>
+    </nav>
+  {{ end }}
+{{ end }}

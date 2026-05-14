@@ -1,0 +1,11 @@
+{{- $content := .InnerDeindent -}}
+{{- partial "docs/components/child-pages.html" (dict
+  "Page" .Page
+  "Root" (.Get "root" | default "")
+  "Title" (.Get "title" | default "")
+  "Style" (.Get "style" | default "cards")
+  "ShowDescriptions" (.Get "showDescriptions" | default true)
+  "ShowDocType" (.Get "showDocType" | default true)
+  "EmptyMessage" (.Get "emptyMessage" | default "")
+  "MaxItems" (.Get "maxItems" | default 0)
+) -}}

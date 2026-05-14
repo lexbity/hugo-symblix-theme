@@ -1,0 +1,25 @@
+{{- $items := slice -}}
+{{- with .Required -}}
+  {{- $required := partial "docs/helpers/boolean.html" (dict "Value" .) -}}
+  {{- if eq $required "true" -}}
+    {{- $items = $items | append (dict "Label" (i18n "required" | default "Required") "Status" "success") -}}
+  {{- else -}}
+    {{- $items = $items | append (dict "Label" (i18n "optional" | default "Optional") "Status" "neutral") -}}
+  {{- end -}}
+{{- end -}}
+{{- with .DocType -}}
+  {{- $items = $items | append (dict "Label" (i18n "type" | default "Type") "Value" . "Status" "info") -}}
+{{- end -}}
+{{- with .Since -}}
+  {{- $items = $items | append (dict "Label" (i18n "since" | default "Since") "Value" . "Status" "success") -}}
+{{- end -}}
+{{- with .Deprecated -}}
+  {{- $items = $items | append (dict "Label" (i18n "deprecated" | default "Deprecated") "Value" . "Status" "warning") -}}
+{{- end -}}
+{{- with .Removed -}}
+  {{- $items = $items | append (dict "Label" (i18n "removed" | default "Removed") "Value" . "Status" "danger") -}}
+{{- end -}}
+{{- if .Experimental -}}
+  {{- $items = $items | append (dict "Label" (i18n "experimental" | default "Experimental") "Value" (i18n "yes" | default "Yes") "Status" "neutral") -}}
+{{- end -}}
+{{- return $items -}}

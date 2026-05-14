@@ -1,0 +1,15 @@
+{{ $page := .Page }}
+{{ $site := .Site | default site }}
+{{ $dataName := $site.Params.docs.nav.data | default "docs_nav" }}
+{{ $navData := index hugo.Data $dataName }}
+{{ $items := slice }}
+
+{{ with $navData }}
+  {{ $items = .items | default slice }}
+{{ end }}
+
+{{ if gt (len $items) 0 }}
+  {{ partial "docs/manual-nav-tree.html" (dict "Items" $items "Current" $page "Site" $site) }}
+{{ else }}
+  <p>{{ i18n "sidebar_placeholder" | default "Sidebar placeholder" }}</p>
+{{ end }}

@@ -1,0 +1,17 @@
+{{- $title := .Get "title" | default "" -}}
+{{- $id := partial "docs/helpers/stable-id.html" (dict "ID" (.Get "id" | default "") "Title" $title) -}}
+{{- $optional := partial "docs/helpers/boolean.html" (dict "Value" (.Get "optional" | default false)) -}}
+{{- $status := .Get "status" | default "" -}}
+<li class="docs-step{{ with .Get "class" }} {{ . }}{{ end }}"{{ with $id }} id="{{ . }}"{{ end }}>
+  <div class="docs-step__marker" aria-hidden="true"></div>
+  <div class="docs-step__content">
+    {{ if or $title $status $optional }}
+      <div class="docs-step__header">
+        {{ with $title }}<h3 class="docs-step__title">{{ . }}</h3>{{ end }}
+        {{ with $status }}{{ partial "docs/components/badge.html" (dict "Label" . "Status" "info" "Variant" "default") }}{{ end }}
+        {{ if eq $optional "true" }}{{ partial "docs/components/badge.html" (dict "Label" (i18n "optional" | default "Optional") "Status" "neutral" "Variant" "default") }}{{ end }}
+      </div>
+    {{ end }}
+    <div class="docs-step__body">{{ .InnerDeindent | markdownify }}</div>
+  </div>
+</li>

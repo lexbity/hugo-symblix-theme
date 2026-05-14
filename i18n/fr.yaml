@@ -1,0 +1,106 @@
+- id: search_docs
+  translation: Rechercher dans la documentation
+- id: language
+  translation: Langue
+- id: version
+  translation: Version
+- id: on_this_page
+  translation: Sur cette page
+- id: edit_this_page
+  translation: Modifier cette page
+- id: improve_this_translation
+  translation: Améliorer cette traduction
+- id: last_updated
+  translation: Dernière mise à jour
+- id: previous
+  translation: Précédent
+- id: next
+  translation: Suivant
+- id: related
+  translation: Pages connexes
+- id: warning_old_version
+  translation: "Vous consultez {{ .Current }}. La documentation la plus récente est {{ .Latest }}."
+- id: warning_outdated_translation
+  translation: "Cette traduction est marquée {{ .Status }} et peut être obsolète."
+- id: translation_warning
+  translation: Avertissement de traduction
+- id: skip_to_content
+  translation: Aller au contenu
+- id: menu
+  translation: Menu
+- id: documentation_navigation
+  translation: Navigation de la documentation
+- id: sidebar_placeholder
+  translation: Espace réservé de la barre latérale
+- id: archived
+  translation: Archivé
+- id: type
+  translation: Type
+- id: required
+  translation: Requis
+- id: optional
+  translation: Facultatif
+- id: method
+  translation: Méthode
+- id: path
+  translation: Chemin
+- id: auth
+  translation: Authentification
+- id: code
+  translation: Code
+- id: label
+  translation: Libellé
+- id: since
+  translation: Depuis
+- id: deprecated
+  translation: Obsolète
+- id: removed
+  translation: Supprimé
+- id: experimental
+  translation: Expérimental
+- id: browse_docs_home
+  translation: Parcourir l'accueil de la documentation
+- id: browse_all_pages
+  translation: Parcourir toutes les pages
+- id: child_pages
+  translation: Pages enfants
+- id: section_map
+  translation: Plan de section
+- id: search_unavailable
+  translation: La recherche n'est pas disponible sans JavaScript.
+- id: search_loading
+  translation: Chargement de la recherche…
+- id: search_empty
+  translation: Tapez pour rechercher
+- id: search_no_results
+  translation: Aucun résultat trouvé
+- id: search_error
+  translation: Échec de la recherche
+- id: search_scope
+  translation: Portée
+- id: search_results_for
+  translation: Résultats pour
+- id: search_results
+  translation: Résultats de recherche
+- id: search_clear
+  translation: Effacer
+- id: search_filters
+  translation: Filtres
+- id: search_filter_version
+  translation: Version
+- id: search_filter_docType
+  translation: Type
+- id: search_filter_topic
+  translation: Sujet
+- id: search_all_versions
+  translation: Toutes les versions
+- id: search_all_types
+  translation: Tous les types
+- id: search_all_topics
+  translation: Tous les sujets
+- id: copy_code
+  translation: Copier le code
+- id: copied
+  translation: Copié
+- id: copy_failed
+  translation: Copie échouée

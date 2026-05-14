@@ -1,0 +1,8 @@
+{{- $anchor := .Anchor -}}
+{{- if not $anchor -}}
+  {{- $anchor = anchorize .Text -}}
+{{- end -}}
+<h{{ .Level }} id="{{ $anchor }}">
+  <a class="docs-heading-anchor" href="#{{ $anchor }}" aria-label="{{ printf "%s %s" (i18n "link_to" | default "Link to") (.Text | plainify) }}">#</a>
+  {{ .Text }}
+</h{{ .Level }}>

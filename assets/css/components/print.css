@@ -1,0 +1,70 @@
+@media print {
+  .skip-link,
+  .docs-sidebar,
+  .docs-toc,
+  .site-footer,
+  .docs-content-footer,
+  .docs-switcher-list,
+  .docs-version-warning,
+  .docs-translation-warning,
+  .docs-page-nav,
+  .docs-related,
+  .docs-breadcrumbs,
+  .docs-page-meta,
+  .docs-sidebar-links {
+    display: none !important;
+  }
+
+  .docs-shell {
+    display: block;
+    padding: 0;
+  }
+
+  .docs-article {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .docs-content,
+  .docs-manual,
+  .docs-manual-section,
+  .docs-browse-list,
+  .docs-page-card,
+  .docs-codeblock,
+  .docs-table-wrapper {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .docs-codeblock,
+  pre,
+  table,
+  figure {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .docs-content a[href^="http"]::after,
+  .docs-manual a[href^="http"]::after,
+  .docs-browse a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    word-break: break-all;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  .docs-content img,
+  .docs-manual img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  .docs-manual-section {
+    margin-bottom: 1.5rem;
+  }
+}

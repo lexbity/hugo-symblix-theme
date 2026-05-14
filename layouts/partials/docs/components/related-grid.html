@@ -1,0 +1,53 @@
+{{- $page := .Page | default . -}}
+{{- $title := .Title | default (i18n "related" | default "Related pages") -}}
+{{- $style := .Style | default "cards" -}}
+{{- $showDescription := partial "docs/helpers/boolean.html" (dict "Value" (.ShowDescription | default true)) -}}
+{{- $showDocType := partial "docs/helpers/boolean.html" (dict "Value" (.ShowDocType | default true)) -}}
+{{- $items := slice -}}
+
+{{- with $page.Params.related -}}
+  {{- range . -}}
+    {{- $ref := . -}}
+    {{- $matches := where site.Pages "RelPermalink" $ref -}}
+    {{- with $matches -}}
+      {{- $candidate := index . 0 -}}
+      {{- if ne $candidate.RelPermalink $page.RelPermalink -}}
+        {{- $items = $items | append $candidate -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if gt (len $items) 0 -}}
+<section class="docs-related-grid docs-related-grid--{{ $style }}" aria-label="{{ $title }}">
+  <h2 class="docs-related-grid__title">{{ $title }}</h2>
+  {{- if eq $style "cards" -}}
+    <div class="docs-card-grid docs-related-grid__cards">
+      {{- range $items -}}
+        {{- partial "docs/page-card.html" (dict "Page" . "Current" $page "ShowDescription" $showDescription "ShowDocType" $showDocType) -}}
+      {{- end -}}
+    </div>
+  {{- else -}}
+    <ul class="docs-related-grid__list docs-related-grid__list--{{ $style }}">
+      {{- range $items -}}
+        <li class="docs-related-grid__item">
+          <a class="docs-related-grid__link" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+          {{- if and $showDescription .Description -}}
+            <p class="docs-related-grid__description">{{ .Description }}</p>
+          {{- end -}}
+          {{- if $showDocType -}}
+            <div class="docs-related-grid__meta">
+              {{- with .Params.docType -}}
+                {{ partial "docs/components/badge.html" (dict "Label" (printf "%s: %s" (i18n "type" | default "Type") .) "Variant" "default" "Status" "info") }}
+              {{- end -}}
+              {{- with .Language.Label -}}
+                {{ partial "docs/components/badge.html" (dict "Label" . "Variant" "default") }}
+              {{- end -}}
+            </div>
+          {{- end -}}
+        </li>
+      {{- end -}}
+    </ul>
+  {{- end -}}
+</section>
+{{- end -}}

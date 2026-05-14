@@ -1,0 +1,8 @@
+{{- $name := .Name | default "" -}}
+{{- $fallback := .Fallback | default (humanize $name) -}}
+{{- $class := .Class | default "" -}}
+{{- if $name -}}
+<span class="docs-icon docs-icon--{{ $name }}{{ with $class }} {{ . }}{{ end }}" aria-hidden="true">{{ $fallback }}</span>
+{{- else if $fallback -}}
+<span class="docs-icon{{ with $class }} {{ . }}{{ end }}" aria-hidden="true">{{ $fallback }}</span>
+{{- end -}}

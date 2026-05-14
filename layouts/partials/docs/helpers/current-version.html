@@ -1,0 +1,17 @@
+{{- $page := . -}}
+{{- $rootName := site.Params.docs.root | default "docs" -}}
+{{- $docsRoot := index (where site.Home.Sections "Section" $rootName) 0 -}}
+{{- $current := hugo.Data.docs_versions.current | default "latest" -}}
+{{- if $page.Params.docsVersion -}}
+  {{- $current = $page.Params.docsVersion -}}
+{{- else if $docsRoot -}}
+  {{- $prefix := strings.TrimPrefix $docsRoot.RelPermalink $page.RelPermalink -}}
+  {{- $parts := split $prefix "/" -}}
+  {{- if gt (len $parts) 0 -}}
+    {{- $first := index $parts 0 -}}
+    {{- if $first -}}
+      {{- $current = $first -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $current -}}

@@ -1,0 +1,31 @@
+{{- $title := .Get "title" | default "Card" -}}
+{{- $href := .Get "href" | default "" -}}
+{{- $external := partial "docs/helpers/boolean.html" (dict "Value" (.Get "external" | default false)) -}}
+{{- $icon := .Get "icon" | default "" -}}
+{{- $badge := .Get "badge" | default "" -}}
+{{- $class := .Get "class" | default "" -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict "Base" (slice "docs-card") "Modifiers" (cond $href (slice "docs-card--linked") (slice)) "Extra" $class) -}}
+{{- $description := .Get "description" | default "" -}}
+
+<article class="{{ $classes }}">
+  <div class="docs-card__header">
+    {{- with $badge }}
+      {{ partial "docs/components/badge.html" (dict "Label" . "Variant" "default" "Class" "docs-card__badge") }}
+    {{- end -}}
+    <h3 class="docs-card__title">
+      {{ if $href }}
+        <a class="docs-card__link" href="{{ $href | relURL }}"{{ if or (eq $external "true") (hasPrefix $href "http://") (hasPrefix $href "https://") }} rel="noreferrer"{{ end }}>
+          {{ with $icon }}{{ partial "docs/helpers/icon.html" (dict "Name" . "Class" "docs-card__icon") }}{{ end -}}
+          {{- $title -}}
+        </a>
+      {{ else }}
+        {{ with $icon }}{{ partial "docs/helpers/icon.html" (dict "Name" . "Class" "docs-card__icon") }}{{ end -}}
+        {{- $title -}}
+      {{ end }}
+    </h3>
+  </div>
+
+  {{ with or $description (.InnerDeindent | strings.TrimSpace) }}
+    <div class="docs-card__description">{{ . | markdownify }}</div>
+  {{ end }}
+</article>

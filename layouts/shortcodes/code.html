@@ -1,0 +1,30 @@
+{{- $title := .Get "title" -}}
+{{- if not $title -}}
+  {{- $title = .Get "label" -}}
+{{- end -}}
+{{- if not $title -}}
+  {{- $title = "Code" -}}
+{{- end -}}
+{{- $language := .Get "language" -}}
+{{- if not $language -}}
+  {{- $language = .Get "lang" -}}
+{{- end -}}
+{{- $filename := .Get "filename" | default "" -}}
+{{- $class := .Get "class" | default "" -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict "Base" (slice "docs-choice-group__panel" "docs-choice-group__panel--code" "docs-code") "Extra" $class) -}}
+<section class="{{ $classes }}">
+  <header class="docs-choice-group__header">
+    <h3 class="docs-choice-group__title">{{ $title }}</h3>
+    <div class="docs-choice-group__meta">
+      {{- with $filename }}
+        {{ partial "docs/components/badge.html" (dict "Label" . "Variant" "default" "Class" "docs-choice-group__badge") }}
+      {{- end -}}
+      {{- with $language }}
+        {{ partial "docs/components/badge.html" (dict "Label" . "Status" "info" "Variant" "default" "Class" "docs-choice-group__badge") }}
+      {{- end -}}
+    </div>
+  </header>
+  <div class="docs-choice-group__body">
+    <pre class="docs-code-group__pre"><code{{ with $language }} class="language-{{ . }}"{{ end }}>{{ .InnerDeindent | trim " \n\t\r" | htmlEscape }}</code></pre>
+  </div>
+</section>

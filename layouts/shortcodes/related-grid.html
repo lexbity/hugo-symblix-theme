@@ -1,0 +1,8 @@
+{{- $content := .InnerDeindent -}}
+{{- partial "docs/components/related-grid.html" (dict
+  "Page" .Page
+  "Title" (.Get "title" | default "")
+  "Style" (.Get "style" | default "cards")
+  "ShowDescription" (.Get "showDescription" | default true)
+  "ShowDocType" (.Get "showDocType" | default true)
+) -}}

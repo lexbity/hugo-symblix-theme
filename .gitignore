@@ -1,0 +1,9 @@
+.hugo_build.lock
+.github
+public/
+resources/
+node_modules/
+exampleSite/public/
+exampleSite/resources/
+test-results/
+devdocs/

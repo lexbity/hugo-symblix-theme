@@ -1,0 +1,10 @@
+<header class="docs-page-header">
+  {{ partial "docs/breadcrumbs.html" . }}
+  <h1>{{ .Title }}</h1>
+  {{ with .Description }}
+    <p>{{ . }}</p>
+  {{ end }}
+  {{ partial "docs/page-meta.html" . }}
+  {{ partial "docs/translation-warning.html" . }}
+  {{ partial "docs/version-warning.html" . }}
+</header>

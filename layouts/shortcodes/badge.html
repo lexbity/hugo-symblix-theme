@@ -1,0 +1,10 @@
+{{- partial "docs/components/badge.html" (dict
+  "Label" (.Get "label" | default (.Get 0 | default ""))
+  "Status" (.Get "status" | default "")
+  "Variant" (.Get "variant" | default "default")
+  "Href" (.Get "href" | default "")
+  "External" (.Get "external" | default false)
+  "Class" (.Get "class" | default "")
+  "Icon" (.Get "icon" | default "")
+  "IconFallback" (.Get "iconFallback" | default "")
+) -}}

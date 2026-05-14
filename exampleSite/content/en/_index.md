@@ -1,0 +1,39 @@
++++
+title = "Docworkbench"
+description = "Versioned, multilingual Hugo documentation without JavaScript."
++++
+
+{{< hero eyebrow="Documentation" title="Docworkbench" subtitle="Versioned, multilingual Hugo documentation without JavaScript." headingLevel="1" primaryHref="/en/docs/latest/" primaryLabel="Open the latest docs" secondaryHref="/en/docs/latest/components/" secondaryLabel="Browse components" >}}
+{{< /hero >}}
+
+{{< feature-grid >}}
+{{< feature title="Versioned docs" icon="versions" >}}
+Keep current and archived documentation in one site.
+{{< /feature >}}
+
+{{< feature title="Multilingual" icon="languages" >}}
+Support translated docs with clear review metadata.
+{{< /feature >}}
+
+{{< feature title="No JavaScript" icon="static" >}}
+Readable HTML, durable navigation, and print-friendly output.
+{{< /feature >}}
+{{< /feature-grid >}}
+
+{{< cards columns="3" >}}
+{{< card title="Getting Started" href="/en/docs/latest/getting-started/" icon="start" badge="Docs" >}}
+Start with the installation and content tree overview.
+{{< /card >}}
+
+{{< card title="Theme Guide" href="/en/docs/latest/" icon="browse" badge="Docs" >}}
+Read the theme documentation from the latest release root.
+{{< /card >}}
+
+{{< card title="Components" href="/en/docs/latest/components/" icon="blocks" badge="Docs" >}}
+See the shortcode and render-hook examples in one place.
+{{< /card >}}
+{{< /cards >}}
+
+{{< cta title="Start building" href="/en/docs/latest/getting-started/" label="Get started" secondaryHref="/en/docs/latest/all-pages/" secondaryLabel="Browse all pages" >}}
+Use the docs shell and authoring primitives as a foundation.
+{{< /cta >}}

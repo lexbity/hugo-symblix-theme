@@ -1,0 +1,22 @@
+{{- $classes := slice -}}
+{{- with .Base -}}
+  {{- range . -}}
+    {{- if . -}}
+      {{- $classes = $classes | append . -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- with .Modifiers -}}
+  {{- range . -}}
+    {{- if . -}}
+      {{- $classes = $classes | append . -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- with .Extra -}}
+  {{- $extra := trim . " " -}}
+  {{- if $extra -}}
+    {{- $classes = $classes | append $extra -}}
+  {{- end -}}
+{{- end -}}
+{{- return (delimit (uniq $classes) " ") -}}

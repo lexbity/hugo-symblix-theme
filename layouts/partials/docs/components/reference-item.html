@@ -1,0 +1,54 @@
+{{- $kind := .Kind | default "reference" -}}
+{{- $name := .Name | default "" -}}
+{{- $heading := .Heading | default $name -}}
+{{- $headingLevel := .HeadingLevel | default 3 -}}
+{{- $showLifecycle := partial "docs/helpers/boolean.html" (dict "Value" (.ShowLifecycleBadges | default true)) -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict
+  "Base" (slice "docs-reference-item" (printf "docs-reference-item--%s" $kind))
+  "Extra" (.Class | default "")
+) -}}
+{{- $id := partial "docs/helpers/stable-id.html" (dict "ID" (.ID | default "") "Title" (or $name $heading)) -}}
+
+<article class="{{ $classes }}"{{ with $id }} id="{{ . }}"{{ end }}>
+  <header class="docs-reference-item__header">
+    {{- if $heading -}}
+      <h{{ $headingLevel }} class="docs-reference-item__name">
+        <code>{{ $heading }}</code>
+      </h{{ $headingLevel }}>
+    {{- end -}}
+    {{- if $showLifecycle -}}
+      <div class="docs-reference-item__badges">
+        {{- partial "docs/components/lifecycle-badges.html" (dict
+          "Required" .Required
+          "DocType" .DocType
+          "Since" .Since
+          "Deprecated" .Deprecated
+          "Removed" .Removed
+          "Experimental" .Experimental
+        ) -}}
+      </div>
+    {{- end -}}
+  </header>
+
+  {{- partial "docs/components/reference-meta.html" (dict
+    "ID" $id
+    "Name" $name
+    "Method" .Method
+    "Path" .Path
+    "Auth" .Auth
+    "Type" .Type
+    "Code" .Code
+    "Label" .Label
+    "Default" .Default
+    "Required" .Required
+    "Since" .Since
+    "Deprecated" .Deprecated
+    "Removed" .Removed
+    "Experimental" .Experimental
+    "Status" .Status
+  ) -}}
+
+  {{- with .Body -}}
+    <div class="docs-reference-item__body">{{ . | markdownify }}</div>
+  {{- end -}}
+</article>

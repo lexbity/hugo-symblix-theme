@@ -1,0 +1,162 @@
+@layer components {
+  .docs-home {
+    display: grid;
+    gap: calc(var(--docs-density-component-gap) * 2.25);
+  }
+
+  .docs-hero {
+    display: grid;
+    gap: calc(var(--docs-density-component-gap) * 1.1);
+    padding: clamp(var(--docs-density-component-padding), 4vw, calc(var(--docs-density-component-padding) * 2.6));
+    border: 1px solid var(--docs-border);
+    border-radius: 0;
+    background:
+      radial-gradient(circle at top right, color-mix(in srgb, var(--docs-accent) 16%, transparent), transparent 45%),
+      linear-gradient(180deg, color-mix(in srgb, var(--docs-surface) 98%, var(--docs-bg)), var(--docs-surface));
+    box-shadow: var(--docs-shadow);
+  }
+
+  .docs-hero--center {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .docs-hero__eyebrow {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: color-mix(in srgb, var(--docs-muted) 86%, var(--docs-text));
+  }
+
+  .docs-hero__title {
+    margin: 0;
+    font-size: clamp(2.4rem, 5vw, 4.25rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    max-width: 12ch;
+  }
+
+  .docs-hero__subtitle {
+    margin: 0;
+    max-width: 64ch;
+    color: var(--docs-muted);
+    font-size: 1.08rem;
+    line-height: 1.75;
+  }
+
+  .docs-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--docs-density-component-gap) * 0.75);
+    margin-top: 0.25rem;
+  }
+
+  .docs-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.85rem;
+    padding: calc(var(--docs-density-component-padding) * 0.58) calc(var(--docs-density-component-padding) * 1.05);
+    border-radius: 0;
+    border: 1px solid var(--docs-border);
+    font-weight: 700;
+    transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+    box-shadow: var(--docs-shadow);
+  }
+
+  .docs-button:hover {
+    transform: translateY(-1px);
+    border-color: var(--docs-accent);
+    box-shadow: 0 0 0 1px var(--docs-accent);
+  }
+
+  .docs-button--primary {
+    background: var(--docs-accent);
+    color: var(--docs-bg);
+    border-color: var(--docs-accent);
+  }
+
+  .docs-button--secondary {
+    background: transparent;
+    color: var(--docs-text);
+  }
+
+  .docs-feature-grid {
+    display: grid;
+    gap: var(--docs-density-component-gap);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  }
+
+  .docs-feature {
+    display: grid;
+    gap: calc(var(--docs-density-component-gap) * 0.75);
+    padding: var(--docs-density-component-padding);
+    border: 1px solid var(--docs-border);
+    border-radius: 0;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--docs-surface) 98%, var(--docs-bg)), var(--docs-surface));
+    box-shadow: var(--docs-shadow);
+  }
+
+  .docs-feature__link {
+    color: var(--docs-text);
+  }
+
+  .docs-feature__icon {
+    margin-inline-end: 0.35rem;
+    color: var(--docs-accent);
+  }
+
+  .docs-cta {
+    padding: var(--docs-density-component-padding);
+    border: 1px solid var(--docs-border);
+    border-radius: 0;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--docs-surface) 98%, var(--docs-bg)), var(--docs-surface));
+    box-shadow: var(--docs-shadow);
+  }
+
+  .docs-feature__title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+
+  .docs-feature__body {
+    margin-top: 0.5rem;
+    color: var(--docs-muted);
+  }
+
+  .docs-feature__body > :first-child,
+  .docs-feature__body > :last-child {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .docs-cta {
+    display: grid;
+    gap: var(--docs-density-component-gap);
+    align-items: start;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .docs-cta__title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+
+  .docs-cta__body {
+    color: var(--docs-muted);
+  }
+
+  .docs-feature-grid + .docs-feature-grid {
+    margin-top: 0.25rem;
+  }
+
+  .docs-cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--docs-density-component-gap) * 0.75);
+  }
+}

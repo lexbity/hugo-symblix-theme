@@ -1,0 +1,112 @@
+- id: search_docs
+  translation: البحث في المستندات
+- id: language
+  translation: اللغة
+- id: version
+  translation: الإصدار
+- id: on_this_page
+  translation: في هذه الصفحة
+- id: edit_this_page
+  translation: تحرير هذه الصفحة
+- id: improve_this_translation
+  translation: تحسين هذه الترجمة
+- id: last_updated
+  translation: آخر تحديث
+- id: previous
+  translation: السابق
+- id: next
+  translation: التالي
+- id: related
+  translation: صفحات ذات صلة
+- id: warning_old_version
+  translation: "أنت تعرض {{ .Current }}. أحدث المستندات هي {{ .Latest }}."
+- id: warning_outdated_translation
+  translation: "هذه الترجمة موسومة بـ {{ .Status }} وقد تكون قديمة."
+- id: translation_warning
+  translation: تحذير الترجمة
+- id: skip_to_content
+  translation: الانتقال إلى المحتوى
+- id: menu
+  translation: القائمة
+- id: documentation_navigation
+  translation: تنقل الوثائق
+- id: sidebar_placeholder
+  translation: عنصر نائب للشريط الجانبي
+- id: archived
+  translation: مؤرشف
+- id: type
+  translation: النوع
+- id: required
+  translation: مطلوب
+- id: optional
+  translation: اختياري
+- id: method
+  translation: الطريقة
+- id: path
+  translation: المسار
+- id: auth
+  translation: المصادقة
+- id: code
+  translation: الرمز
+- id: label
+  translation: التسمية
+- id: since
+  translation: منذ
+- id: deprecated
+  translation: مهجور
+- id: removed
+  translation: أزيل
+- id: experimental
+  translation: تجريبي
+- id: browse_docs_home
+  translation: تصفح الصفحة الرئيسية للوثائق
+- id: browse_all_pages
+  translation: تصفح كل الصفحات
+- id: child_pages
+  translation: الصفحات الفرعية
+- id: section_map
+  translation: خريطة القسم
+- id: search_unavailable
+  translation: البحث غير متاح بدون JavaScript.
+- id: search_loading
+  translation: جارٍ تحميل البحث…
+- id: search_empty
+  translation: اكتب للبحث
+- id: search_no_results
+  translation: لم يتم العثور على نتائج
+- id: search_error
+  translation: فشل البحث
+- id: search_scope
+  translation: النطاق
+- id: search_results_for
+  translation: نتائج البحث عن
+- id: search_results
+  translation: نتائج البحث
+- id: search_clear
+  translation: مسح
+- id: search_filters
+  translation: عوامل التصفية
+- id: search_filter_version
+  translation: الإصدار
+- id: search_filter_docType
+  translation: النوع
+- id: search_filter_topic
+  translation: الموضوع
+- id: search_all_versions
+  translation: كل الإصدارات
+- id: search_all_types
+  translation: كل الأنواع
+- id: search_all_topics
+  translation: كل الموضوعات
+- id: copy_code
+  translation: نسخ الشفرة
+- id: copied
+  translation: تم النسخ
+- id: copy_failed
+  translation: فشل النسخ
+- id: light
+  translation: فاتح
+- id: dark
+  translation: داكن
+- id: system
+  translation: النظام

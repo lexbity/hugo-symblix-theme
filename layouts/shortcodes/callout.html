@@ -1,0 +1,10 @@
+{{- partial "docs/components/callout.html" (dict
+  "Type" (.Get "type" | default "note")
+  "Title" (.Get "title" | default "")
+  "Compact" (.Get "compact" | default false)
+  "ID" (.Get "id" | default "")
+  "Class" (.Get "class" | default "")
+  "Icon" (.Get "icon" | default "")
+  "IconFallback" (.Get "iconFallback" | default "")
+  "Body" .InnerDeindent
+) -}}

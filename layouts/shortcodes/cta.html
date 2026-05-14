@@ -1,0 +1,21 @@
+{{- $title := .Get "title" | default "Call to action" -}}
+{{- $href := .Get "href" | default "" -}}
+{{- $label := .Get "label" | default (i18n "learn_more" | default "Learn more") -}}
+{{- $variant := .Get "variant" | default "default" -}}
+{{- $secondaryHref := .Get "secondaryHref" | default "" -}}
+{{- $secondaryLabel := .Get "secondaryLabel" | default "" -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict "Base" (slice "docs-cta" (printf "docs-cta--%s" $variant)) "Extra" (.Get "class" | default "")) -}}
+<section class="{{ $classes }}">
+  <div class="docs-cta__content">
+    <h3 class="docs-cta__title">{{ $title }}</h3>
+    <div class="docs-cta__body">{{ .InnerDeindent | markdownify }}</div>
+  </div>
+  <div class="docs-cta__actions">
+    {{ with $href }}
+      <a class="docs-button docs-button--primary" href="{{ . | relURL }}">{{ $label }}</a>
+    {{ end }}
+    {{ with $secondaryHref }}
+      <a class="docs-button docs-button--secondary" href="{{ . | relURL }}">{{ $secondaryLabel | default (i18n "learn_more" | default "Learn more") }}</a>
+    {{ end }}
+  </div>
+</section>

@@ -1,0 +1,24 @@
+{{ $page := .Page }}
+{{ $version := partial "docs/helpers/current-version.html" $page | strings.TrimSpace }}
+{{ $showDescription := partial "docs/helpers/boolean.html" (dict "Value" (.ShowDescription | default true)) }}
+{{ $showDocType := partial "docs/helpers/boolean.html" (dict "Value" (.ShowDocType | default true)) }}
+{{ $showLanguage := partial "docs/helpers/boolean.html" (dict "Value" (.ShowLanguage | default true)) }}
+<article class="docs-page-card">
+  <h3 class="docs-page-card-title">
+    <a class="docs-page-card-link" href="{{ $page.RelPermalink }}">{{ $page.LinkTitle }}</a>
+  </h3>
+  {{ if and (eq $showDescription "true") $page.Description }}
+    <p class="docs-page-card-description">{{ $page.Description }}</p>
+  {{ end }}
+  <div class="docs-page-card-meta">
+    {{ with $version }}
+      {{ partial "docs/components/badge.html" (dict "Label" (printf "%s: %s" (i18n "version" | default "Version") .) "Variant" "default") }}
+    {{ end }}
+    {{ if and (eq $showDocType "true") $page.Params.docType }}
+      {{ partial "docs/components/badge.html" (dict "Label" (printf "%s: %s" (i18n "type" | default "Type") $page.Params.docType) "Status" "info" "Variant" "default") }}
+    {{ end }}
+    {{ if and (eq $showLanguage "true") $page.Language.Label }}
+      {{ partial "docs/components/badge.html" (dict "Label" $page.Language.Label "Variant" "default") }}
+    {{ end }}
+  </div>
+</article>

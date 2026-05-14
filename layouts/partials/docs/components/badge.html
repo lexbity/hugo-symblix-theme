@@ -1,0 +1,31 @@
+{{- $label := .Label | default (.label | default "") -}}
+{{- if not $label -}}
+  {{- return "" -}}
+{{- end -}}
+
+{{- $status := .Status | default "" -}}
+{{- $variant := .Variant | default "default" -}}
+{{- $href := .Href | default "" -}}
+{{- $external := partial "docs/helpers/boolean.html" (dict "Value" (.External | default false)) -}}
+{{- $class := .Class | default "" -}}
+{{- $icon := .Icon | default "" -}}
+{{- $iconFallback := .IconFallback | default "" -}}
+
+{{- $classes := partial "docs/helpers/classname.html" (dict
+  "Base" (slice "docs-badge" (printf "docs-badge-%s" $variant))
+  "Modifiers" (cond $status (slice (printf "docs-badge-%s" $status) (printf "docs-badge--%s" $status)) (slice))
+  "Extra" $class
+) -}}
+
+{{- if $href -}}
+  {{- $isExternal := or (eq $external "true") (hasPrefix $href "http://") (hasPrefix $href "https://") -}}
+  <a class="{{ $classes }}" href="{{ $href }}"{{ if $isExternal }} rel="noreferrer"{{ end }}>
+    {{- with $icon }}{{ partial "docs/helpers/icon.html" (dict "Name" $icon "Fallback" $iconFallback) }}{{ end -}}
+    {{- $label -}}
+  </a>
+{{- else -}}
+  <span class="{{ $classes }}">
+    {{- with $icon }}{{ partial "docs/helpers/icon.html" (dict "Name" $icon "Fallback" $iconFallback) }}{{ end -}}
+    {{- $label -}}
+  </span>
+{{- end -}}

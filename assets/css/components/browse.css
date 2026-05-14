@@ -1,0 +1,92 @@
+@layer components {
+  .docs-browse,
+  .docs-taxonomy,
+  .docs-terms {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .docs-browse-header h1,
+  .docs-taxonomy h1,
+  .docs-terms h1 {
+    margin: 0;
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    line-height: 1.15;
+  }
+
+  .docs-browse-header p,
+  .docs-taxonomy > p,
+  .docs-terms > p {
+    margin: 0;
+    color: var(--docs-muted);
+  }
+
+  .docs-browse-list,
+  .docs-terms-list {
+    display: grid;
+    gap: 1rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .docs-browse-item {
+    display: grid;
+    gap: 0.75rem;
+    padding-inline-start: 0;
+  }
+
+  .docs-browse-item > .docs-browse-list {
+    margin-inline-start: 1rem;
+    padding-inline-start: 1rem;
+    border-inline-start: 1px solid var(--docs-border);
+  }
+
+  .docs-page-card,
+  .docs-terms-item {
+    padding: 1rem;
+    border: 1px solid var(--docs-border);
+    border-radius: 0;
+    background: color-mix(in srgb, var(--docs-bg) 94%, var(--docs-border));
+  }
+
+  .docs-page-card-title,
+  .docs-terms-item {
+    margin: 0;
+  }
+
+  .docs-page-card-link,
+  .docs-terms-link {
+    color: var(--docs-text);
+    font-weight: 700;
+  }
+
+  .docs-page-card-description {
+    margin: 0.5rem 0 0;
+    color: var(--docs-muted);
+  }
+
+  .docs-page-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .docs-taxonomy-list {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .docs-terms-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .docs-terms-count {
+    color: var(--docs-muted);
+    font-variant-numeric: tabular-nums;
+  }
+}

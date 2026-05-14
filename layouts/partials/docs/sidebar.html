@@ -1,0 +1,49 @@
+{{ $sidebarVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
+{{ $sidebarRoot := partial "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $sidebarVersion "Site" site) | strings.TrimSpace }}
+{{ $navMode := site.Params.docs.nav.mode | default "auto" }}
+<details
+  class="docs-sidebar"
+  open
+  data-sidebar
+  data-sidebar-root="{{ site.Language.Lang }}|{{ $sidebarVersion }}|{{ $sidebarRoot }}"
+>
+  <summary class="docs-sidebar-toggle">{{ i18n "menu" | default "Menu" }}</summary>
+  <div class="docs-sidebar-panel" aria-label="{{ i18n "menu" | default "Menu" }}">
+    {{ partial "docs/logo.html" . }}
+    {{ partial "docs/search-fallback.html" . }}
+    <p class="docs-sidebar-root">
+      <span class="docs-sidebar-root-label">
+        {{ if eq $navMode "manual" }}
+          {{ i18n "documentation_navigation" | default "Documentation navigation" }}
+        {{ else }}
+          {{ with where site.Pages "RelPermalink" $sidebarRoot }}
+            {{ (index . 0).LinkTitle }}
+          {{ else }}
+            {{ i18n "sidebar_placeholder" | default "Sidebar placeholder" }}
+          {{ end }}
+        {{ end }}
+      </span>
+    </p>
+    <nav
+      id="docs-sidebar-nav"
+      class="docs-nav"
+      aria-label="{{ i18n "documentation_navigation" | default "Documentation navigation" }}"
+    >
+      {{ if eq $navMode "manual" }}
+        {{ partial "docs/manual-nav.html" (dict "Page" . "Site" site) }}
+      {{ else }}
+        {{ with where site.Pages "RelPermalink" $sidebarRoot }}
+          {{ partial "docs/nav-tree.html" (dict "Node" (index . 0) "Current" $) }}
+        {{ else }}
+          <p>{{ i18n "sidebar_placeholder" | default "Sidebar placeholder" }}</p>
+        {{ end }}
+      {{ end }}
+    </nav>
+    <div class="docs-sidebar-footer">
+      {{ partial "docs/search-browse.html" . }}
+      {{ partial "docs/language-switcher.html" . }}
+      {{ partial "docs/version-switcher.html" . }}
+      {{ partial "docs/theme-switcher.html" . }}
+    </div>
+  </div>
+</details>

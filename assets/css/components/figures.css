@@ -1,0 +1,26 @@
+@layer components {
+  .docs-figure {
+    margin: var(--docs-density-component-gap) 0;
+  }
+
+  .docs-figure__image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 0;
+    border: 1px solid var(--docs-border);
+  }
+
+  .docs-figure__caption {
+    margin-top: calc(var(--docs-density-component-gap) * 0.5);
+    color: var(--docs-muted);
+    font-size: 0.92rem;
+  }
+
+  .docs-figure__warning {
+    margin-top: calc(var(--docs-density-component-gap) * 0.5);
+    color: var(--docs-danger);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+}

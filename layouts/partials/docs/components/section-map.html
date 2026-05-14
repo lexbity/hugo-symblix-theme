@@ -1,0 +1,37 @@
+{{- $page := .Page -}}
+{{- if not $page -}}
+  {{- $page = .CurrentSection -}}
+{{- end -}}
+{{- if and (not $page) .Root -}}
+  {{- $page = site.GetPage .Root -}}
+{{- end -}}
+{{- if not $page -}}
+  {{- $page = .Page.CurrentSection -}}
+{{- end -}}
+{{- if and $page (not $page.IsSection) -}}
+  {{- with $page.CurrentSection -}}
+    {{- $page = . -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $title := .Title | default (i18n "section_map" | default "Section map") -}}
+{{- $depth := int (.Depth | default 2) -}}
+{{- $showCurrent := partial "docs/helpers/boolean.html" (dict "Value" (.ShowCurrent | default true)) -}}
+{{- $showDescriptions := partial "docs/helpers/boolean.html" (dict "Value" (.ShowDescriptions | default false)) -}}
+{{- $style := .Style | default "tree" -}}
+{{- $maxItems := int (.MaxItems | default 0) -}}
+
+{{- if $page -}}
+<nav class="docs-section-map docs-section-map--{{ $style }}" aria-label="{{ $title }}">
+  <h2 class="docs-section-map__title">{{ $title }}</h2>
+  {{- partial "docs/components/section-map-node.html" (dict
+    "Node" $page
+    "Current" .Page
+    "Depth" $depth
+    "Level" 1
+    "ShowCurrent" $showCurrent
+    "ShowDescriptions" $showDescriptions
+    "MaxItems" $maxItems
+  ) -}}
+</nav>
+{{- end -}}

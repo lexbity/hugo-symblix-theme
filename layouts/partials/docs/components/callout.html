@@ -1,0 +1,22 @@
+{{- $type := .Type | default "note" -}}
+{{- $title := .Title | default (humanize $type) -}}
+{{- $compact := .Compact | default false -}}
+{{- $id := partial "docs/helpers/stable-id.html" (dict "ID" .ID "Title" $title) -}}
+{{- $modifiers := slice (printf "docs-callout--%s" $type) (printf "docs-callout-%s" $type) -}}
+{{- if $compact -}}
+  {{- $modifiers = $modifiers | append "docs-callout--compact" -}}
+{{- end -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict
+  "Base" (slice "docs-callout")
+  "Modifiers" $modifiers
+  "Extra" .Class
+) -}}
+{{- $icon := .Icon | default "" -}}
+{{- $iconFallback := .IconFallback | default "" -}}
+<aside class="{{ $classes }}" role="note"{{ with $id }} id="{{ . }}"{{ end }}>
+  <div class="docs-callout__header">
+    {{- with $icon }}{{ partial "docs/helpers/icon.html" (dict "Name" . "Fallback" $iconFallback "Class" "docs-callout__icon") }}{{ end -}}
+    <p class="docs-callout-title">{{ $title }}</p>
+  </div>
+  <div class="docs-callout-body">{{ .Body | markdownify }}</div>
+</aside>

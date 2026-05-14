@@ -1,0 +1,9 @@
+{{- $rows := partial "docs/helpers/reference-meta.html" . -}}
+{{- if $rows -}}
+<dl class="docs-reference-item__meta{{ with .Class }} {{ . }}{{ end }}"{{ with partial "docs/helpers/stable-id.html" (dict "ID" .ID "Title" .Name) }} id="{{ . }}"{{ end }}>
+  {{- range $rows -}}
+    <dt>{{ .Label }}</dt>
+    <dd>{{ .Value }}</dd>
+  {{- end -}}
+</dl>
+{{- end -}}

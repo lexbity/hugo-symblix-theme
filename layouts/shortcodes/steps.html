@@ -1,0 +1,12 @@
+{{- $start := .Get "start" | default 1 -}}
+{{- $variant := .Get "variant" | default "default" -}}
+{{- $compact := partial "docs/helpers/boolean.html" (dict "Value" (.Get "compact" | default false)) -}}
+{{- $id := partial "docs/helpers/stable-id.html" (dict "ID" (.Get "id" | default "") "Title" (.Get "title" | default "")) -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict
+  "Base" (slice "docs-steps" (printf "docs-steps--%s" $variant))
+  "Modifiers" (cond (eq $compact "true") (slice "docs-steps--compact") (slice))
+  "Extra" (.Get "class" | default "")
+) -}}
+<ol class="{{ $classes }}"{{ with $id }} id="{{ . }}"{{ end }} style="counter-reset: docs-step {{ sub (int $start) 1 }};">
+  {{ .Inner }}
+</ol>

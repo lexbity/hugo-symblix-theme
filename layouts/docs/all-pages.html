@@ -1,0 +1,33 @@
+{{ define "main" }}
+  {{ $page := . }}
+  {{ $rootName := site.Params.docs.root | default "docs" }}
+  {{ $currentVersion := partial "docs/helpers/current-version.html" $page | strings.TrimSpace }}
+  {{ $versionRootPermalink := partial "docs/helpers/version-root.html" (dict "Page" $page "VersionSlug" $currentVersion "Site" site) | strings.TrimSpace }}
+  {{ $versionRoot := false }}
+  {{ with where site.Pages "RelPermalink" $versionRootPermalink }}
+    {{ $versionRoot = index . 0 }}
+  {{ end }}
+  <a class="skip-link" href="#main-content">{{ i18n "skip_to_content" | default "Skip to content" }}</a>
+  <div class="docs-shell">
+    {{ partial "docs/sidebar.html" . }}
+    <main id="main-content" class="docs-main" tabindex="-1">
+      <article class="docs-article">
+        {{ partial "docs/page-header.html" . }}
+        <div class="docs-content">
+          {{ .Content }}
+        </div>
+        {{ if $versionRoot }}
+          <section class="docs-browse docs-all-pages" aria-label="All pages">
+            <header class="docs-browse-header">
+              <h2>{{ $page.Title }}</h2>
+              {{ with $page.Description }}<p>{{ . }}</p>{{ end }}
+            </header>
+            {{ partial "docs/browse-tree.html" (dict "Node" $versionRoot "Current" $page) }}
+          </section>
+        {{ end }}
+        {{ partial "docs/content-footer.html" . }}
+      </article>
+    </main>
+    {{ partial "docs/toc.html" . }}
+  </div>
+{{ end }}
