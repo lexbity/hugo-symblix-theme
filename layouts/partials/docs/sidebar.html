@@ -1,5 +1,5 @@
 {{ $sidebarVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
-{{ $sidebarRoot := partial "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $sidebarVersion "Site" site) | strings.TrimSpace }}
+{{ $sidebarRoot := partialCached "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $sidebarVersion "Site" site) (site.Language.Lang) $sidebarVersion | strings.TrimSpace }}
 {{ $navMode := site.Params.docs.nav.mode | default "auto" }}
 <details
   class="docs-sidebar"

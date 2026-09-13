@@ -39,6 +39,8 @@ items:
         page: /en/docs/latest/components/code-blocks/
       - title: Reference
         page: /en/docs/latest/components/reference/
+      - title: Project Front Page
+        page: /en/docs/latest/components/project/
       - title: Navigation
         page: /en/docs/latest/components/navigation/
       - title: Print

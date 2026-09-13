@@ -13,11 +13,15 @@ async function analyzePage(page: Page) {
 }
 
 test("accessibility smoke passes on representative pages", async ({ page }) => {
+  await page.goto("/en/");
+  expect(await analyzePage(page)).toEqual([]);
+
   await page.goto("/en/docs/latest/");
-  const englishViolations = await analyzePage(page);
-  expect(englishViolations).toEqual([]);
+  expect(await analyzePage(page)).toEqual([]);
+
+  await page.goto("/en/docs/latest/components/project/");
+  expect(await analyzePage(page)).toEqual([]);
 
   await page.goto("/ar/docs/latest/");
-  const arabicViolations = await analyzePage(page);
-  expect(arabicViolations).toEqual([]);
+  expect(await analyzePage(page)).toEqual([]);
 });

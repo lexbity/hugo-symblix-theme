@@ -1,0 +1,5 @@
+{{- $label := .Label | default (i18n "latest_release" | default "Latest release") -}}
+<p class="docs-release">
+  <span class="docs-release__label">{{ $label }}</span>
+  <span class="docs-release__version">{{ .Version }}</span>{{ with .Date }}<span class="docs-release__date">{{ . }}</span>{{ end }}{{ with .Href }}<a class="docs-release__link" href="{{ . }}">{{ i18n "changelog" | default "Changelog" }}</a>{{ end }}
+</p>

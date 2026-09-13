@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
 
+test("project front page composes install and downloads", async ({ page }) => {
+  await page.goto("/en/");
+  await expect(page.locator(".docs-release")).toBeVisible();
+  await expect(page.locator('.docs-choice-group--install')).toBeVisible();
+  await expect(page.locator(".docs-downloads .docs-download")).toHaveCount(3);
+});
+
 test("example site renders representative pages", async ({ page }) => {
   await page.goto("/en/docs/latest/");
   await expect(page).toHaveTitle(/Latest/);

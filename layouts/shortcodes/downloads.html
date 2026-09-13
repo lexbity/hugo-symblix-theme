@@ -1,0 +1,4 @@
+{{- $classes := partial "docs/helpers/classname.html" (dict "Base" (slice "docs-downloads") "Extra" (.Get "class" | default "")) -}}
+<ul class="{{ $classes }}" data-downloads{{ with .Get "id" }} id="{{ . }}"{{ end }}>
+{{- .InnerDeindent -}}
+</ul>

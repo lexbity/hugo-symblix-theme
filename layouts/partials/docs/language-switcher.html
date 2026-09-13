@@ -3,7 +3,7 @@
   {{ $rootName := site.Params.docs.root | default "docs" }}
   {{ $currentLang := partial "docs/helpers/current-language.html" . | strings.TrimSpace }}
   {{ $currentVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
-  {{ $currentRootPermalink := partial "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $currentVersion "Site" site) | strings.TrimSpace }}
+  {{ $currentRootPermalink := partialCached "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $currentVersion "Site" site) (site.Language.Lang) $currentVersion | strings.TrimSpace }}
   {{ $defaultSite := index (where hugo.Sites "Language.IsDefault" true) 0 }}
   {{ $relativePath := "" }}
   {{ if $currentRootPermalink }}

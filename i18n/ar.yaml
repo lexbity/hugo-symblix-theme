@@ -124,3 +124,15 @@
   translation: الوثائق
 - id: home_open_docs
   translation: افتح أحدث الوثائق
+- id: install
+  translation: تثبيت
+- id: download
+  translation: تنزيل
+- id: latest_release
+  translation: أحدث إصدار
+- id: changelog
+  translation: سجل التغييرات
+- id: checksum
+  translation: sha256
+- id: suggested_for_system
+  translation: مقترح لنظامك

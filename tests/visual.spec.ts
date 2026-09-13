@@ -1,3 +1,6 @@
+// Write-only capture: produces full-page PNGs under tests/tests/artifacts/ for human
+// review and diffing. These are NOT regression baselines and are not compared; see
+// devdocs/plans D14 before converting this to toHaveScreenshot.
 import { expect, test } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";

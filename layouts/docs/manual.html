@@ -1,7 +1,7 @@
 {{ define "main" }}
   {{ $page := . }}
   {{ $currentVersion := partial "docs/helpers/current-version.html" $page | strings.TrimSpace }}
-  {{ $versionRootPermalink := partial "docs/helpers/version-root.html" (dict "Page" $page "VersionSlug" $currentVersion "Site" site) | strings.TrimSpace }}
+  {{ $versionRootPermalink := partialCached "docs/helpers/version-root.html" (dict "Page" $page "VersionSlug" $currentVersion "Site" site) (site.Language.Lang) $currentVersion | strings.TrimSpace }}
   {{ $versionRoot := false }}
   {{ with where site.Pages "RelPermalink" $versionRootPermalink }}
     {{ $versionRoot = index . 0 }}

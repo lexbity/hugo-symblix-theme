@@ -14,7 +14,7 @@
 {{ end }}
 
 {{ with $versionRoot }}
-  {{ $sequence := partial "docs/helpers/nav-sequence.html" (dict "Node" .) }}
+  {{ $sequence := partialCached "docs/helpers/nav-sequence.html" (dict "Node" .) .RelPermalink }}
   {{ $currentIndex := -1 }}
   {{ range $i, $page := $sequence }}
     {{ if eq $page.RelPermalink $.RelPermalink }}

@@ -8,7 +8,7 @@
 {{- with $attrs.filename -}}
   {{- $filename = . -}}
 {{- end -}}
-{{- $plainLexers := slice "text" "txt" "plain" "plaintext" "tree" -}}
+{{- $plainLexers := partial "docs/helpers/plain-lexers.html" -}}
 {{- with $lang -}}
   {{- if in $plainLexers . -}}
     {{- $lang = "plaintext" -}}

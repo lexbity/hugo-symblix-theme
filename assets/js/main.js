@@ -2,6 +2,7 @@ import { initTheme } from "./theme.js";
 import { initSidebar } from "./sidebar.js";
 import { initTabs } from "./tabs.js";
 import { initCopyCode } from "./copy-code.js";
+import { initDownloads } from "./downloads.js";
 import { initSearchPage } from "./search/index.js";
 
 try {
@@ -26,6 +27,12 @@ try {
   initCopyCode();
 } catch (error) {
   console.warn("Copy-code bootstrap failed", error);
+}
+
+try {
+  initDownloads();
+} catch (error) {
+  console.warn("Downloads bootstrap failed", error);
 }
 
 try {

@@ -124,3 +124,15 @@
   translation: ドキュメント
 - id: home_open_docs
   translation: 最新のドキュメントを開く
+- id: install
+  translation: インストール
+- id: download
+  translation: ダウンロード
+- id: latest_release
+  translation: 最新リリース
+- id: changelog
+  translation: 変更履歴
+- id: checksum
+  translation: sha256
+- id: suggested_for_system
+  translation: このシステム向け

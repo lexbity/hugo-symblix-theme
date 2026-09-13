@@ -1,0 +1,10 @@
+{{- $label := .Get "label" | default "" -}}
+{{- if not $label -}}
+  {{- errorf "install-method shortcode requires label (%s)" .Position -}}
+{{- end -}}
+{{- $id := .Get "id" | default (partial "docs/helpers/stable-id.html" (dict "Prefix" "install" "Value" $label)) -}}
+{{- /* contract: data-choice-panel is how install detects methods (spec D3) */ -}}
+<section class="docs-choice-group__panel docs-choice-group__panel--install docs-install-method"
+         data-choice-panel data-choice-title="{{ $label }}" data-choice-id="{{ $id }}">
+  {{- partial "docs/components/install-command.html" (dict "Label" $label "Command" .InnerDeindent) -}}
+</section>

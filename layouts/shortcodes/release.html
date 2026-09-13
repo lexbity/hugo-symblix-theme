@@ -1,0 +1,10 @@
+{{- $version := .Get "version" | default "" -}}
+{{- if not $version -}}
+  {{- errorf "release shortcode requires version (%s)" .Position -}}
+{{- end -}}
+{{ partial "docs/components/release.html" (dict
+  "Version" $version
+  "Date" (.Get "date" | default "")
+  "Href" (.Get "href" | default "")
+  "Label" (.Get "label" | default "")
+) }}

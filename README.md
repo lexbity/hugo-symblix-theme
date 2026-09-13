@@ -10,6 +10,7 @@ A Hugo documentation theme for structured, navigable, versioned, multilingual te
 - **Versioning:** current + archived docs trees, a version switcher with page-equivalent resolution, `noindex` and sitemap exclusion for archived releases.
 - **Multilingual:** per-language content trees, translation status warnings, and a language switcher that falls back gracefully when a page is untranslated.
 - **Pre-built CSS:** ships compiled CSS so sites need only Hugo. Tailwind CSS v4 is an optional development dependency for styling from source.
+- **Project front page:** `release`, `install`, and `downloads` shortcodes compose a software landing page — release badge, copyable install commands, and binary downloads — complete without JavaScript. Platform detection annotates the right download row as a JavaScript enhancement only.
 
 ## Requirements
 
@@ -41,9 +42,10 @@ Create a new page with one of the archetypes:
 hugo new --source exampleSite --theme hugo-theme-docworkbench content/en/docs/latest/my-page.md
 hugo new --source exampleSite --theme hugo-theme-docworkbench --kind how-to content/en/docs/latest/user-guide/my-task.md
 hugo new --source exampleSite --theme hugo-theme-docworkbench --kind tutorial content/en/docs/latest/tutorials/my-tutorial.md
+hugo new --source exampleSite --theme hugo-theme-docworkbench --kind home content/en/_index.md
 ```
 
-Available archetypes: `default`, `tutorial`, `how-to`, `reference`, `explanation`, `migration`, `release-note`. The archetypes do not force any folder structure — use them wherever they fit your documentation tree.
+Available archetypes: `default`, `home`, `tutorial`, `how-to`, `reference`, `explanation`, `migration`, `release-note`. The archetypes do not force any folder structure — use them wherever they fit your documentation tree. The `home` archetype scaffolds a project front page with the release, install, and downloads shortcodes.
 
 ## Example Site
 

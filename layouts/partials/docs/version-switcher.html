@@ -1,7 +1,7 @@
 {{ $versionsData := hugo.Data.docs_versions.versions | default slice }}
 {{ if gt (len $versionsData) 1 }}
   {{ $currentSlug := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
-  {{ $currentRootPermalink := partial "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $currentSlug) | strings.TrimSpace }}
+  {{ $currentRootPermalink := partialCached "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $currentSlug) (site.Language.Lang) $currentSlug | strings.TrimSpace }}
   {{ $currentRoot := false }}
   {{ with where site.Pages "RelPermalink" $currentRootPermalink }}
     {{ $currentRoot = index . 0 }}
@@ -15,7 +15,7 @@
   {{ $options := slice }}
   {{ range sort $versionsData "weight" "desc" }}
     {{ $version := . }}
-    {{ $targetRootPermalink := partial "docs/helpers/version-root.html" (dict "Page" $ "VersionSlug" $version.id) | strings.TrimSpace }}
+    {{ $targetRootPermalink := partialCached "docs/helpers/version-root.html" (dict "Page" $ "VersionSlug" $version.id) (site.Language.Lang) $version.id | strings.TrimSpace }}
     {{ $targetLink := "" }}
     {{ with where site.Pages "RelPermalink" $targetRootPermalink }}
       {{ $targetRoot := index . 0 }}

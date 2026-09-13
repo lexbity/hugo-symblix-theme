@@ -12,7 +12,7 @@
 {{- $filename := .Get "filename" | default "" -}}
 {{- $class := .Get "class" | default "" -}}
 {{- $classes := partial "docs/helpers/classname.html" (dict "Base" (slice "docs-choice-group__panel" "docs-choice-group__panel--code" "docs-code") "Extra" $class) -}}
-{{- $plainLexers := slice "text" "txt" "plain" "plaintext" "tree" -}}
+{{- $plainLexers := partial "docs/helpers/plain-lexers.html" -}}
 {{- with $language -}}
   {{- if in $plainLexers . -}}
     {{- $language = "plaintext" -}}

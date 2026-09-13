@@ -1,0 +1,153 @@
+/* Project front page components: release, install, downloads. */
+@layer components {
+  .docs-release {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: calc(var(--docs-density-component-gap) * 0.6);
+    padding: calc(var(--docs-density-component-padding) * 0.45) calc(var(--docs-density-component-padding) * 0.8);
+    border: 1px solid var(--docs-border);
+    border-radius: var(--docs-component-radius);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--docs-surface) 98%, var(--docs-bg)), var(--docs-surface));
+    box-shadow: var(--docs-shadow);
+  }
+
+  .docs-release__label {
+    color: var(--docs-muted);
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .docs-release__version {
+    font-weight: 800;
+    font-family: var(--docs-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
+  }
+
+  .docs-release__date {
+    color: var(--docs-muted);
+    font-size: 0.9rem;
+  }
+
+  .docs-release__link {
+    color: var(--docs-accent);
+    font-weight: 700;
+  }
+
+  .docs-install {
+    margin-block: var(--docs-density-component-gap);
+  }
+
+  .docs-install:not(.docs-choice-group) {
+    display: grid;
+    gap: calc(var(--docs-density-component-gap) * 0.75);
+    padding: var(--docs-density-component-padding);
+    border: 1px solid var(--docs-border);
+    border-radius: var(--docs-component-radius);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--docs-surface) 98%, var(--docs-bg)), var(--docs-surface));
+    box-shadow: var(--docs-shadow);
+  }
+
+  .docs-install-method__label {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.35;
+  }
+
+  .docs-install-method__command {
+    position: relative;
+  }
+
+  .docs-install-method__pre {
+    margin: 0;
+    white-space: pre;
+    overflow-x: auto;
+    direction: ltr;
+    unicode-bidi: isolate;
+    padding: var(--docs-density-component-padding);
+    border-inline-start: 3px solid var(--docs-accent);
+    border-radius: var(--docs-component-radius);
+    background: color-mix(in srgb, var(--docs-surface) 88%, var(--docs-border));
+    font-family: var(--docs-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+
+  .docs-downloads {
+    display: grid;
+    gap: var(--docs-density-component-gap);
+    margin-block: var(--docs-density-component-gap);
+    padding: 0;
+    list-style: none;
+  }
+
+  .docs-download {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: calc(var(--docs-density-component-gap) * 0.6);
+    padding: var(--docs-density-component-padding);
+    border: 1px solid var(--docs-border);
+    border-radius: var(--docs-component-radius);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--docs-surface) 98%, var(--docs-bg)), var(--docs-surface));
+    box-shadow: var(--docs-shadow);
+  }
+
+  .docs-download--primary {
+    border-color: var(--docs-accent);
+    box-shadow: 0 0 0 1px var(--docs-accent), var(--docs-shadow);
+  }
+
+  .docs-download__icon {
+    color: var(--docs-accent);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .docs-download__link {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: calc(var(--docs-density-component-gap) * 0.5);
+    color: var(--docs-text);
+    font-weight: 700;
+  }
+
+  .docs-download__link:hover {
+    color: var(--docs-accent);
+  }
+
+  .docs-download__size,
+  .docs-download__checksum {
+    color: var(--docs-muted);
+    font-size: 0.85rem;
+  }
+
+  .docs-download__checksum:hover {
+    color: var(--docs-accent);
+  }
+
+  .docs-download[data-suggested] {
+    border-color: var(--docs-accent);
+    box-shadow: 0 0 0 1px var(--docs-accent), var(--docs-shadow);
+  }
+
+  .docs-download__suggested {
+    position: absolute;
+    top: -0.6rem;
+    inset-inline-end: 0.75rem;
+    padding: 0.05rem 0.5rem;
+    border: 1px solid var(--docs-accent);
+    border-radius: var(--docs-component-radius);
+    background: var(--docs-surface);
+    color: var(--docs-accent);
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+}

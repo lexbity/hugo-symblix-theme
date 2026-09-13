@@ -1,0 +1,22 @@
+{{- $label := .Get "label" | default "" -}}
+{{- if not $label -}}
+  {{- errorf "download shortcode requires label (%s)" .Position -}}
+{{- end -}}
+{{- $href := .Get "href" | default "" -}}
+{{- if not $href -}}
+  {{- errorf "download shortcode requires href (%s)" .Position -}}
+{{- end -}}
+{{- $platform := .Get "platform" | default "" -}}
+{{- $primary := eq (partial "docs/helpers/boolean.html" (dict "Value" (.Get "primary" | default false))) "true" -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict
+    "Base" (slice "docs-download")
+    "Modifiers" (cond $primary (slice "docs-download--primary") (slice))
+    "Extra" (.Get "class" | default "")) -}}
+<li class="{{ $classes }}"
+    {{ with $platform }}data-platform="{{ . }}"{{ end }}
+    data-suggested-label="{{ i18n "suggested_for_system" | default "Suggested for your system" }}"{{ with .Get "id" }} id="{{ . }}"{{ end }}>
+  {{- partial "docs/helpers/icon.html" (dict "Name" $platform "Class" "docs-download__icon") -}}
+  <a class="docs-download__link" href="{{ $href }}" download rel="noreferrer">{{ $label }}</a>
+  {{ with .Get "size" }}<span class="docs-download__size">{{ . }}</span>{{ end }}
+  {{ with .Get "checksum" }}<a class="docs-download__checksum" href="{{ . }}" rel="noreferrer">{{ i18n "checksum" | default "sha256" }}</a>{{ end }}
+</li>

@@ -1,0 +1,21 @@
+{{- $inner := .InnerDeindent -}}
+{{- /* contract: data-choice-panel is how install detects methods (spec D3) */ -}}
+{{- $hasMethods := findRE "data-choice-panel" $inner -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict
+    "Base" (slice "docs-install")
+    "Extra" (.Get "class" | default "")) -}}
+{{- if $hasMethods -}}
+<div class="{{ $classes }} docs-choice-group docs-choice-group--install" data-choice-group="tabs"{{ with .Get "id" }} id="{{ . }}"{{ end }}>
+{{- $inner -}}
+</div>
+{{- else -}}
+<div class="{{ $classes }}"{{ with .Get "id" }} id="{{ . }}"{{ end }}>
+  {{- if trim $inner " \n\t\r" -}}
+    {{- partial "docs/components/install-command.html" (dict
+        "Label" (.Get "label" | default (i18n "install" | default "Install"))
+        "Command" $inner) -}}
+  {{- else -}}
+    {{- errorf "install shortcode requires a command body or install-method children (%s)" .Position -}}
+  {{- end -}}
+</div>
+{{- end -}}

@@ -1,17 +1,17 @@
 {{ define "main" }}
   {{ $currentVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
-  {{ $versionRootPermalink := partial "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $currentVersion "Site" site) | strings.TrimSpace }}
+  {{ $versionRootPermalink := partialCached "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $currentVersion "Site" site) (site.Language.Lang) $currentVersion | strings.TrimSpace }}
   <section class="docs-home">
     {{ .Content }}
   </section>
   {{ if not .Content }}
-    <section class="docs-hero">
-      <p class="docs-hero__eyebrow">{{ i18n "home_eyebrow" | default "Documentation" }}</p>
-      <h1 class="docs-hero__title">{{ .Site.Title }}</h1>
-      <p class="docs-hero__subtitle">{{ with .Site.Params.description }}{{ . }}{{ else }}{{ .Site.Title }}{{ end }}</p>
-      <div class="docs-hero__actions">
-        <a class="docs-button docs-button--primary" href="{{ $versionRootPermalink }}">{{ i18n "home_open_docs" | default "Open the latest docs" }}</a>
-      </div>
-    </section>
+    {{ partial "docs/components/hero.html" (dict
+      "Title" .Site.Title
+      "Subtitle" (or .Site.Params.description .Site.Title)
+      "Eyebrow" (i18n "home_eyebrow" | default "Documentation")
+      "HeadingLevel" "1"
+      "PrimaryHref" $versionRootPermalink
+      "PrimaryLabel" (i18n "home_open_docs" | default "Open the latest docs")
+    ) }}
   {{ end }}
 {{ end }}

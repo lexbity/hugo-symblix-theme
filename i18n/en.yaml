@@ -124,3 +124,15 @@
   translation: Documentation
 - id: home_open_docs
   translation: Open the latest docs
+- id: install
+  translation: Install
+- id: download
+  translation: Download
+- id: latest_release
+  translation: Latest release
+- id: changelog
+  translation: Changelog
+- id: checksum
+  translation: sha256
+- id: suggested_for_system
+  translation: Suggested for your system

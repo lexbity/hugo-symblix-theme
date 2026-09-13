@@ -8,31 +8,17 @@
 {{- $primaryLabel := .Get "primaryLabel" | default "" -}}
 {{- $secondaryHref := .Get "secondaryHref" | default "" -}}
 {{- $secondaryLabel := .Get "secondaryLabel" | default "" -}}
-{{- $classes := partial "docs/helpers/classname.html" (dict
-  "Base" (slice "docs-hero" (printf "docs-hero--%s" $variant))
-  "Modifiers" (cond (eq $align "center") (slice "docs-hero--center") (slice))
-  "Extra" (.Get "class" | default "")
+{{- partial "docs/components/hero.html" (dict
+  "Title" $title
+  "Subtitle" $subtitle
+  "Eyebrow" $eyebrow
+  "Align" $align
+  "Variant" $variant
+  "HeadingLevel" $headingLevel
+  "PrimaryHref" $primaryHref
+  "PrimaryLabel" $primaryLabel
+  "SecondaryHref" $secondaryHref
+  "SecondaryLabel" $secondaryLabel
+  "Inner" .InnerDeindent
+  "Class" (.Get "class" | default "")
 ) -}}
-<section class="{{ $classes }}">
-  {{ with $eyebrow }}<p class="docs-hero__eyebrow">{{ . }}</p>{{ end }}
-  {{ if eq $headingLevel "1" }}
-    <h1 class="docs-hero__title">{{ $title }}</h1>
-  {{ else if eq $headingLevel "3" }}
-    <h3 class="docs-hero__title">{{ $title }}</h3>
-  {{ else }}
-    <h2 class="docs-hero__title">{{ $title }}</h2>
-  {{ end }}
-  {{ with or $subtitle (.InnerDeindent | strings.TrimSpace) }}
-    <div class="docs-hero__subtitle">{{ . | markdownify }}</div>
-  {{ end }}
-  {{ if or $primaryHref $secondaryHref }}
-    <div class="docs-hero__actions">
-      {{ with $primaryHref }}
-        <a class="docs-button docs-button--primary" href="{{ . | relURL }}">{{ $primaryLabel | default (i18n "get_started" | default "Get started") }}</a>
-      {{ end }}
-      {{ with $secondaryHref }}
-        <a class="docs-button docs-button--secondary" href="{{ . | relURL }}">{{ $secondaryLabel | default (i18n "learn_more" | default "Learn more") }}</a>
-      {{ end }}
-    </div>
-  {{ end }}
-</section>

@@ -1,0 +1,11 @@
+{{- $label := .Label | default (i18n "install" | default "Install") -}}
+{{- $command := trim .Command " \n\t\r" -}}
+{{- /* .Command arrives as Hugo's untyped .Inner string and is auto-escaped at
+       interpolation below. Do NOT add safeHTML; do NOT add htmlEscape (double-escape). Spec FR-1. */ -}}
+<p class="docs-install-method__label">{{ $label }}</p>
+<div class="docs-install-method__command" data-codeblock
+     data-copy-label="{{ i18n "copy_code" | default "Copy code" }}"
+     data-copied-label="{{ i18n "copied" | default "Copied" }}"
+     data-copy-failed-label="{{ i18n "copy_failed" | default "Copy failed" }}">
+  <pre class="docs-install-method__pre"><code>{{ $command }}</code></pre>
+</div>
