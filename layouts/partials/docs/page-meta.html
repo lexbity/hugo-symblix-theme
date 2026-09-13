@@ -1,4 +1,4 @@
-<section class="docs-page-meta" aria-label="Page metadata">
+<section class="docs-page-meta" aria-label="{{ i18n "page_metadata" | default "Page metadata" }}">
   {{ partial "docs/components/lifecycle-badges.html" (dict
     "DocType" .Params.docType
     "Since" .Params.since
@@ -13,7 +13,7 @@
   {{ if ne $updated.Year 1 }}
     <span class="docs-page-meta-item">
       <strong>{{ i18n "last_updated" | default "Last updated" }}:</strong>
-      <time datetime="{{ $updated.Format "2006-01-02" }}">{{ $updated.Format "Jan 2, 2006" }}</time>
+      <time datetime="{{ $updated.Format "2006-01-02" }}">{{ time.Format ":date_long" $updated }}</time>
     </span>
   {{ end }}
 </section>

@@ -20,7 +20,6 @@ defaultContentLanguageInSubdir = true
 
 [params.docs]
 root = "docs"
-editURLBase = "https://example.com/edit/"
 rightToc = true
 
 [params.docs.nav]

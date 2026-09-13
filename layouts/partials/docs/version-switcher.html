@@ -2,36 +2,46 @@
 {{ if gt (len $versionsData) 1 }}
   {{ $currentSlug := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
   {{ $currentRootPermalink := partial "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $currentSlug) | strings.TrimSpace }}
+  {{ $currentRoot := false }}
   {{ with where site.Pages "RelPermalink" $currentRootPermalink }}
-    {{ $currentRoot := index . 0 }}
-    {{ $currentLabel := $currentSlug }}
-    {{ range $versionsData }}
-      {{ if eq .id $currentSlug }}
-        {{ $currentLabel = .label }}
+    {{ $currentRoot = index . 0 }}
+  {{ end }}
+  {{ $currentLabel := $currentSlug }}
+  {{ range $versionsData }}
+    {{ if eq .id $currentSlug }}
+      {{ $currentLabel = .label }}
+    {{ end }}
+  {{ end }}
+  {{ $options := slice }}
+  {{ range sort $versionsData "weight" "desc" }}
+    {{ $version := . }}
+    {{ $targetRootPermalink := partial "docs/helpers/version-root.html" (dict "Page" $ "VersionSlug" $version.id) | strings.TrimSpace }}
+    {{ $targetLink := "" }}
+    {{ with where site.Pages "RelPermalink" $targetRootPermalink }}
+      {{ $targetRoot := index . 0 }}
+      {{ with $currentRoot }}
+        {{ $equivalent := partial "docs/helpers/equivalent-page.html" (dict "Page" $ "CurrentRoot" $currentRoot "TargetRoot" $targetRoot) }}
+        {{ with $equivalent }}
+          {{ $targetLink = . }}
+        {{ end }}
       {{ end }}
     {{ end }}
-    <section class="docs-switcher docs-switcher--version">
-      <label class="docs-switcher-label" for="docs-version-choice">{{ i18n "version" | default "Version" }}</label>
-      <select
-        id="docs-version-choice"
-        class="docs-switcher-select"
-        data-version-select
-        onchange="if (this.value) window.location.href = this.value"
-      >
-        {{ range sort $versionsData "weight" "desc" }}
-          {{ $version := . }}
-          {{ $targetRootPermalink := partial "docs/helpers/version-root.html" (dict "Page" $ "VersionSlug" $version.id) | strings.TrimSpace }}
-          {{ $targetLink := $targetRootPermalink }}
-          {{ with where site.Pages "RelPermalink" $targetRootPermalink }}
-            {{ $targetRoot := index . 0 }}
-            {{ $equivalent := partial "docs/helpers/equivalent-page.html" (dict "Page" $ "CurrentRoot" $currentRoot "TargetRoot" $targetRoot) }}
-            {{ if $equivalent }}
-              {{ $targetLink = $equivalent }}
-            {{ end }}
-          {{ end }}
-          <option value="{{ $targetLink }}" {{ if eq $version.id $currentSlug }}selected{{ end }}>{{ $version.label }}{{ if $version.archived }} ({{ i18n "archived" | default "Archived" }}){{ end }}</option>
+    {{ if $targetLink }}
+      {{ $options = $options | append (dict "id" $version.id "label" $version.label "archived" $version.archived "href" $targetLink) }}
+    {{ end }}
+  {{ end }}
+  {{ if gt (len $options) 1 }}
+    <details class="docs-switcher docs-switcher--version">
+      <summary class="docs-switcher-summary">
+        <span class="docs-switcher-label">{{ i18n "version" | default "Version" }}: {{ $currentLabel }}</span>
+      </summary>
+      <ul class="docs-switcher-list">
+        {{ range $options }}
+          <li>
+            <a class="docs-switcher-link" href="{{ .href }}"{{ if eq .id $currentSlug }} aria-current="page"{{ end }}>{{ .label }}{{ if .archived }} ({{ i18n "archived" | default "Archived" }}){{ end }}</a>
+          </li>
         {{ end }}
-      </select>
-    </section>
+      </ul>
+    </details>
   {{ end }}
 {{ end }}

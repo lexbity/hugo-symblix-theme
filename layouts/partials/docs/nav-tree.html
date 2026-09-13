@@ -60,7 +60,6 @@
         {{ end }}
 
         {{ $isCurrent := eq $page.RelPermalink $current.RelPermalink }}
-        {{ $isOpen := or $isCurrent (hasPrefix $current.RelPermalink $page.RelPermalink) }}
         <li class="docs-nav-item">
           {{ if gt (len $sortedGrandchildren) 0 }}
             <details class="docs-nav-group" open data-nav-group data-nav-path="{{ $page.RelPermalink }}">

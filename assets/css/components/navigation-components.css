@@ -96,3 +96,123 @@
     font-style: italic;
   }
 }
+
+/* Search page */
+.docs-search-page {
+  display: grid;
+  gap: 1rem;
+  margin-block-start: 1.5rem;
+}
+
+.docs-search-form {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.docs-search-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.docs-search-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.docs-search-input {
+  flex: 1 1 16rem;
+  padding: 0.62rem 0.7rem;
+  border: 1px solid var(--docs-border);
+  background: var(--docs-surface);
+  color: var(--docs-text);
+  font: inherit;
+}
+
+.docs-search-submit {
+  padding: 0.62rem 1rem;
+  border: 1px solid var(--docs-accent);
+  background: var(--docs-accent);
+  color: var(--docs-surface);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.docs-search-submit:hover,
+.docs-search-submit:focus-visible {
+  filter: brightness(1.08);
+}
+
+.docs-search-scope {
+  margin: 0;
+  color: var(--docs-muted);
+  font-size: 0.9rem;
+}
+
+.docs-search-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.docs-search-filter {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--docs-muted);
+}
+
+.docs-search-select {
+  min-width: 9rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--docs-border);
+  background: var(--docs-surface);
+  color: var(--docs-text);
+  font: inherit;
+}
+
+.docs-search-status {
+  margin: 0;
+  color: var(--docs-muted);
+  font-size: 0.9rem;
+}
+
+.docs-search-results-list {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.docs-search-result-link {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.docs-search-result-description {
+  margin: 0.15rem 0 0;
+  color: var(--docs-muted);
+  font-size: 0.92rem;
+}
+
+.docs-search-result-meta {
+  margin: 0.15rem 0 0;
+  color: var(--docs-muted);
+  font-size: 0.8rem;
+  text-transform: lowercase;
+}
+
+.docs-search-fallback-note {
+  margin: 0 0 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--docs-border);
+  background: color-mix(in srgb, var(--docs-surface) 92%, var(--docs-bg));
+  color: var(--docs-muted);
+}
+
+.docs-search-fallback-browse {
+  margin: 0 0 0.75rem;
+}

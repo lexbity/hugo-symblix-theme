@@ -5,7 +5,7 @@ docType = "reference"
 weight = 55
 +++
 
-{{< hero eyebrow="مكونات المرجع" title="مرجع منظم" subtitle="استبدل الجداول الخام بعناصر مرجعية قابلة للمسح والربط." headingLevel="2" primaryHref="/ar/docs/latest/components/" primaryLabel="العودة إلى المكونات" secondaryHref="/ar/docs/latest/technical-content/" secondaryLabel="عرض المحتوى التقني" >}}
+{{< hero eyebrow="مكونات المرجع" title="مرجع منظم" subtitle="استبدل الجداول الخام بعناصر مرجعية قابلة للمسح والربط." headingLevel="2" primaryHref="/ar/docs/latest/components/" primaryLabel="العودة إلى المكونات" secondaryHref="/ar/docs/latest/components/code-groups/" secondaryLabel="عرض المحتوى التقني" >}}
 {{< /hero >}}
 
 {{< config-option name="params.docs.rightToc" type="boolean" default="true" since="v1.0" >}}

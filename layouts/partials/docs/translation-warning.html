@@ -5,10 +5,6 @@
     <aside class="docs-translation-warning" role="note" aria-label="{{ i18n "warning_outdated_translation" (dict "Status" (humanize $status)) }}">
       <strong>{{ i18n "translation_warning" | default "Translation warning" }}:</strong>
       <span>{{ i18n "warning_outdated_translation" (dict "Status" (humanize $status)) }}</span>
-      {{ $editBase := site.Params.docs.editURLBase | default "" }}
-      {{ if and $editBase $page.File }}
-        <a class="docs-translation-warning-link" href="{{ printf "%s%s" $editBase $page.File.Path }}">{{ i18n "improve_this_translation" | default "Improve this translation" }}</a>
-      {{ end }}
     </aside>
   {{ end }}
 {{ end }}

@@ -6,6 +6,7 @@ since = "v1.2"
 experimental = true
 tags = ["configuration"]
 related = ["/en/docs/latest/getting-started/", "/en/docs/latest/navigation/"]
+date = 2026-05-01
 weight = 20
 +++
 
@@ -22,15 +23,22 @@ theme = "hugo-theme-docworkbench"
 defaultContentLanguage = "en"
 defaultContentLanguageInSubdir = true
 
+[taxonomies]
+tag = "tags"
+
 [params.docs]
 root = "docs"
-editURLBase = "https://example.com/edit/"
 rightToc = true
+
+[outputs]
+home = ["HTML", "RSS", "SearchIndex"]
 
 [params.docs.nav]
 mode = "manual"
 data = "docs_nav"
 ```
+
+The `root` parameter is the name of the top-level docs section under each language's content directory (`docs` in the example site, but any folder name works). Set `[outputs] home` so the theme publishes the per-language `search-index.json` used by the search page.
 
 ## Content tree
 
@@ -49,25 +57,28 @@ content/
 
 The example site adds more pages, but the core idea stays the same: use folders and `_index.md` for navigation groups, use front matter `weight` for ordering, and let Hugo build the tree.
 
-## What not to configure
+## Optional parameters
 
-{{< warning title="Retired runtime features" >}}
-The final static release does not require configuration for live search, theme switching, copy-code buttons, or sidebar persistence. Those layers were intentionally removed in the cleanup phase.
-{{< /warning >}}
+| Parameter | Default | Purpose |
+| --- | --- | --- |
+| `params.docs.root` | `docs` | Section name of the documentation tree. |
+| `params.docs.rightToc` | `true` | Show the "On this page" table of contents. |
+| `params.docs.favicon` | `""` | Emits a `<link rel="icon">` when set. |
+| `params.docs.versions.noindexArchived` | `false` | Adds `noindex` to archived versions and drops them from the sitemap. |
+| `params.docs.components.reference.headingLevel` | `3` | Heading level used by reference shortcodes. |
+| `params.docs.theme.preset` | `minimal` | Visual preset: `minimal`, `rounded`, or `high-contrast`. |
+| `params.docs.theme.density` | `comfortable` | Spacing density for callouts and code blocks: `comfortable`, `compact`, or `dense`. |
+| `params.features.themeSwitcher` | `true` | Renders the light/dark/system preference control. |
+| `params.seo.openGraph` / `params.seo.twitterCards` | `true` | Emit OG and Twitter card meta tags. |
+| `params.images` / page `images` | — | Image URLs used for `og:image` / `twitter:image`. |
 
 ## CSS customization
 
-The theme styles are centralized in `assets/css/input.css` and the component layers it imports. Override them by adding more CSS layers in your downstream site rather than patching the templates directly.
+The theme ships pre-built CSS at `assets/css/compiled/theme.css`, so a site works with `hugo` alone — no Node.js, npm, or security-policy changes required. The compiled stylesheet is regenerated from the Tailwind source layers with `npm run build:css` whenever you customize them.
 
-{{< details title="Current CSS entrypoint" open=true >}}
-```css
-@import "tailwindcss";
+If you build styles from source (see [Customization](/en/docs/latest/customization/)), allow the Tailwind CLI in Hugo's security policy:
 
-@import "./theme.css";
-@import "./components/shortcodes.css";
-@import "./components/badges.css";
-@import "./components/shell.css";
-@import "./components/nav.css";
-@import "./components/sidebar.css";
+```toml
+[security.exec]
+allow = ['^(dart-)?sass$', '^go$', '^git$', '^node$', '^postcss$', '^tailwindcss$']
 ```
-{{< /details >}}

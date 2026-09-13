@@ -1,4 +1,4 @@
-<nav class="docs-breadcrumbs" aria-label="Breadcrumb">
+<nav class="docs-breadcrumbs" aria-label="{{ i18n "breadcrumb" | default "Breadcrumb" }}">
   <ol class="docs-breadcrumbs-list">
     {{ range .Ancestors.Reverse }}
       {{ if not .IsHome }}

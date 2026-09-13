@@ -11,11 +11,24 @@ topic = "topics"
 [markup.goldmark.renderer]
 unsafe = true
 
+# Optional: build CSS from Tailwind source instead of the committed pre-built CSS.
+# Enable together with `npm run dev` (which sets HUGO_PARAMS_DOCS_TAILWINDSOURCE=true).
+[security.exec]
+allow = ['^(dart-)?sass$', '^go$', '^git$', '^node$', '^postcss$', '^tailwindcss$']
+
+[outputs]
+home = ["HTML", "RSS", "SearchIndex"]
+
+[outputFormats.SearchIndex]
+baseName = "search-index"
+mediaType = "application/json"
+isPlainText = true
+notUgly = true
+
 [params.docs]
 root = "docs"
 logo = ""
 logoAlt = "Docworkbench"
-editURLBase = "https://example.com/edit/"
 rightToc = true
 versions = { noindexArchived = true }
 

@@ -1,16 +1,28 @@
 {{ $searchLabel := i18n "search_docs" | default "Search docs" }}
+{{ $currentVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
+{{ $versionRootPermalink := partial "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $currentVersion "Site" site) | strings.TrimSpace }}
+{{ $searchLink := .Site.Home.RelPermalink }}
+{{ with where site.Pages "RelPermalink" $versionRootPermalink }}
+  {{ $versionRoot := index . 0 }}
+  {{ with $versionRoot.GetPage "search" }}
+    {{ $searchLink = .RelPermalink }}
+  {{ end }}
+{{ end }}
 <section class="docs-sidebar-search" aria-labelledby="docs-sidebar-search-title">
   <h2 id="docs-sidebar-search-title" class="docs-sidebar-heading">{{ i18n "search" | default "Search" }}</h2>
-  <label class="docs-sidebar-search-label" for="docs-sidebar-search-input">{{ $searchLabel }}</label>
-  <input
-    id="docs-sidebar-search-input"
-    class="docs-sidebar-search-input"
-    type="search"
-    inputmode="search"
-    autocomplete="off"
-    spellcheck="false"
-    placeholder="{{ $searchLabel }}"
-    aria-controls="docs-sidebar-nav"
-    data-sidebar-search
-  >
+  <form class="docs-sidebar-search-form" role="search" method="get" action="{{ $searchLink }}">
+    <label class="docs-sidebar-search-label" for="docs-sidebar-search-input">{{ $searchLabel }}</label>
+    <input
+      id="docs-sidebar-search-input"
+      class="docs-sidebar-search-input"
+      type="search"
+      name="q"
+      inputmode="search"
+      autocomplete="off"
+      spellcheck="false"
+      placeholder="{{ $searchLabel }}"
+      aria-controls="docs-sidebar-nav"
+      data-sidebar-search
+    >
+  </form>
 </section>

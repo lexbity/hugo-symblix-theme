@@ -6,10 +6,6 @@
   translation: バージョン
 - id: on_this_page
   translation: このページの内容
-- id: edit_this_page
-  translation: このページを編集
-- id: improve_this_translation
-  translation: この翻訳を改善
 - id: last_updated
   translation: 最終更新
 - id: previous
@@ -67,7 +63,7 @@
 - id: section_map
   translation: セクションマップ
 - id: search_unavailable
-  translation: JavaScript がないと検索は利用できません。
+  translation: "対話型検索には JavaScript が必要です。下のリストをブラウザのページ内検索で探すか、すべてのページを表示してください。"
 - id: search_loading
   translation: 検索を読み込んでいます…
 - id: search_empty
@@ -104,3 +100,27 @@
   translation: コピーしました
 - id: copy_failed
   translation: コピーに失敗しました
+- id: theme
+  translation: テーマ
+- id: light
+  translation: ライト
+- id: dark
+  translation: ダーク
+- id: system
+  translation: システム
+- id: search
+  translation: 検索
+- id: search_results_count
+  translation: "検索結果: {count}"
+- id: breadcrumb
+  translation: パンくずリスト
+- id: previous_next
+  translation: 前後のページ
+- id: all_pages
+  translation: すべてのページ
+- id: page_metadata
+  translation: ページ情報
+- id: home_eyebrow
+  translation: ドキュメント
+- id: home_open_docs
+  translation: 最新のドキュメントを開く

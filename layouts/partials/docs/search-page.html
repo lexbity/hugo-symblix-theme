@@ -1,0 +1,65 @@
+{{- $currentVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace -}}
+{{- $versionRootPermalink := partial "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $currentVersion "Site" site) | strings.TrimSpace -}}
+{{- $allPagesLink := .Site.Home.RelPermalink -}}
+{{- with where site.Pages "RelPermalink" $versionRootPermalink -}}
+  {{- $versionRoot := index . 0 -}}
+  {{- with $versionRoot.GetPage "all-pages" -}}
+    {{- $allPagesLink = .RelPermalink -}}
+  {{- end -}}
+{{- end -}}
+<section
+  class="docs-search-page"
+  data-docs-search
+  data-search-index="{{ "search-index.json" | relLangURL }}"
+  data-search-version="{{ $currentVersion }}"
+  data-results-template="{{ i18n "search_results_count" | default "Results: {count}" }}"
+  data-empty-message="{{ i18n "search_no_results" | default "No results found" }}"
+  data-error-message="{{ i18n "search_error" | default "Search failed" }}"
+>
+  <form class="docs-search-form" role="search" method="get" action="{{ .RelPermalink }}" data-search-form>
+    <label class="docs-search-label" for="docs-search-input">{{ i18n "search_docs" | default "Search docs" }}</label>
+    <div class="docs-search-controls">
+      <input
+        id="docs-search-input"
+        class="docs-search-input"
+        type="search"
+        name="q"
+        inputmode="search"
+        autocomplete="off"
+        spellcheck="false"
+        data-search-input
+      >
+      <button class="docs-search-submit" type="submit">{{ i18n "search" | default "Search" }}</button>
+    </div>
+    <p class="docs-search-scope">
+      {{ i18n "search_scope" | default "Scope" }}: {{ $currentVersion }} · {{ site.Language.Label | default site.Language.Lang }}
+    </p>
+    <div class="docs-search-filters">
+      <label class="docs-search-filter">
+        <span>{{ i18n "search_filter_version" | default "Version" }}</span>
+        <select class="docs-search-select" data-search-filter data-search-filter-version></select>
+      </label>
+      <label class="docs-search-filter">
+        <span>{{ i18n "search_filter_docType" | default "Type" }}</span>
+        <select class="docs-search-select" data-search-filter data-search-filter-doctype></select>
+      </label>
+      <label class="docs-search-filter">
+        <span>{{ i18n "search_filter_topic" | default "Topic" }}</span>
+        <select class="docs-search-select" data-search-filter data-search-filter-topic></select>
+      </label>
+    </div>
+  </form>
+  <p class="docs-search-status" data-search-status aria-live="polite"></p>
+  <div class="docs-search-results" data-search-results hidden></div>
+  <div class="docs-search-fallback" data-search-fallback>
+    <noscript>
+      <p class="docs-search-fallback-note">{{ i18n "search_unavailable" | default "Interactive search requires JavaScript. Use your browser's find-in-page on the list below." }}</p>
+    </noscript>
+    <p class="docs-search-fallback-browse">
+      <a href="{{ $allPagesLink }}">{{ i18n "browse_all_pages" | default "Browse all pages" }}</a>
+    </p>
+    {{ with where site.Pages "RelPermalink" $versionRootPermalink }}
+      {{ partial "docs/browse-tree.html" (dict "Node" (index . 0) "Current" $) }}
+    {{ end }}
+  </div>
+</section>

@@ -1,0 +1,17 @@
+{{ define "main" }}
+  <a class="skip-link" href="#main-content">{{ i18n "skip_to_content" | default "Skip to content" }}</a>
+  <div class="docs-shell">
+    {{ partial "docs/sidebar.html" . }}
+    <main id="main-content" class="docs-main" tabindex="-1">
+      <article class="docs-article">
+        {{ partial "docs/page-header.html" . }}
+        <div class="docs-content">
+          {{ .Content }}
+          {{ partial "docs/search-page.html" . }}
+        </div>
+        {{ partial "docs/content-footer.html" . }}
+      </article>
+    </main>
+    {{ partial "docs/toc.html" . }}
+  </div>
+{{ end }}

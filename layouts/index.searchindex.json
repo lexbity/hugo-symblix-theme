@@ -1,0 +1,26 @@
+{{- $rootName := site.Params.docs.root | default "docs" -}}
+{{- $docsRoot := false -}}
+{{- with where site.Home.Sections "Section" $rootName -}}
+  {{- $docsRoot = index . 0 -}}
+{{- end -}}
+{{- $entries := slice -}}
+{{- with $docsRoot -}}
+  {{- range .RegularPagesRecursive -}}
+    {{- if and .Params.nav .Params.nav.hidden -}}
+      {{- continue -}}
+    {{- end -}}
+    {{- $content := trim (plainify .Content) " \n\t" -}}
+    {{- $description := trim (plainify (.Description | default "")) " \n\t" -}}
+    {{- $entries = $entries | append (dict
+      "title" .Title
+      "description" $description
+      "url" .RelPermalink
+      "language" site.Language.Lang
+      "version" (partial "docs/helpers/current-version.html" . | strings.TrimSpace)
+      "docType" (.Params.docType | default "")
+      "topics" (.Params.topics | default .Params.tags | default slice)
+      "content" $content
+    ) -}}
+  {{- end -}}
+{{- end -}}
+{{- $entries | jsonify -}}

@@ -6,10 +6,6 @@
   translation: Version
 - id: on_this_page
   translation: Sur cette page
-- id: edit_this_page
-  translation: Modifier cette page
-- id: improve_this_translation
-  translation: Améliorer cette traduction
 - id: last_updated
   translation: Dernière mise à jour
 - id: previous
@@ -67,7 +63,7 @@
 - id: section_map
   translation: Plan de section
 - id: search_unavailable
-  translation: La recherche n'est pas disponible sans JavaScript.
+  translation: "La recherche interactive nécessite JavaScript. Utilisez la recherche de votre navigateur sur la liste ci-dessous, ou parcourez toutes les pages."
 - id: search_loading
   translation: Chargement de la recherche…
 - id: search_empty
@@ -104,3 +100,27 @@
   translation: Copié
 - id: copy_failed
   translation: Copie échouée
+- id: theme
+  translation: Thème
+- id: light
+  translation: Clair
+- id: dark
+  translation: Sombre
+- id: system
+  translation: Système
+- id: search
+  translation: Rechercher
+- id: search_results_count
+  translation: "Résultats : {count}"
+- id: breadcrumb
+  translation: Fil d'Ariane
+- id: previous_next
+  translation: Précédent et suivant
+- id: all_pages
+  translation: Toutes les pages
+- id: page_metadata
+  translation: Métadonnées de la page
+- id: home_eyebrow
+  translation: Documentation
+- id: home_open_docs
+  translation: Ouvrir la documentation

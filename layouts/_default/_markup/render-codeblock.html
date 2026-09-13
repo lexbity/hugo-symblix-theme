@@ -8,12 +8,15 @@
 {{- with $attrs.filename -}}
   {{- $filename = . -}}
 {{- end -}}
-{{- $codeClass := "text" -}}
+{{- $plainLexers := slice "text" "txt" "plain" "plaintext" "tree" -}}
 {{- with $lang -}}
-  {{- $codeClass = . -}}
+  {{- if in $plainLexers . -}}
+    {{- $lang = "plaintext" -}}
+  {{- end -}}
+{{- else -}}
+  {{- $lang = "plaintext" -}}
 {{- end -}}
-
-<figure class="docs-codeblock docs-codeblock--{{ $codeClass }}">
+<figure class="docs-codeblock docs-codeblock--{{ $lang }}">
   {{- if or $title $filename -}}
     <figcaption class="docs-codeblock__header">
       {{- with $title -}}
@@ -24,5 +27,13 @@
       {{- end -}}
     </figcaption>
   {{- end -}}
-  <pre><code{{ with $lang }} class="language-{{ . }}"{{ end }}>{{ .Inner | strings.TrimSuffix "\n" | htmlEscape }}</code></pre>
+  <div
+    class="docs-codeblock__body"
+    data-codeblock
+    data-copy-label="{{ i18n "copy_code" | default "Copy code" }}"
+    data-copied-label="{{ i18n "copied" | default "Copied" }}"
+    data-copy-failed-label="{{ i18n "copy_failed" | default "Copy failed" }}"
+  >
+    {{- transform.Highlight (trim .Inner "\n\r") $lang (dict "noClasses" false) -}}
+  </div>
 </figure>

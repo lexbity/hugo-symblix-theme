@@ -5,7 +5,7 @@
     gap: 0.25rem;
     padding: 0.15rem 0.5rem;
     border: 1px solid var(--docs-border);
-    border-radius: 0;
+    border-radius: var(--docs-component-radius);
     font-size: 0.85rem;
     font-weight: 700;
     line-height: 1.4;

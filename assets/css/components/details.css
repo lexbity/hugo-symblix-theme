@@ -3,7 +3,7 @@
     margin: var(--docs-density-component-gap) 0;
     padding: calc(var(--docs-density-component-padding) * 0.75) var(--docs-density-component-padding);
     border: 1px solid var(--docs-border);
-    border-radius: 0;
+    border-radius: var(--docs-component-radius);
     background: color-mix(in srgb, var(--docs-bg) 94%, var(--docs-border));
   }
 

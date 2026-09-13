@@ -13,7 +13,6 @@
   --docs-sidebar-width: 19rem;
   --docs-content-width: 52rem;
   --docs-toc-width: 14rem;
-  --docs-radius: 0;
   --docs-component-gap: 1rem;
   --docs-component-padding: 1.25rem;
   --docs-component-radius: 0;
@@ -68,7 +67,7 @@ html[data-docs-preset="minimal"] {
 }
 
 html[data-docs-preset="rounded"] {
-  --docs-component-radius: 0;
+  --docs-component-radius: 0.5rem;
 }
 
 html[data-docs-preset="high-contrast"] {

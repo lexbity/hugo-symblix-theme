@@ -1,6 +1,0 @@
-{{ $rootName := site.Params.docs.root | default "docs" }}
-{{ $matches := where site.Home.Sections "Section" $rootName }}
-{{ with $matches }}
-  {{ return (index . 0) }}
-{{ end }}
-{{ return nil }}

@@ -21,7 +21,7 @@ Parcourez l’arborescence complète.
 {{< /card >}}
 {{< /cards >}}
 
-{{< cta title="Besoin de contexte ?" href="/fr/docs/latest/technical-content/" label="Lire le contenu technique" secondaryHref="/fr/docs/latest/code-and-tables/" secondaryLabel="Voir le code et les tableaux" >}}
+{{< cta title="Besoin de contexte ?" href="/fr/docs/latest/components/reference/" label="Lire le contenu technique" secondaryHref="/fr/docs/latest/components/code-groups/" secondaryLabel="Voir le code et les tableaux" >}}
 Les pages d’exemple permettent de comparer les modèles avant d’écrire.
 {{< /cta >}}
 

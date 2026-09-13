@@ -21,6 +21,6 @@ weight = 1
 {{< /card >}}
 {{< /cards >}}
 
-{{< cta title="هل تحتاج إلى سياق؟" href="/ar/docs/latest/technical-content/" label="اقرأ المحتوى التقني" secondaryHref="/ar/docs/latest/code-and-tables/" secondaryLabel="عرض الشيفرة والجداول" >}}
+{{< cta title="هل تحتاج إلى سياق؟" href="/ar/docs/latest/components/reference/" label="اقرأ المحتوى التقني" secondaryHref="/ar/docs/latest/components/code-groups/" secondaryLabel="عرض الشيفرة والجداول" >}}
 استخدم صفحات الأمثلة لمقارنة الأنماط قبل كتابة المحتوى الخاص بك.
 {{< /cta >}}

@@ -17,7 +17,7 @@
           {{ .Content }}
         </div>
         {{ if $versionRoot }}
-          <section class="docs-browse docs-all-pages" aria-label="All pages">
+          <section class="docs-browse docs-all-pages" aria-label="{{ i18n "all_pages" | default "All pages" }}">
             <header class="docs-browse-header">
               <h2>{{ $page.Title }}</h2>
               {{ with $page.Description }}<p>{{ . }}</p>{{ end }}

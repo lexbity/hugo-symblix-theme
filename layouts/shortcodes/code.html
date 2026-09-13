@@ -12,6 +12,12 @@
 {{- $filename := .Get "filename" | default "" -}}
 {{- $class := .Get "class" | default "" -}}
 {{- $classes := partial "docs/helpers/classname.html" (dict "Base" (slice "docs-choice-group__panel" "docs-choice-group__panel--code" "docs-code") "Extra" $class) -}}
+{{- $plainLexers := slice "text" "txt" "plain" "plaintext" "tree" -}}
+{{- with $language -}}
+  {{- if in $plainLexers . -}}
+    {{- $language = "plaintext" -}}
+  {{- end -}}
+{{- end -}}
 <section class="{{ $classes }}">
   <header class="docs-choice-group__header">
     <h3 class="docs-choice-group__title">{{ $title }}</h3>
@@ -25,6 +31,24 @@
     </div>
   </header>
   <div class="docs-choice-group__body">
-    <pre class="docs-code-group__pre"><code{{ with $language }} class="language-{{ . }}"{{ end }}>{{ .InnerDeindent | trim " \n\t\r" | htmlEscape }}</code></pre>
+    {{- if $language -}}
+      <div
+        class="docs-code-group__pre"
+        data-codeblock
+        data-copy-label="{{ i18n "copy_code" | default "Copy code" }}"
+        data-copied-label="{{ i18n "copied" | default "Copied" }}"
+        data-copy-failed-label="{{ i18n "copy_failed" | default "Copy failed" }}"
+      >
+        {{- transform.Highlight (.InnerDeindent | trim " \n\t\r") $language (dict "noClasses" false) -}}
+      </div>
+    {{- else -}}
+      <pre
+        class="docs-code-group__pre"
+        data-codeblock
+        data-copy-label="{{ i18n "copy_code" | default "Copy code" }}"
+        data-copied-label="{{ i18n "copied" | default "Copied" }}"
+        data-copy-failed-label="{{ i18n "copy_failed" | default "Copy failed" }}"
+      ><code>{{ .InnerDeindent | trim " \n\t\r" | htmlEscape }}</code></pre>
+    {{- end -}}
   </div>
 </section>

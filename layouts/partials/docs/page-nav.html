@@ -23,7 +23,7 @@
   {{ end }}
 
   {{ if ge $currentIndex 0 }}
-    <nav class="docs-page-nav" aria-label="Previous and next">
+    <nav class="docs-page-nav" aria-label="{{ i18n "previous_next" | default "Previous and next" }}">
       <ul class="docs-page-nav-list">
         {{ if gt $currentIndex 0 }}
           {{ $prev := index $sequence (sub $currentIndex 1) }}

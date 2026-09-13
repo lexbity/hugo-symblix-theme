@@ -1,11 +1,20 @@
 name = "hugo-theme-docworkbench"
 license = "MIT"
 licenselink = "https://opensource.org/licenses/MIT"
-description = "A Hugo documentation theme for versioned, multilingual technical docs with a no-JavaScript baseline."
+description = "A Hugo documentation theme for versioned, multilingual software project docs with a no-JavaScript baseline, server-side syntax highlighting, and static-first search."
 homepage = "https://example.com/hugo-theme-docworkbench"
-tags = ["documentation", "docs", "hugo", "multilingual", "versioned", "tailwindcss"]
-features = ["No-JS baseline", "Version-aware docs", "Multilingual docs", "Structured content tree", "Tailwind-based styling"]
-min_version = "0.120.0"
+tags = ["documentation", "docs", "hugo", "multilingual", "versioned", "search"]
+features = [
+  "No-JS baseline",
+  "Version-aware docs for software releases",
+  "Multilingual docs with translation status warnings",
+  "Client-side search with static fallback",
+  "Server-side Chroma syntax highlighting",
+  "Copy-to-clipboard code blocks",
+  "Pre-built CSS with optional Tailwind source build",
+  "Structured content tree",
+]
+min_version = "0.124.0"
 
 [author]
 name = "Lex"

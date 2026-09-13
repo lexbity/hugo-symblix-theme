@@ -12,7 +12,7 @@
     margin: 0;
     padding: 0;
     border: 1px solid var(--docs-border);
-    border-radius: 0;
+    border-radius: var(--docs-component-radius);
     background: linear-gradient(180deg, color-mix(in srgb, var(--docs-surface) 98%, var(--docs-bg)), var(--docs-surface));
     box-shadow: var(--docs-shadow);
   }
@@ -27,7 +27,7 @@
     font-weight: 700;
     padding: 0.75rem 1rem;
     cursor: pointer;
-    border-radius: 0;
+    border-radius: var(--docs-component-radius);
   }
 
   .docs-choice-switcher__button:last-child {
@@ -44,7 +44,7 @@
     gap: calc(var(--docs-density-component-gap) * 0.75);
     padding: var(--docs-density-component-padding);
     border: 1px solid var(--docs-border);
-    border-radius: 0;
+    border-radius: var(--docs-component-radius);
     background: linear-gradient(180deg, color-mix(in srgb, var(--docs-surface) 98%, var(--docs-bg)), var(--docs-surface));
     box-shadow: var(--docs-shadow);
   }
@@ -106,7 +106,7 @@
     margin: 0;
     overflow-x: auto;
     padding: var(--docs-density-component-padding);
-    border-radius: 0;
+    border-radius: var(--docs-component-radius);
     background: color-mix(in srgb, var(--docs-surface) 88%, var(--docs-border));
   }
 

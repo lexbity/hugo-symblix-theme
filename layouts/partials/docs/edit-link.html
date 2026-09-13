@@ -1,6 +1,0 @@
-{{ $base := site.Params.docs.editURLBase | default "" }}
-{{ if and $base .File }}
-  <p class="docs-edit-link">
-    <a href="{{ printf "%s%s" $base .File.Path }}">{{ i18n "edit_this_page" | default "Edit this page" }}</a>
-  </p>
-{{ end }}

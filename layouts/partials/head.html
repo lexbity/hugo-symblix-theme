@@ -5,6 +5,14 @@
   <meta name="description" content="{{ . | plainify }}">
 {{ end }}
 <link rel="canonical" href="{{ .Permalink }}">
+{{ with site.Params.docs.favicon }}
+  <link rel="icon" href="{{ . | relURL }}">
+{{ end }}
+{{ $rss := .OutputFormats.Get "rss" }}
+{{ if not $rss }}{{ $rss = .Site.Home.OutputFormats.Get "rss" }}{{ end }}
+{{ with $rss }}
+  <link rel="alternate" type="{{ .MediaType.Type }}" href="{{ .Permalink }}" title="{{ $.Site.Title }}">
+{{ end }}
 {{ if hugo.IsMultilingual }}
   {{ $translations := .AllTranslations }}
   {{ range $translations }}
@@ -30,6 +38,7 @@
       } catch (error) {}
     })();
   </script>
+  <noscript><style>.docs-switcher--theme,[data-sidebar-search]{display:none !important}</style></noscript>
 {{ end }}
 {{ $versions := hugo.Data.docs_versions.versions | default slice }}
 {{ $currentVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
@@ -48,6 +57,7 @@
     {{ $ogTitle = .Site.Title }}
   {{ end }}
   {{ $ogDescription := or .Description .Summary }}
+  {{ $ogImages := .Params.images | default site.Params.images }}
   <meta property="og:title" content="{{ $ogTitle | plainify }}">
   {{ with $ogDescription }}
     <meta property="og:description" content="{{ . | plainify }}">
@@ -56,13 +66,26 @@
   <meta property="og:url" content="{{ .Permalink }}">
   <meta property="og:site_name" content="{{ .Site.Title }}">
   <meta property="og:locale" content="{{ .Site.Language.Locale }}">
+  {{ range $ogImages }}
+    <meta property="og:image" content="{{ . | absURL }}">
+  {{ end }}
 {{ end }}
 {{ if $seo.twitterCards }}
-  <meta name="twitter:card" content="summary">
+  {{ $twitterImages := .Params.images | default site.Params.images }}
+  <meta name="twitter:card" content="{{ if $twitterImages }}summary_large_image{{ else }}summary{{ end }}">
   <meta name="twitter:title" content="{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }}{{ end }}">
   {{ with or .Description .Summary }}
     <meta name="twitter:description" content="{{ . | plainify }}">
   {{ end }}
+  {{ range $twitterImages }}
+    <meta name="twitter:image" content="{{ . | absURL }}">
+  {{ end }}
 {{ end }}
-{{ $css := resources.Get "css/input.css" | css.TailwindCSS | minify | fingerprint }}
-<link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
+{{ if site.Params.docs.tailwindSource }}
+  {{ $css := resources.Get "css/input.css" | css.TailwindCSS }}
+  {{ $css := $css | minify | fingerprint }}
+  <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
+{{ else }}
+  {{ $css := resources.Get "css/compiled/theme.css" | minify | fingerprint }}
+  <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
+{{ end }}

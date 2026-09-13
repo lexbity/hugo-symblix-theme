@@ -4,7 +4,7 @@
     max-width: 100%;
     margin: 1.5rem 0;
     border: 1px solid var(--docs-border);
-    border-radius: 0;
+    border-radius: var(--docs-component-radius);
     box-shadow: var(--docs-shadow);
   }
 

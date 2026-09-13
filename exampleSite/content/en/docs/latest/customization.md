@@ -7,11 +7,22 @@ weight = 70
 
 Customization is done with Hugo templates, CSS layers, and content authoring.
 
-## CSS and Tailwind
+## CSS: pre-built by default, Tailwind optional
 
-The theme ships a single Tailwind entrypoint plus a set of component layers. Downstream sites can extend or override those layers without changing the theme's layout templates.
+The theme ships pre-built CSS at `assets/css/compiled/theme.css`. A downstream site needs only Hugo — no Node.js, no npm, no security-policy changes — and pages load a single fingerprinted stylesheet.
 
-{{< details title="Styling entrypoint" open=true >}}
+The stylesheet is generated from a Tailwind CSS v4 entrypoint plus plain component layers, so you can customize with or without a Node toolchain:
+
+- **Without Node:** add your own plain-CSS layers in the downstream site and override the theme's custom properties (`--docs-accent`, `--docs-border`, spacing, and so on) from `assets/css/theme.css`.
+- **With Node (Tailwind source build):** install dependencies (`npm install`), edit `assets/css/input.css` and the component layers it imports, then regenerate the compiled file:
+
+```bash
+npm run build:css
+```
+
+For live development against the source layers, `npm run dev` compiles the CSS on each build (it sets `HUGO_PARAMS_DOCS_TAILWINDSOURCE=true`, which switches the theme from the compiled file to the Tailwind pipeline). This mode requires the Tailwind CLI to be allowed in Hugo's security policy — see [Configuration](/en/docs/latest/configuration/).
+
+{{< details title="Styling entrypoint (source build)" >}}
 ```css
 @import "tailwindcss";
 

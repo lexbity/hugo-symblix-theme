@@ -6,10 +6,6 @@
   translation: الإصدار
 - id: on_this_page
   translation: في هذه الصفحة
-- id: edit_this_page
-  translation: تحرير هذه الصفحة
-- id: improve_this_translation
-  translation: تحسين هذه الترجمة
 - id: last_updated
   translation: آخر تحديث
 - id: previous
@@ -67,7 +63,7 @@
 - id: section_map
   translation: خريطة القسم
 - id: search_unavailable
-  translation: البحث غير متاح بدون JavaScript.
+  translation: "يتطلب البحث التفاعلي تفعيل JavaScript. استخدم بحث المتصفح في القائمة أدناه، أو تصفح كل الصفحات."
 - id: search_loading
   translation: جارٍ تحميل البحث…
 - id: search_empty
@@ -110,3 +106,21 @@
   translation: داكن
 - id: system
   translation: النظام
+- id: theme
+  translation: السمة
+- id: search
+  translation: بحث
+- id: search_results_count
+  translation: "النتائج: {count}"
+- id: breadcrumb
+  translation: مسار التنقل
+- id: previous_next
+  translation: السابق والتالي
+- id: all_pages
+  translation: كل الصفحات
+- id: page_metadata
+  translation: بيانات الصفحة
+- id: home_eyebrow
+  translation: الوثائق
+- id: home_open_docs
+  translation: افتح أحدث الوثائق

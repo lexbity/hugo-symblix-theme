@@ -6,10 +6,6 @@
   translation: Version
 - id: on_this_page
   translation: On this page
-- id: edit_this_page
-  translation: Edit this page
-- id: improve_this_translation
-  translation: Improve this translation
 - id: last_updated
   translation: Last updated
 - id: previous
@@ -67,7 +63,7 @@
 - id: section_map
   translation: Section map
 - id: search_unavailable
-  translation: Search is unavailable without JavaScript.
+  translation: "Interactive search requires JavaScript. Use your browser's find-in-page on the list below, or browse all pages."
 - id: search_loading
   translation: Loading search…
 - id: search_empty
@@ -104,3 +100,27 @@
   translation: Copied
 - id: copy_failed
   translation: Copy failed
+- id: theme
+  translation: Theme
+- id: light
+  translation: Light
+- id: dark
+  translation: Dark
+- id: system
+  translation: System
+- id: search
+  translation: Search
+- id: search_results_count
+  translation: "Results: {count}"
+- id: breadcrumb
+  translation: Breadcrumb
+- id: previous_next
+  translation: Previous and next
+- id: all_pages
+  translation: All pages
+- id: page_metadata
+  translation: Page metadata
+- id: home_eyebrow
+  translation: Documentation
+- id: home_open_docs
+  translation: Open the latest docs

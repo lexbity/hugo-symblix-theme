@@ -5,7 +5,7 @@ docType = "reference"
 weight = 55
 +++
 
-{{< hero eyebrow="Composants de référence" title="Référence structurée" subtitle="Remplacez les tableaux bruts par des éléments de référence lisibles et liés." headingLevel="2" primaryHref="/fr/docs/latest/components/" primaryLabel="Retour aux composants" secondaryHref="/fr/docs/latest/technical-content/" secondaryLabel="Voir le contenu technique" >}}
+{{< hero eyebrow="Composants de référence" title="Référence structurée" subtitle="Remplacez les tableaux bruts par des éléments de référence lisibles et liés." headingLevel="2" primaryHref="/fr/docs/latest/components/" primaryLabel="Retour aux composants" secondaryHref="/fr/docs/latest/components/code-groups/" secondaryLabel="Voir le contenu technique" >}}
 {{< /hero >}}
 
 {{< config-option name="params.docs.rightToc" type="boolean" default="true" since="v1.0" >}}

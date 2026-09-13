@@ -4,7 +4,7 @@ description = "ホームページやセクションハブのための hero、fea
 weight = 80
 +++
 
-{{< hero eyebrow="ドキュメントの入口" title="ランディング" subtitle="hero、feature grid、cards、CTA を使って、入口を実用的にします。" headingLevel="2" primaryHref="/ja/docs/latest/getting-started/" primaryLabel="ここから開始" secondaryHref="/ja/docs/latest/components/" secondaryLabel="コンポーネントを見る" >}}
+{{< hero eyebrow="ドキュメントの入口" title="ランディング" subtitle="hero、feature grid、cards、CTA を使って、入口を実用的にします。" headingLevel="2" primaryHref="/ja/docs/latest/" primaryLabel="ここから開始" secondaryHref="/ja/docs/latest/components/" secondaryLabel="コンポーネントを見る" >}}
 {{< /hero >}}
 
 {{< feature-grid columns="3" >}}
@@ -19,7 +19,7 @@ weight = 80
 {{< /feature >}}
 {{< /feature-grid >}}
 
-{{< cta title="公開の準備はできましたか？" href="/ja/docs/latest/all-pages/" label="ドキュメントを表示" secondaryHref="/ja/docs/latest/components/" secondaryLabel="コンポーネントを再確認" >}}
+{{< cta title="公開の準備はできましたか？" href="/ja/docs/latest/" label="ドキュメントを表示" secondaryHref="/ja/docs/latest/components/reference/" secondaryLabel="コンポーネントを再確認" >}}
 ランディングプリミティブを組み合わせて、簡潔で辿りやすい入口を作ります。
 {{< /cta >}}
 

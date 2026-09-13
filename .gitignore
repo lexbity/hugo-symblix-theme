@@ -1,9 +1,9 @@
 .hugo_build.lock
-.github
+devdocs/
 public/
 resources/
 node_modules/
 exampleSite/public/
 exampleSite/resources/
 test-results/
-devdocs/
+tests/tests/

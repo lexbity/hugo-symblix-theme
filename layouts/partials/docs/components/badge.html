@@ -1,4 +1,4 @@
-{{- $label := .Label | default (.label | default "") -}}
+{{- $label := .Label | default "" -}}
 {{- if not $label -}}
   {{- return "" -}}
 {{- end -}}

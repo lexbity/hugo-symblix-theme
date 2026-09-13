@@ -14,7 +14,7 @@
     align-items: center;
     padding: 0.2rem 0.55rem;
     border: 1px solid var(--docs-border);
-    border-radius: 0;
+    border-radius: var(--docs-component-radius);
     background: color-mix(in srgb, var(--docs-surface) 96%, var(--docs-bg));
     font-size: 0.85rem;
     font-weight: 700;
@@ -56,7 +56,7 @@
   .docs-content code:not(pre code) {
     padding: 0.15rem 0.35rem;
     border: 1px solid var(--docs-border);
-    border-radius: 0;
+    border-radius: var(--docs-component-radius);
     background: color-mix(in srgb, var(--docs-surface) 90%, var(--docs-bg));
     color: var(--docs-text);
     font-size: 0.95em;
@@ -67,7 +67,7 @@
     overflow-x: auto;
     padding: 1rem;
     border: 1px solid var(--docs-border);
-    border-radius: 0;
+    border-radius: var(--docs-component-radius);
     background: color-mix(in srgb, var(--docs-surface) 90%, var(--docs-bg));
     max-width: 100%;
     direction: ltr;
@@ -86,4 +86,142 @@
   .docs-content :is(pre, code) {
     tab-size: 2;
   }
+
+  .docs-content .highlight {
+    margin: 0;
+  }
+
+  .docs-content .highlight pre {
+    margin: 0;
+  }
+
+  .docs-codeblock__body {
+    position: relative;
+  }
+
+  .docs-copy-button {
+    position: absolute;
+    top: 0.5rem;
+    inset-inline-end: 0.5rem;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--docs-border);
+    background: var(--docs-surface);
+    color: var(--docs-muted);
+    font: inherit;
+    font-size: 0.78rem;
+    line-height: 1.2;
+    cursor: pointer;
+    opacity: 0.85;
+  }
+
+  .docs-copy-button:hover,
+  .docs-copy-button:focus-visible {
+    color: var(--docs-text);
+    border-color: var(--docs-accent);
+    opacity: 1;
+  }
+
+  .docs-copy-button[data-copied="true"] {
+    color: var(--docs-accent);
+    border-color: var(--docs-accent);
+  }
+}
+
+/* Chroma syntax-highlight tokens. Generated server-side by Hugo (noClasses=false);
+   palettes follow the theme's light/dark variables. */
+:root {
+  --docs-code-bg: color-mix(in srgb, var(--docs-surface) 90%, var(--docs-bg));
+  --docs-code-text: var(--docs-text);
+  --docs-code-comment: #64748b;
+  --docs-code-keyword: #7c3aed;
+  --docs-code-string: #047857;
+  --docs-code-number: #b45309;
+  --docs-code-function: #1d4ed8;
+  --docs-code-type: #0f766e;
+  --docs-code-constant: #9d174d;
+  --docs-code-operator: #475569;
+  --docs-code-error: #dc2626;
+}
+
+html[data-theme="dark"] {
+  --docs-code-comment: #7d8ca3;
+  --docs-code-keyword: #c4b5fd;
+  --docs-code-string: #86efac;
+  --docs-code-number: #fbbf24;
+  --docs-code-function: #93c5fd;
+  --docs-code-type: #5eead4;
+  --docs-code-constant: #f9a8d4;
+  --docs-code-operator: #94a3b8;
+  --docs-code-error: #f87171;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    --docs-code-comment: #7d8ca3;
+    --docs-code-keyword: #c4b5fd;
+    --docs-code-string: #86efac;
+    --docs-code-number: #fbbf24;
+    --docs-code-function: #93c5fd;
+    --docs-code-type: #5eead4;
+    --docs-code-constant: #f9a8d4;
+    --docs-code-operator: #94a3b8;
+    --docs-code-error: #f87171;
+  }
+}
+
+.docs-content .highlight {
+  color: var(--docs-code-text);
+  background: var(--docs-code-bg);
+}
+
+.docs-content .highlight .err { color: var(--docs-code-error); }
+.docs-content .highlight .c, .docs-content .highlight .c1, .docs-content .highlight .ch,
+.docs-content .highlight .cm, .docs-content .highlight .cs {
+  color: var(--docs-code-comment);
+  font-style: italic;
+}
+.docs-content .highlight .cp { color: var(--docs-code-constant); }
+.docs-content .highlight .k, .docs-content .highlight .kc, .docs-content .highlight .kd,
+.docs-content .highlight .kn, .docs-content .highlight .kr, .docs-content .highlight .kv {
+  color: var(--docs-code-keyword);
+  font-weight: 600;
+}
+.docs-content .highlight .kt { color: var(--docs-code-type); font-weight: 600; }
+.docs-content .highlight .o, .docs-content .highlight .ow, .docs-content .highlight .p {
+  color: var(--docs-code-operator);
+}
+.docs-content .highlight .s, .docs-content .highlight .sa, .docs-content .highlight .sb,
+.docs-content .highlight .sc, .docs-content .highlight .sd, .docs-content .highlight .se,
+.docs-content .highlight .sh, .docs-content .highlight .si, .docs-content .highlight .sx,
+.docs-content .highlight .s1, .docs-content .highlight .s2 {
+  color: var(--docs-code-string);
+}
+.docs-content .highlight .sr { color: var(--docs-code-string); font-weight: 600; }
+.docs-content .highlight .m, .docs-content .highlight .mb, .docs-content .highlight .mf,
+.docs-content .highlight .mh, .docs-content .highlight .mi, .docs-content .highlight .il,
+.docs-content .highlight .mo {
+  color: var(--docs-code-number);
+}
+.docs-content .highlight .na { color: var(--docs-code-type); }
+.docs-content .highlight .nb { color: var(--docs-code-function); }
+.docs-content .highlight .nc { color: var(--docs-code-type); font-weight: 600; }
+.docs-content .highlight .no { color: var(--docs-code-constant); }
+.docs-content .highlight .nd { color: var(--docs-code-keyword); }
+.docs-content .highlight .ni { color: var(--docs-code-operator); }
+.docs-content .highlight .nn { color: var(--docs-code-type); }
+.docs-content .highlight .nf, .docs-content .highlight .fm {
+  color: var(--docs-code-function);
+}
+.docs-content .highlight .nt { color: var(--docs-code-keyword); }
+.docs-content .highlight .nv, .docs-content .highlight .vc, .docs-content .highlight .vg,
+.docs-content .highlight .vi, .docs-content .highlight .vm {
+  color: var(--docs-code-constant);
+}
+.docs-content .highlight .gd { color: var(--docs-code-error); }
+.docs-content .highlight .gi { color: var(--docs-code-string); }
+.docs-content .highlight .gs { font-weight: 700; }
+.docs-content .highlight .ge { font-style: italic; }
+.docs-content .highlight .gh, .docs-content .highlight .gu {
+  color: var(--docs-code-keyword);
+  font-weight: 600;
 }

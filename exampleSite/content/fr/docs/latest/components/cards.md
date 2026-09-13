@@ -11,7 +11,7 @@ weight = 20
 Point d’entrée rapide pour les nouveaux contributeurs.
 {{< /card >}}
 
-{{< card title="Contenu technique" href="/fr/docs/latest/technical-content/" >}}
+{{< card title="Contenu technique" href="/fr/docs/latest/components/reference/" >}}
 Exerce la prose, les tableaux, les figures et le code.
 {{< /card >}}
 

@@ -1,0 +1,10 @@
+# Theme-level defaults merged into downstream sites.
+# The SearchIndex output format powers the per-language search index
+# (/{lang}/search-index.json). Activate it per site with:
+#   [outputs]
+#   home = ["HTML", "RSS", "SearchIndex"]
+[outputFormats.SearchIndex]
+baseName = "search-index"
+mediaType = "application/json"
+isPlainText = true
+notUgly = true

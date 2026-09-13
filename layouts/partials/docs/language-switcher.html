@@ -23,25 +23,18 @@
     {{ $currentLabel = $defaultSite.Language.Label | default $currentLabel }}
   {{ end }}
 
-  <section class="docs-switcher docs-switcher--language">
-    <label class="docs-switcher-label" for="docs-language-choice">{{ i18n "language" | default "Language" }}</label>
-    <select
-      id="docs-language-choice"
-      class="docs-switcher-select"
-      data-language-select
-      onchange="if (this.value) window.location.href = this.value"
-    >
+  <details class="docs-switcher docs-switcher--language">
+    <summary class="docs-switcher-summary">
+      <span class="docs-switcher-label">{{ i18n "language" | default "Language" }}: {{ $currentLabel }}</span>
+    </summary>
+    <ul class="docs-switcher-list">
       {{ range hugo.Sites }}
         {{ $targetSite := . }}
         {{ $targetLang := $targetSite.Language.Lang }}
-        {{ $targetLabel := $targetSite.Language.Label | default $targetSite.Language.Name }}
+        {{ $targetLabel := $targetSite.Language.Label | default $targetSite.Language.Lang }}
 
         {{ $targetLink := "" }}
         {{ $targetExact := $targetSite.GetPage $exactPath }}
-        {{ $targetSection := false }}
-        {{ if and $relativePath (ne $parentPath ".") (ne $parentPath "/") }}
-          {{ $targetSection = $targetSite.GetPage (printf "/%s/%s/%s" $rootName $currentVersion $parentPath) }}
-        {{ end }}
         {{ $targetVersionRoot := $targetSite.GetPage (printf "/%s/%s" $rootName $currentVersion) }}
         {{ $targetDocsRoot := $targetSite.GetPage (printf "/%s" $rootName) }}
 
@@ -49,8 +42,10 @@
           {{ $targetLink = .RelPermalink }}
         {{ end }}
 
-        {{ if and (not $targetLink) $targetSection }}
-          {{ $targetLink = $targetSection.RelPermalink }}
+        {{ if and (not $targetLink) $relativePath (ne $parentPath ".") (ne $parentPath "/") }}
+          {{ with $targetSite.GetPage (printf "/%s/%s/%s" $rootName $currentVersion $parentPath) }}
+            {{ $targetLink = .RelPermalink }}
+          {{ end }}
         {{ end }}
 
         {{ if and (not $targetLink) $targetVersionRoot }}
@@ -71,8 +66,10 @@
           {{ $targetLink = $targetSite.Home.RelPermalink }}
         {{ end }}
 
-        <option value="{{ $targetLink }}" {{ if eq $targetLang $currentLang }}selected{{ end }}>{{ $targetLabel }}</option>
+        <li>
+          <a class="docs-switcher-link" href="{{ $targetLink }}"{{ if eq $targetLang $currentLang }} aria-current="page"{{ end }} hreflang="{{ $targetLang }}">{{ $targetLabel }}</a>
+        </li>
       {{ end }}
-    </select>
-  </section>
+    </ul>
+  </details>
 {{ end }}

@@ -46,7 +46,7 @@
   .docs-terms-item {
     padding: 1rem;
     border: 1px solid var(--docs-border);
-    border-radius: 0;
+    border-radius: var(--docs-component-radius);
     background: color-mix(in srgb, var(--docs-bg) 94%, var(--docs-border));
   }
 

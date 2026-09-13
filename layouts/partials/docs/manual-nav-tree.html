@@ -15,6 +15,11 @@
   {{ if and (not $hidden) (or $title $pagePath $url) }}
     {{ $link := "" }}
     {{ $resolvedPage := false }}
+    {{ $defaultSite := index (where hugo.Sites "Language.IsDefault" true) 0 }}
+    {{ $defaultLang := "" }}
+    {{ with $defaultSite }}
+      {{ $defaultLang = .Language.Lang }}
+    {{ end }}
     {{ if $pagePath }}
       {{ $link = $pagePath }}
       {{ $translatedPath := replaceRE "^/[^/]+/" (printf "/%s/" $currentLang) $pagePath }}
@@ -25,6 +30,19 @@
         {{ with where $site.Pages "RelPermalink" $pagePath }}
           {{ $resolvedPage = index . 0 }}
           {{ $link = $resolvedPage.RelPermalink }}
+        {{ else }}
+          {{/* No translation: fall back to the default-language page so the
+             entry still resolves for readers of partial translations. */}}
+          {{ if $defaultLang }}
+            {{ $defaultPath := replaceRE "^/[^/]+/" (printf "/%s/" $defaultLang) $pagePath }}
+            {{ with where $defaultSite.Pages "RelPermalink" $defaultPath }}
+              {{ $resolvedPage = index . 0 }}
+              {{ $link = $resolvedPage.RelPermalink }}
+            {{ end }}
+          {{ end }}
+          {{ if not $resolvedPage }}
+            {{ warnf "docs_nav: page %q not found (language %q and default language %q); sidebar link left as-is" $pagePath $currentLang $defaultLang }}
+          {{ end }}
         {{ end }}
       {{ end }}
     {{ else if $url }}
@@ -51,6 +69,13 @@
           {{ else }}
             {{ with where $site.Pages "RelPermalink" $childPage }}
               {{ $childLink = (index . 0).RelPermalink }}
+            {{ else }}
+              {{ with $defaultSite }}
+                {{ $defaultChildPath := replaceRE "^/[^/]+/" (printf "/%s/" $defaultLang) $childPage }}
+                {{ with where .Pages "RelPermalink" $defaultChildPath }}
+                  {{ $childLink = (index . 0).RelPermalink }}
+                {{ end }}
+              {{ end }}
             {{ end }}
           {{ end }}
         {{ else if $childURL }}

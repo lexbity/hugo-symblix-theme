@@ -29,7 +29,7 @@
     min-block-size: 2rem;
     padding: 0 0.5rem;
     border: 1px solid var(--docs-border);
-    border-radius: 0;
+    border-radius: var(--docs-component-radius);
     background: color-mix(in srgb, var(--docs-bg) 88%, var(--docs-border));
     font-weight: 800;
     font-variant-numeric: tabular-nums;

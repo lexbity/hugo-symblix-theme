@@ -1,31 +1,20 @@
 +++
 title = "Search"
-description = "Use browse pages and static navigation instead of a live search bundle."
+description = "Interactive search with a static, JavaScript-free fallback."
+layout = "search"
 related = ["/en/docs/latest/navigation/", "/en/docs/latest/all-pages/"]
 weight = 60
 +++
 
-The final supported release does not ship a client-side search UI.
+The docs ship an interactive search page backed by a per-language JSON index, plus a static fallback that works without JavaScript.
 
-## What changed
+## How search works
 
-The older search bundle was removed during the cleanup phase so the theme stays static end to end. The docs still need to be discoverable, so the theme keeps two browse mechanisms:
+- **With JavaScript**, typing searches the full documentation index for the current language. Results are scoped to the current version by default, with version, type, and topic filters.
+- **Without JavaScript**, the interactive index is unavailable. The complete page list for the current version is rendered below the search box — use your browser's find-in-page, or open the browse index.
 
-1. The sidebar navigation tree
-2. The `all-pages/` browse index for each docs version
+Each language publishes its own `search-index.json` at the language root, so the payload stays small and the default scope is "current language + current version".
 
-## Why this is intentional
-
-{{< warning title="No live search" >}}
-There is no JavaScript search overlay in the release build. This keeps the docs usable in restricted environments and makes the theme easier to reason about and test.
-{{< /warning >}}
-
-## How readers browse
-
-Use these entry points instead of search:
-
-{{< child-pages root="/en/docs/latest/" title="Browseable sections" showDescriptions="true" maxItems="6" />}}
-
-{{< note title="Static discovery" >}}
-The browse pages are part of the documentation, not a fallback afterthought. They are built into the same theme shell as the rest of the site.
+{{< note title="Static discovery first" >}}
+The browse pages are part of the documentation, not a fallback afterthought. Search enhances them; it does not replace them.
 {{< /note >}}

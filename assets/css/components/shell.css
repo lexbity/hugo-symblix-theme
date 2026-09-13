@@ -68,7 +68,7 @@
     transform: translateY(-200%);
     padding: 0.5rem 0.75rem;
     border: 1px solid var(--docs-border);
-    border-radius: 0;
+    border-radius: var(--docs-component-radius);
     background: var(--docs-bg);
     color: var(--docs-text);
     z-index: 50;

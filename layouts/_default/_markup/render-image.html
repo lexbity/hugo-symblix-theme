@@ -5,7 +5,7 @@
 {{- $alt := .Text | default "" -}}
 {{- $title := .Title | default "" -}}
 <figure class="docs-markdown-figure">
-  <img class="docs-markdown-image" src="{{ $src | safeURL }}" alt="{{ $alt | plainify }}"{{ with $title }} title="{{ . | plainify }}"{{ end }}>
+  <img class="docs-markdown-image" src="{{ $src | safeURL }}" alt="{{ $alt | plainify }}" loading="lazy" decoding="async"{{ with $title }} title="{{ . | plainify }}"{{ end }}>
   {{- if $title -}}
     <figcaption class="docs-markdown-figure__caption">{{ $title | markdownify }}</figcaption>
   {{- end -}}
