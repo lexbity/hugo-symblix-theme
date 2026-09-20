@@ -1,6 +1,6 @@
-import { searchEntries } from "./adapters/matcher.js";
+import { searchEntries, precomputeEntries } from "./adapters/matcher.js";
 
-function populateSelect(select, values) {
+function populateSelect(select, values, allLabel) {
   if (!select) {
     return;
   }
@@ -20,7 +20,7 @@ function populateSelect(select, values) {
   if (values.length > 0) {
     const placeholder = document.createElement("option");
     placeholder.value = "";
-    placeholder.textContent = "All";
+    placeholder.textContent = allLabel || "All";
     select.insertBefore(placeholder, select.firstChild);
     select.value = "";
   }
@@ -104,6 +104,12 @@ function renderResults(root, results, query) {
     container.hidden = false;
   }
 
+  // Update results container aria-label with query
+  if (query && results !== null) {
+    const resultsHeading = root.dataset.resultsHeading || "Results for";
+    container.setAttribute("aria-label", `${resultsHeading} ${query}`);
+  }
+
   const count = results === null ? 0 : results.length;
   if (status) {
     const template = root.dataset.resultsTemplate || "";
@@ -112,7 +118,8 @@ function renderResults(root, results, query) {
 
   if (results === null || results.length === 0) {
     if (results !== null && results.length === 0 && status) {
-      status.textContent = root.dataset.emptyMessage || "No results found";
+      const emptyMessage = root.dataset.emptyMessage || "No results found";
+      status.textContent = emptyMessage;
     }
     return;
   }
@@ -167,6 +174,7 @@ export function initSearchPage() {
   const indexUrl = root.dataset.searchIndex;
   const input = root.querySelector("[data-search-input]");
   const form = root.querySelector("[data-search-form]");
+  const clearBtn = root.querySelector("[data-search-clear]");
   if (!indexUrl || !input || !form) {
     return;
   }
@@ -178,6 +186,12 @@ export function initSearchPage() {
       return Promise.resolve(index);
     }
     if (!loadPromise) {
+      // Show loading state
+      const status = root.querySelector("[data-search-status]");
+      if (status && root.dataset.loadingMessage) {
+        status.textContent = root.dataset.loadingMessage;
+      }
+
       loadPromise = fetch(indexUrl)
         .then((response) => {
           if (!response.ok) {
@@ -186,7 +200,9 @@ export function initSearchPage() {
           return response.json();
         })
         .then((parsed) => {
-          index = parsed;
+          // Precompute haystacks for faster search
+          index = precomputeEntries(parsed);
+
           const versionSelect = root.querySelector("[data-search-filter-version]");
           const docTypeSelect = root.querySelector("[data-search-filter-doctype]");
           const topicSelect = root.querySelector("[data-search-filter-topic]");
@@ -204,9 +220,10 @@ export function initSearchPage() {
             (entry.topics || []).forEach((topic) => topics.add(topic));
           });
 
-          populateSelect(versionSelect, Array.from(versions));
-          populateSelect(docTypeSelect, Array.from(docTypes));
-          populateSelect(topicSelect, Array.from(topics));
+          populateSelect(versionSelect, Array.from(versions), versionSelect?.dataset.allVersions);
+          populateSelect(docTypeSelect, Array.from(docTypes), docTypeSelect?.dataset.allTypes);
+          populateSelect(topicSelect, Array.from(topics), topicSelect?.dataset.allTopics);
+
           const filters = root.querySelector("[data-search-filters]");
           if (filters) {
             filters.hidden = false;
@@ -214,6 +231,12 @@ export function initSearchPage() {
           const currentVersion = root.dataset.searchVersion || "";
           if (versionSelect && Array.from(versionSelect.options).some((option) => option.value === currentVersion)) {
             versionSelect.value = currentVersion;
+          }
+
+          // Show empty hint after index loads
+          const emptyHint = root.dataset.emptyHint || "";
+          if (status && emptyHint) {
+            status.textContent = emptyHint;
           }
 
           return index;
@@ -250,6 +273,29 @@ export function initSearchPage() {
       .then((loaded) => runSearch(root, loaded, input.value))
       .catch(() => {});
   });
+
+  // Clear button handler
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      input.value = "";
+      const container = root.querySelector("[data-search-results]");
+      const status = root.querySelector("[data-search-status]");
+      const fallback = root.querySelector("[data-search-fallback]");
+      if (container) {
+        container.textContent = "";
+        container.hidden = true;
+      }
+      if (status) {
+        const emptyHint = root.dataset.emptyHint || "";
+        status.textContent = emptyHint;
+      }
+      if (fallback) {
+        fallback.hidden = false;
+      }
+      input.focus();
+    });
+  }
+
   root.querySelectorAll("select[data-search-filter]").forEach((select) => {
     select.addEventListener("change", scheduleSearch);
   });

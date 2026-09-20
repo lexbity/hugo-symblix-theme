@@ -94,12 +94,12 @@
 
   .docs-choice-group--methods .docs-choice-group__panel {
     border-inline-start-width: 0.3rem;
-    border-inline-start-color: #22c55e;
+    border-inline-start-color: var(--docs-choice-ok);
   }
 
   .docs-choice-group--code .docs-choice-group__panel {
     border-inline-start-width: 0.3rem;
-    border-inline-start-color: #f59e0b;
+    border-inline-start-color: var(--docs-choice-warn);
   }
 
   .docs-code-group__pre {
@@ -115,7 +115,7 @@
     white-space: pre;
     direction: ltr;
     unicode-bidi: isolate;
-    font-family: var(--docs-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
+    font-family: var(--docs-font-mono);
     font-size: 0.92rem;
     line-height: 1.65;
   }

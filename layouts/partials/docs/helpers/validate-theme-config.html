@@ -1,0 +1,86 @@
+{{- /* Validates theme config and emits warnf for violations.
+   Called from head.html via partialCached (per site). */ -}}
+{{- $theme := site.Params.docs.theme | default dict -}}
+{{- /* Only validate if theme config is explicitly set (not just defaults) */ -}}
+{{- $hasThemeConfig := not (eq (len $theme) 0) -}}
+{{- if not $hasThemeConfig -}}
+  {{- return -}}
+{{- end -}}
+{{- $colors := $theme.colors | default dict -}}
+{{- $fonts := $theme.fonts | default dict -}}
+{{- $density := $theme.density | default "comfortable" -}}
+{{- $preset := $theme.preset | default "minimal" -}}
+
+{{- /* Enum checks */ -}}
+{{- $validDensities := dict "comfortable" true "compact" true "dense" true -}}
+{{- if not (isset $validDensities $density) -}}
+  {{- warnf "params.docs.theme.density: invalid value %q; must be one of %q" $density (slice "comfortable" "compact" "dense") -}}
+{{- end -}}
+{{- $validPresets := dict "minimal" true "rounded" true "high-contrast" true -}}
+{{- if not (isset $validPresets $preset) -}}
+  {{- warnf "params.docs.theme.preset: invalid value %q; must be one of %q" $preset (slice "minimal" "rounded" "high-contrast") -}}
+{{- end -}}
+
+{{- /* Hex validation for colors */ -}}
+{{- $hexRe := "^#[0-9a-fA-F]{3,8}$" -}}
+
+{{- if $colors.accent -}}
+  {{- if not (findRE $hexRe $colors.accent) -}}
+    {{- warnf "params.docs.theme.colors.accent: invalid hex color %q (must match %s)" $colors.accent $hexRe -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $light := $colors.light | default dict -}}
+{{- $dark := $colors.dark | default dict -}}
+
+{{- if $light -}}
+  {{- range $key, $val := $light -}}
+    {{- if not (findRE $hexRe $val) -}}
+      {{- warnf "params.docs.theme.colors.light.%s: invalid hex color %q (must match %s)" $key $val $hexRe -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if $dark -}}
+  {{- range $key, $val := $dark -}}
+    {{- if not (findRE $hexRe $val) -}}
+      {{- warnf "params.docs.theme.colors.dark.%s: invalid hex color %q (must match %s)" $key $val $hexRe -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Dark completeness: if dark block present, must have all 7 keys */ -}}
+{{- if $dark -}}
+  {{- $required := slice "bg" "surface" "surface2" "text" "muted" "border" "accent" -}}
+  {{- range $required -}}
+    {{- if not (isset $dark .) -}}
+      {{- warnf "params.docs.theme.colors.dark: missing required key %q (all 7 keys required when dark block is present)" . -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Light completeness: if light block present, must have all 7 keys */ -}}
+{{- if $light -}}
+  {{- $required := slice "bg" "surface" "surface2" "text" "muted" "border" "accent" -}}
+  {{- range $required -}}
+    {{- if not (isset $light .) -}}
+      {{- warnf "params.docs.theme.colors.light: missing required key %q (all 7 keys required when light block is present)" . -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Unknown keys in colors */ -}}
+{{- $knownColors := dict "accent" true "light" true "dark" true -}}
+{{- range $key, $_ := $colors -}}
+  {{- if not (isset $knownColors $key) -}}
+    {{- warnf "params.docs.theme.colors: unknown key %q; known keys: %q" $key (slice "accent" "light" "dark") -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Unknown keys in fonts */ -}}
+{{- $knownFonts := dict "body" true "mono" true -}}
+{{- range $key, $_ := $fonts -}}
+  {{- if not (isset $knownFonts $key) -}}
+    {{- warnf "params.docs.theme.fonts: unknown key %q; known keys: %q" $key (slice "body" "mono") -}}
+  {{- end -}}
+{{- end -}}

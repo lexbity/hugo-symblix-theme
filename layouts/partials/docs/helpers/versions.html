@@ -1,0 +1,119 @@
+{{- /* Derived version model.
+   Input: none (uses site, default-language basis).
+   Output: dict { current: string, list: []dict{id,label,archived,weight,alias} }.
+   Pure function of section tree + override file (data/docs_versions.yaml).
+   Cached per site language. */ -}}
+{{- $rootName := site.Params.docs.root | default "docs" -}}
+{{- $defaultSite := index (where hugo.Sites "Language.IsDefault" true) 0 -}}
+{{- $baseSite := $defaultSite | default site -}}
+{{- $docsRoot := index (where $baseSite.Home.Sections "Section" $rootName) 0 -}}
+
+{{- if not $docsRoot -}}
+  {{- return dict "current" "latest" "list" slice -}}
+{{- end -}}
+
+{{- $sections := $docsRoot.Sections -}}
+{{- $semverRe := "^v?(\\d{1,3})\\.(\\d{1,3})(?:\\.(\\d{1,3}))?$" -}}
+{{- $versions := slice -}}
+{{- $aliasEntry := dict -}}
+{{- $hasLatest := false -}}
+
+{{- range $sections -}}
+  {{- $path := strings.TrimSuffix "/" .RelPermalink -}}
+  {{- $parts := split $path "/" -}}
+  {{- $name := index $parts (sub (len $parts) 1) -}}
+  {{- if or (eq $name "latest") (eq $name "current") -}}
+    {{- $hasLatest = true -}}
+    {{- $aliasEntry = dict "id" $name "label" $name "archived" false "weight" 999999999 "alias" true -}}
+    {{- continue -}}
+  {{- end -}}
+  {{- $m := findRESubmatch $semverRe $name -}}
+  {{- if not $m -}}
+    {{- warnf "version dir %q is neither reserved (latest/current) nor semver; ignored" $name -}}
+    {{- continue -}}
+  {{- end -}}
+  {{- $major := int (index $m 1) -}}
+  {{- $minor := int (index $m 2) -}}
+  {{- $patch := int (index $m 3) -}}
+  {{- $weight := add (add (mul $major 1000000) (mul $minor 1000)) $patch -}}
+  {{- $versions = $versions | append (dict "id" $name "label" $name "weight" $weight "archived" false) -}}
+{{- end -}}
+
+{{- $versions = sort $versions "weight" "desc" -}}
+
+{{- $current := "latest" -}}
+{{- if not $hasLatest -}}
+  {{- if gt (len $versions) 0 -}}
+    {{- $current = (index $versions 0).id -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $keepLive := site.Params.docs.versions.keepLive | default 1 -}}
+
+{{- $versionsArchived := slice -}}
+{{- range $i, $v := $versions -}}
+  {{- if ge $i $keepLive -}}
+    {{- $versionsArchived = $versionsArchived | append (merge $v (dict "archived" true)) -}}
+  {{- else -}}
+    {{- $versionsArchived = $versionsArchived | append $v -}}
+  {{- end -}}
+{{- end -}}
+{{- $versions = $versionsArchived -}}
+
+{{- /* Override pass: data/docs_versions.yaml per-id field-wise */ -}}
+{{- $overrideData := hugo.Data.docs_versions -}}
+{{- if $overrideData -}}
+  {{- $overrideVersions := $overrideData.versions | default slice -}}
+  {{- $versionsOverridden := slice -}}
+  {{- range $versions -}}
+    {{- $v := . -}}
+    {{- $foundOverride := false -}}
+    {{- range $overrideVersions -}}
+      {{- if eq .id $v.id -}}
+        {{- $foundOverride = true -}}
+        {{- $v = merge $v . -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $versionsOverridden = $versionsOverridden | append $v -}}
+  {{- end -}}
+  {{- $versions = $versionsOverridden -}}
+
+  {{- /* Check for unknown override ids (skip alias entries created by derivation) */ -}}
+  {{- range $overrideVersions -}}
+    {{- $oid := .id -}}
+    {{- $found := false -}}
+    {{- range $versions -}}
+      {{- if and (eq .id $oid) (not (or (isset . "alias") .alias)) -}}
+        {{- $found = true -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if not $found -}}
+      {{- warnf "docs_versions.yaml: override for unknown version id %q" $oid -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- if $overrideData.current -}}
+    {{- $currentOverride := $overrideData.current -}}
+    {{- $match := false -}}
+    {{- if eq $currentOverride "latest" -}}
+      {{- $match = true -}}
+    {{- else -}}
+      {{- range $versions -}}
+        {{- if eq .id $currentOverride -}}
+          {{- $match = true -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if not $match -}}
+      {{- warnf "docs_versions.yaml: current override %q diverges from derived %q; derivation wins" $currentOverride $current -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $list := slice -}}
+{{- if $hasLatest -}}
+  {{- $list = $list | append $aliasEntry -}}
+{{- end -}}
+{{- $list = $list | append $versions -}}
+
+{{- return dict "current" $current "list" $list -}}

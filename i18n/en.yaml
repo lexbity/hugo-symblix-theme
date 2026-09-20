@@ -16,6 +16,8 @@
   translation: Related pages
 - id: warning_old_version
   translation: "You are viewing {{ .Current }}. The latest docs are {{ .Latest }}."
+- id: warning_latest_link
+  translation: "Go to the latest docs"
 - id: warning_outdated_translation
   translation: "This translation is marked {{ .Status }} and may be out of date."
 - id: translation_warning
@@ -76,8 +78,6 @@
   translation: Scope
 - id: search_results_for
   translation: Results for
-- id: search_results
-  translation: Search results
 - id: search_clear
   translation: Clear
 - id: search_filters
@@ -126,8 +126,6 @@
   translation: Open the latest docs
 - id: install
   translation: Install
-- id: download
-  translation: Download
 - id: latest_release
   translation: Latest release
 - id: changelog
@@ -144,3 +142,31 @@
   translation: License
 - id: powered_by
   translation: Powered by Hugo
+- id: note
+  translation: Note
+- id: tip
+  translation: Tip
+- id: info
+  translation: Information
+- id: warning
+  translation: Warning
+- id: danger
+  translation: Danger
+- id: success
+  translation: Success
+- id: get_started
+  translation: Get started
+- id: learn_more
+  translation: Learn more
+- id: link_to
+  translation: Link to
+- id: yes
+  translation: Yes
+- id: no
+  translation: No
+- id: default
+  translation: Default
+- id: status
+  translation: Status
+- id: figure_missing_alt
+  translation: Image

@@ -132,39 +132,11 @@ Make sure cards, tables, figures, and reference blocks stay readable on paper.
 
 ## Table
 
-<div class="table-wrap">
-  <table>
-    <thead>
-      <tr>
-        <th>Element</th>
-        <th>Print behavior</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Sidebar</td>
-        <td>Hidden</td>
-      </tr>
-      <tr>
-        <td>TOC</td>
-        <td>Hidden</td>
-      </tr>
-      <tr>
-        <td>Tabs</td>
-        <td>All panels visible</td>
-      </tr>
-      <tr>
-        <td>Methods</td>
-        <td>All methods visible</td>
-      </tr>
-      <tr>
-        <td>Code groups</td>
-        <td>All snippets visible</td>
-      </tr>
-      <tr>
-        <td>Details</td>
-        <td>Expanded in print</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+| Element | Print behavior |
+|---|---|
+| Sidebar | Hidden |
+| TOC | Hidden |
+| Tabs | All panels visible |
+| Methods | All methods visible |
+| Code groups | All snippets visible |
+| Details | Expanded in print |

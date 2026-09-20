@@ -14,7 +14,7 @@ hugo new site my-docs
 
 {{< step title="Add the theme" status="Required" >}}
 ```sh
-git submodule add https://github.com/example/hugo-theme-symblix themes/docworkbench
+git submodule add https://github.com/example/hugo-theme-symblix themes/hugo-theme-symblix
 ```
 {{< /step >}}
 

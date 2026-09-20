@@ -1,28 +1,30 @@
-{{ $versionsData := hugo.Data.docs_versions.versions | default slice }}
-{{ if gt (len $versionsData) 1 }}
+{{ $derived := partialCached "docs/helpers/versions.html" . .Site.Language.Lang }}
+{{ if gt (len $derived.list) 1 }}
   {{ $currentSlug := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
-  {{ $currentRootPermalink := partialCached "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $currentSlug) (site.Language.Lang) $currentSlug | strings.TrimSpace }}
+  {{ $currentRootPermalink := partialCached "docs/helpers/version-root-strict.html" (dict "Page" . "VersionSlug" $currentSlug) (site.Language.Lang) $currentSlug | strings.TrimSpace }}
   {{ $currentRoot := false }}
   {{ with where site.Pages "RelPermalink" $currentRootPermalink }}
     {{ $currentRoot = index . 0 }}
   {{ end }}
   {{ $currentLabel := $currentSlug }}
-  {{ range $versionsData }}
+  {{ range $derived.list }}
     {{ if eq .id $currentSlug }}
       {{ $currentLabel = .label }}
     {{ end }}
   {{ end }}
   {{ $options := slice }}
-  {{ range sort $versionsData "weight" "desc" }}
+  {{ range sort $derived.list "weight" "desc" }}
     {{ $version := . }}
-    {{ $targetRootPermalink := partialCached "docs/helpers/version-root.html" (dict "Page" $ "VersionSlug" $version.id) (site.Language.Lang) $version.id | strings.TrimSpace }}
+    {{ $targetRootPermalink := partialCached "docs/helpers/version-root-strict.html" (dict "Page" $ "VersionSlug" $version.id) (site.Language.Lang) $version.id | strings.TrimSpace }}
     {{ $targetLink := "" }}
-    {{ with where site.Pages "RelPermalink" $targetRootPermalink }}
-      {{ $targetRoot := index . 0 }}
-      {{ with $currentRoot }}
-        {{ $equivalent := partial "docs/helpers/equivalent-page.html" (dict "Page" $ "CurrentRoot" $currentRoot "TargetRoot" $targetRoot) }}
-        {{ with $equivalent }}
-          {{ $targetLink = . }}
+    {{ if $targetRootPermalink }}
+      {{ with where site.Pages "RelPermalink" $targetRootPermalink }}
+        {{ $targetRoot := index . 0 }}
+        {{ with $currentRoot }}
+          {{ $equivalent := partial "docs/helpers/equivalent-page.html" (dict "Page" $ "CurrentRoot" $currentRoot "TargetRoot" $targetRoot) }}
+          {{ with $equivalent }}
+            {{ $targetLink = . }}
+          {{ end }}
         {{ end }}
       {{ end }}
     {{ end }}

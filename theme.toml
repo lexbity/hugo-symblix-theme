@@ -2,7 +2,7 @@ name = "hugo-theme-symblix"
 license = "MIT"
 licenselink = "https://opensource.org/licenses/MIT"
 description = "A Hugo documentation theme for versioned, multilingual software project docs with a no-JavaScript baseline, server-side syntax highlighting, and static-first search."
-homepage = "https://example.com/hugo-theme-symblix"
+homepage = "https://github.com/OWNER/hugo-theme-symblix"
 tags = ["documentation", "docs", "hugo", "multilingual", "versioned", "search"]
 features = [
   "No-JS baseline",
@@ -14,7 +14,7 @@ features = [
   "Pre-built CSS with optional Tailwind source build",
   "Structured content tree",
 ]
-min_version = "0.124.0"
+min_version = "0.158.0"
 
 [author]
 name = "Lex"

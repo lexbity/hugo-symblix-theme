@@ -1,5 +1,5 @@
 baseURL = "http://localhost:1313/"
-title = "Docworkbench Example"
+title = "Symblix Example"
 theme = "hugo-theme-symblix"
 defaultContentLanguage = "en"
 defaultContentLanguageInSubdir = true
@@ -8,8 +8,8 @@ defaultContentLanguageInSubdir = true
 tag = "tags"
 topic = "topics"
 
-[markup.goldmark.renderer]
-unsafe = true
+# unsafe = true removed — theme does not require raw HTML in markdown.
+# Extend via shortcodes instead.
 
 # Optional: build CSS from Tailwind source instead of the committed pre-built CSS.
 # Enable together with `npm run dev` (which sets HUGO_PARAMS_DOCS_TAILWINDSOURCE=true).
@@ -28,7 +28,7 @@ notUgly = true
 [params.docs]
 root = "docs"
 logo = ""
-logoAlt = "Docworkbench"
+logoAlt = "Symblix"
 rightToc = true
 versions = { noindexArchived = true }
 
@@ -36,10 +36,10 @@ versions = { noindexArchived = true }
 # for identity verification (e.g. Mastodon).
 [[params.docs.social]]
 name = "GitHub"
-url = "https://github.com/lex/hugo-theme-symblix"
+url = "https://github.com/OWNER/hugo-theme-symblix"
 
 [params.docs.footer]
-copyright = "Docworkbench authors"
+copyright = "Symblix authors"
 licenseURL = "https://opensource.org/licenses/MIT"
 licenseLabel = "MIT"
 poweredBy = true

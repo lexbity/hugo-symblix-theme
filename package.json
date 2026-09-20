@@ -1,4 +1,6 @@
 {
+  "name": "symblix",
+  "private": true,
   "dependencies": {
     "@tailwindcss/cli": "^4.3.0",
     "tailwindcss": "^4.3.0"
@@ -11,7 +13,8 @@
     "check": "hugo --source exampleSite --theme hugo-theme-symblix --panicOnWarning --cleanDestinationDir",
     "build:css": "tailwindcss -i assets/css/input.css -o assets/css/compiled/theme.css",
     "test": "playwright test",
-    "test:install": "playwright install --with-deps chromium"
+    "test:install": "playwright install --with-deps chromium",
+    "screenshots": "playwright test tests/screenshots.spec.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.4",

@@ -1,7 +1,8 @@
 {{- $page := . -}}
 {{- $rootName := site.Params.docs.root | default "docs" -}}
 {{- $docsRoot := index (where site.Home.Sections "Section" $rootName) 0 -}}
-{{- $current := hugo.Data.docs_versions.current | default "latest" -}}
+{{- $derived := partialCached "docs/helpers/versions.html" . .Site.Language.Lang -}}
+{{- $current := $derived.current -}}
 {{- if $page.Params.docsVersion -}}
   {{- $current = $page.Params.docsVersion -}}
 {{- else if $docsRoot -}}

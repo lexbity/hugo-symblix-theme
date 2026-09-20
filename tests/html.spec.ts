@@ -52,5 +52,5 @@ test("site footer carries project links and license", async ({ page }) => {
   const footer = page.locator(".site-footer");
   await expect(footer.locator(".docs-social-link")).toHaveCount(1);
   await expect(footer.locator('a[rel~="license"]')).toHaveText("MIT");
-  await expect(footer.locator(".site-footer__copyright")).toContainText("Docworkbench authors");
+  await expect(footer.locator(".site-footer__copyright")).toContainText("Symblix authors");
 });

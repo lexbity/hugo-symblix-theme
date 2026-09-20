@@ -16,6 +16,8 @@
   translation: صفحات ذات صلة
 - id: warning_old_version
   translation: "أنت تعرض {{ .Current }}. أحدث المستندات هي {{ .Latest }}."
+- id: warning_latest_link
+  translation: "الانتقال إلى أحدث المستندات"
 - id: warning_outdated_translation
   translation: "هذه الترجمة موسومة بـ {{ .Status }} وقد تكون قديمة."
 - id: translation_warning
@@ -76,8 +78,6 @@
   translation: النطاق
 - id: search_results_for
   translation: نتائج البحث عن
-- id: search_results
-  translation: نتائج البحث
 - id: search_clear
   translation: مسح
 - id: search_filters
@@ -126,8 +126,6 @@
   translation: افتح أحدث الوثائق
 - id: install
   translation: تثبيت
-- id: download
-  translation: تنزيل
 - id: latest_release
   translation: أحدث إصدار
 - id: changelog
@@ -144,3 +142,31 @@
   translation: الترخيص
 - id: powered_by
   translation: Powered by Hugo
+- id: note
+  translation: ملاحظة
+- id: tip
+  translation: نصيحة
+- id: info
+  translation: معلومة
+- id: warning
+  translation: تحذير
+- id: danger
+  translation: خطر
+- id: success
+  translation: نجاح
+- id: get_started
+  translation: ابدأ
+- id: learn_more
+  translation: تعرف على المزيد
+- id: link_to
+  translation: رابط إلى
+- id: yes
+  translation: نعم
+- id: no
+  translation: لا
+- id: default
+  translation: افتراضي
+- id: status
+  translation: الحالة
+- id: figure_missing_alt
+  translation: صورة

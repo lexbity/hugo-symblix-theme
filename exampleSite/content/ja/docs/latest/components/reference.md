@@ -20,7 +20,7 @@ weight = 100
 Hugo のビルド環境を制御します。
 {{< /env-var >}}
 
-{{< cli-command name="docworkbench audit" >}}
+{{< cli-command name="symblix audit" >}}
 ドキュメントを監査し、壊れたリンクや古いページ、欠落したメタデータを報告します。
 {{< /cli-command >}}
 

@@ -3,8 +3,7 @@
   {{ $rootName := site.Params.docs.root | default "docs" }}
   {{ $currentLang := partial "docs/helpers/current-language.html" . | strings.TrimSpace }}
   {{ $currentVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
-  {{ $currentRootPermalink := partialCached "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $currentVersion "Site" site) (site.Language.Lang) $currentVersion | strings.TrimSpace }}
-  {{ $defaultSite := index (where hugo.Sites "Language.IsDefault" true) 0 }}
+  {{ $currentRootPermalink := partialCached "docs/helpers/version-root-strict.html" (dict "Page" . "VersionSlug" $currentVersion "Site" site) (site.Language.Lang) $currentVersion | strings.TrimSpace }}
   {{ $relativePath := "" }}
   {{ if $currentRootPermalink }}
     {{ $relativePath = strings.TrimSuffix "/" (strings.TrimPrefix $currentRootPermalink $page.RelPermalink) }}
@@ -19,57 +18,52 @@
   {{ end }}
 
   {{ $currentLabel := site.Language.Label | default site.Language.Name }}
-  {{ if and $defaultSite (eq site.Language.Lang $currentLang) }}
-    {{ $currentLabel = $defaultSite.Language.Label | default $currentLabel }}
-  {{ end }}
+  {{ $options := slice }}
+  {{ range hugo.Sites }}
+    {{ $targetSite := . }}
+    {{ $targetLang := $targetSite.Language.Lang }}
+    {{ $targetLabel := $targetSite.Language.Label | default $targetSite.Language.Lang }}
 
-  <details class="docs-switcher docs-switcher--language">
-    <summary class="docs-switcher-summary">
-      <span class="docs-switcher-label">{{ i18n "language" | default "Language" }}: {{ $currentLabel }}</span>
-    </summary>
-    <ul class="docs-switcher-list">
-      {{ range hugo.Sites }}
-        {{ $targetSite := . }}
-        {{ $targetLang := $targetSite.Language.Lang }}
-        {{ $targetLabel := $targetSite.Language.Label | default $targetSite.Language.Lang }}
-
-        {{ $targetLink := "" }}
+    {{ $targetRootPermalink := partialCached "docs/helpers/version-root-strict.html" (dict "Page" $ "VersionSlug" $currentVersion "Site" $targetSite) ($targetSite.Language.Lang) $currentVersion | strings.TrimSpace }}
+    {{ $targetLink := "" }}
+    {{ if $targetRootPermalink }}
+      {{ with where $targetSite.Pages "RelPermalink" $targetRootPermalink }}
+        {{ $targetRoot := index . 0 }}
+        {{/* Exact page match */}}
         {{ $targetExact := $targetSite.GetPage $exactPath }}
-        {{ $targetVersionRoot := $targetSite.GetPage (printf "/%s/%s" $rootName $currentVersion) }}
-        {{ $targetDocsRoot := $targetSite.GetPage (printf "/%s" $rootName) }}
-
         {{ with $targetExact }}
           {{ $targetLink = .RelPermalink }}
         {{ end }}
-
+        {{/* Parent path fallback */}}
         {{ if and (not $targetLink) $relativePath (ne $parentPath ".") (ne $parentPath "/") }}
           {{ with $targetSite.GetPage (printf "/%s/%s/%s" $rootName $currentVersion $parentPath) }}
             {{ $targetLink = .RelPermalink }}
           {{ end }}
         {{ end }}
-
-        {{ if and (not $targetLink) $targetVersionRoot }}
-          {{ $targetLink = $targetVersionRoot.RelPermalink }}
-        {{ end }}
-
-        {{ if and (not $targetLink) $targetDocsRoot }}
-          {{ $targetLink = $targetDocsRoot.RelPermalink }}
-        {{ end }}
-
-        {{ if and (not $targetLink) $defaultSite }}
-          {{ with $defaultSite.GetPage (printf "/%s/%s" $rootName $currentVersion) }}
-            {{ $targetLink = .RelPermalink }}
-          {{ end }}
-        {{ end }}
-
+        {{/* Version root fallback */}}
         {{ if not $targetLink }}
-          {{ $targetLink = $targetSite.Home.RelPermalink }}
+          {{ $targetLink = $targetRoot.RelPermalink }}
         {{ end }}
-
-        <li>
-          <a class="docs-switcher-link" href="{{ $targetLink }}"{{ if eq $targetLang $currentLang }} aria-current="page"{{ end }} hreflang="{{ partial "docs/helpers/language-code.html" (dict "Site" $targetSite) }}">{{ $targetLabel }}</a>
-        </li>
       {{ end }}
-    </ul>
-  </details>
+    {{ end }}
+
+    {{ if $targetLink }}
+      {{ $options = $options | append (dict "lang" $targetLang "label" $targetLabel "href" $targetLink "current" (eq $targetLang $currentLang)) }}
+    {{ end }}
+  {{ end }}
+
+  {{ if gt (len $options) 1 }}
+    <details class="docs-switcher docs-switcher--language">
+      <summary class="docs-switcher-summary">
+        <span class="docs-switcher-label">{{ i18n "language" | default "Language" }}: {{ $currentLabel }}</span>
+      </summary>
+      <ul class="docs-switcher-list">
+        {{ range $options }}
+          <li>
+            <a class="docs-switcher-link" href="{{ .href }}"{{ if .current }} aria-current="page"{{ end }} hreflang="{{ partial "docs/helpers/language-code.html" (dict "Site" (index (where hugo.Sites "Language.Lang" .lang) 0)) }}">{{ .label }}</a>
+          </li>
+        {{ end }}
+      </ul>
+    </details>
+  {{ end }}
 {{ end }}

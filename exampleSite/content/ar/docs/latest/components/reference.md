@@ -24,11 +24,11 @@ weight = 55
 يتحكم في بيئة بناء Hugo ويمكن استخدامه لتغيير سلوك البناء.
 {{< /env-var >}}
 
-{{< cli-command name="docworkbench audit" >}}
+{{< cli-command name="symblix audit" >}}
 يفحص محتوى الوثائق ويبلغ عن الروابط المكسورة والصفحات القديمة والبيانات الوصفية المفقودة.
 
 ```sh
-docworkbench audit ./exampleSite
+symblix audit ./exampleSite
 ```
 {{< /cli-command >}}
 

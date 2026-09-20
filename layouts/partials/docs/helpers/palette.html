@@ -1,0 +1,48 @@
+{{- /* Palette resolution and validation.
+   Returns: dict { emits: bool, light: map|false, dark: map|false, fonts: {body, mono}|false } */ -}}
+{{- $theme := site.Params.docs.theme | default dict -}}
+{{- $colors := $theme.colors | default dict -}}
+{{- $fonts := $theme.fonts | default dict -}}
+{{- $preset := $theme.preset | default "minimal" -}}
+
+{{- /* Palette is suppressed entirely for high-contrast preset (build-time gate) */ -}}
+{{- if eq $preset "high-contrast" -}}
+  {{- return dict "emits" false "light" false "dark" false "fonts" false -}}
+{{- end -}}
+
+{{- $accent := $colors.accent | default "" -}}
+{{- $light := $colors.light | default dict -}}
+{{- $dark := $colors.dark | default dict -}}
+
+{{- $hasLight := not (eq (len $light) 0) -}}
+{{- $hasDark := not (eq (len $dark) 0) -}}
+{{- $hasAccent := not (eq $accent "") -}}
+
+{{- /* No config -> no palette override */ -}}
+{{- if not (or $hasLight $hasDark $hasAccent (not (eq (len $fonts) 0))) -}}
+  {{- return dict "emits" false "light" false "dark" false "fonts" false -}}
+{{- end -}}
+
+{{- /* Build light token map */ -}}
+{{- $lightTokens := dict -}}
+{{- if $hasLight -}}
+  {{- $lightTokens = $light -}}
+{{- else if $hasAccent -}}
+  {{- $lightTokens = dict "accent" $accent -}}
+{{- end -}}
+
+{{- /* Build dark token map: all-or-none */ -}}
+{{- $darkTokens := dict -}}
+{{- if $hasDark -}}
+  {{- $darkTokens = $dark -}}
+{{- else if $hasAccent -}}
+  {{- $darkTokens = dict "accent" (printf "color-mix(in oklab, %s 72%%, white)" $accent) -}}
+{{- end -}}
+
+{{- /* Fonts: always emit if provided */ -}}
+{{- $fontTokens := dict -}}
+{{- if not (eq (len $fonts) 0) -}}
+  {{- $fontTokens = $fonts -}}
+{{- end -}}
+
+{{- return dict "emits" true "light" $lightTokens "dark" $darkTokens "fonts" $fontTokens -}}

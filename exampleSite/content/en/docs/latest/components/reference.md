@@ -24,11 +24,11 @@ URL segment and internal version key used for routing and version switching.
 Controls the Hugo build environment and can be used to branch build behavior.
 {{< /env-var >}}
 
-{{< cli-command name="docworkbench audit" >}}
+{{< cli-command name="symblix audit" >}}
 Audits documentation content and reports broken links, stale pages, and missing metadata.
 
 ```sh
-docworkbench audit ./exampleSite
+symblix audit ./exampleSite
 ```
 {{< /cli-command >}}
 

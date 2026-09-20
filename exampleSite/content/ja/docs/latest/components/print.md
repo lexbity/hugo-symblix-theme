@@ -14,28 +14,9 @@ weight = 110
 
 {{< figure src="/images/docs-diagram.svg" alt="ドキュメントレイアウト図" caption="図は印刷時にも読みやすくあるべきです。" >}}
 
-<div class="table-wrap">
-  <table>
-    <thead>
-      <tr>
-        <th>要素</th>
-        <th>印刷時の挙動</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>サイドバー</td>
-        <td>非表示</td>
-      </tr>
-      <tr>
-        <td>TOC</td>
-        <td>非表示</td>
-      </tr>
-      <tr>
-        <td>コードブロック</td>
-        <td>保持</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+| 要素 | 印刷時の挙動 |
+|---|---|
+| サイドバー | 非表示 |
+| TOC | 非表示 |
+| コードブロック | 保持 |
 

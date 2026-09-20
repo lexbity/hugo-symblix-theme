@@ -14,28 +14,9 @@ et ne pas dépendre d’une UI repliable pour exposer les informations important
 
 {{< figure src="/images/docs-diagram.svg" alt="Un schéma simple de mise en page" caption="Les figures doivent rester lisibles à l’impression." >}}
 
-<div class="table-wrap">
-  <table>
-    <thead>
-      <tr>
-        <th>Élément</th>
-        <th>Comportement à l’impression</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Barre latérale</td>
-        <td>Masquée</td>
-      </tr>
-      <tr>
-        <td>Sommaire</td>
-        <td>Masqué</td>
-      </tr>
-      <tr>
-        <td>Blocs de code</td>
-        <td>Conservés</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+| Élément | Comportement à l'impression |
+|---|---|
+| Barre latérale | Masquée |
+| Sommaire | Masqué |
+| Blocs de code | Conservés |
 

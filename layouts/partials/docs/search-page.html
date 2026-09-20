@@ -15,6 +15,11 @@
   data-results-template="{{ i18n "search_results_count" | default "Results: {count}" }}"
   data-empty-message="{{ i18n "search_no_results" | default "No results found" }}"
   data-error-message="{{ i18n "search_error" | default "Search failed" }}"
+  data-loading-message="{{ i18n "search_loading" | default "Loading search…" }}"
+  data-empty-hint="{{ i18n "search_empty" | default "Type to search" }}"
+  data-clear-label="{{ i18n "search_clear" | default "Clear" }}"
+  data-filter-heading="{{ i18n "search_filters" | default "Filters" }}"
+  data-results-heading="{{ i18n "search_results_for" | default "Results for" }}"
 >
   <form class="docs-search-form" role="search" method="get" action="{{ .RelPermalink }}" data-search-form>
     <label class="docs-search-label" for="docs-search-input">{{ i18n "search_docs" | default "Search docs" }}</label>
@@ -30,27 +35,29 @@
         data-search-input
       >
       <button class="docs-search-submit" type="submit">{{ i18n "search" | default "Search" }}</button>
+      <button class="docs-search-clear" type="button" data-search-clear aria-label="{{ i18n "search_clear" | default "Clear" }}"></button>
     </div>
     <p class="docs-search-scope">
       {{ i18n "search_scope" | default "Scope" }}: {{ $currentVersion }} · {{ site.Language.Label | default site.Language.Lang }}
     </p>
     <div class="docs-search-filters" data-search-filters hidden>
+      <h3 class="docs-search-filters-heading" data-filter-heading>{{ i18n "search_filters" | default "Filters" }}</h3>
       <label class="docs-search-filter">
         <span>{{ i18n "search_filter_version" | default "Version" }}</span>
-        <select class="docs-search-select" data-search-filter data-search-filter-version></select>
+        <select class="docs-search-select" data-search-filter data-search-filter-version data-all-versions="{{ i18n "search_all_versions" | default "All versions" }}"></select>
       </label>
       <label class="docs-search-filter">
         <span>{{ i18n "search_filter_docType" | default "Type" }}</span>
-        <select class="docs-search-select" data-search-filter data-search-filter-doctype></select>
+        <select class="docs-search-select" data-search-filter data-search-filter-doctype data-all-types="{{ i18n "search_all_types" | default "All types" }}"></select>
       </label>
       <label class="docs-search-filter">
         <span>{{ i18n "search_filter_topic" | default "Topic" }}</span>
-        <select class="docs-search-select" data-search-filter data-search-filter-topic></select>
+        <select class="docs-search-select" data-search-filter data-search-filter-topic data-all-topics="{{ i18n "search_all_topics" | default "All topics" }}"></select>
       </label>
     </div>
   </form>
   <p class="docs-search-status" data-search-status aria-live="polite"></p>
-  <div class="docs-search-results" data-search-results hidden></div>
+  <div class="docs-search-results" data-search-results hidden aria-label="{{ i18n "search_results_for" | default "Results for" }}"></div>
   <div class="docs-search-fallback" data-search-fallback>
     <noscript>
       <p class="docs-search-fallback-note">{{ i18n "search_unavailable" | default "Interactive search requires JavaScript. Use your browser's find-in-page on the list below." }}</p>

@@ -24,11 +24,11 @@ Segment d’URL et clé interne de version utilisés pour le routage et le chang
 Contrôle l’environnement de build Hugo et peut servir à varier le comportement de compilation.
 {{< /env-var >}}
 
-{{< cli-command name="docworkbench audit" >}}
+{{< cli-command name="symblix audit" >}}
 Analyse le contenu documentaire et signale les liens brisés, les pages obsolètes et les métadonnées manquantes.
 
 ```sh
-docworkbench audit ./exampleSite
+symblix audit ./exampleSite
 ```
 {{< /cli-command >}}
 

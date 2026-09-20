@@ -19,14 +19,14 @@ test("release badge renders version and changelog link", async ({ page }) => {
   await expect(badge).toBeVisible();
   await expect(badge.locator(".docs-release__version")).toHaveText("v0.1.0");
   await expect(badge.getByRole("link", { name: "Changelog" })).toHaveAttribute("href",
-    "https://github.com/lex/hugo-theme-symblix/releases");
+    "https://github.com/OWNER/hugo-theme-symblix/releases");
 });
 
 test("install renders the command byte-exact with the copy contract", async ({ page }) => {
   await page.goto("/en/docs/latest/components/project/");
   const install = page.locator(".docs-install").first();
   const code = install.locator(".docs-install-method__pre code");
-  expect(await code.textContent()).toBe("brew install docworkbench");
+  expect(await code.textContent()).toBe("brew install symblix");
   const block = install.locator("[data-codeblock]");
   await expect(block).toHaveAttribute("data-copy-label", "Copy code");
   await expect(block).toHaveAttribute("data-copied-label", "Copied");
@@ -37,7 +37,7 @@ test("install preserves multi-line command fidelity", async ({ page }) => {
   await page.goto("/en/docs/latest/components/project/");
   const code = page.locator(".docs-install").nth(1).locator(".docs-install-method__pre code");
   expect(await code.textContent()).toBe(
-    "curl -fsSL https://example.com/install.sh | sh\n  && docworkbench --version",
+    "curl -fsSL https://example.com/install.sh | sh\n  && symblix --version",
   );
 });
 
@@ -45,7 +45,7 @@ test("install command renders HTML-lookalike characters as literal text", async 
   await page.goto("/en/docs/latest/components/project/");
   const code = page.locator(".docs-install").filter({ hasText: "Redirects and comparisons" }).locator("code");
   expect(await code.textContent()).toBe(
-    "docworkbench render < input.md > output.html && diff <(docworkbench check < input.md) output.html",
+    "symblix render < input.md > output.html && diff <(symblix check < input.md) output.html",
   );
   // If the command were interpolated unescaped, <input.md> would parse as an element.
   expect(await code.evaluate((el) => el.children.length)).toBe(0);

@@ -13,7 +13,8 @@
   {{- end -}}
 {{- end -}}
 {{- if not $rootPermalink -}}
-  {{- if and $docsRoot (eq $currentSlug (hugo.Data.docs_versions.current | default "latest")) -}}
+  {{- $derived := partialCached "docs/helpers/versions.html" $site $site.Language.Lang -}}
+  {{- if and $docsRoot (eq $currentSlug $derived.current) -}}
     {{- /* The current version may live directly under the docs root without a
            version subdirectory; the docs root is then its version root. */ -}}
     {{- $rootPermalink = $docsRoot.RelPermalink -}}
@@ -22,14 +23,9 @@
            version without a tree in *this* language is normal. Warn only when
            no language has a tree for the version at all. */ -}}
     {{- $existsAnywhere := false -}}
-    {{- range hugo.Sites -}}
-      {{- $siteDocsRoot := index (where .Home.Sections "Section" $rootName) 0 -}}
-      {{- with $siteDocsRoot -}}
-        {{- range .Sections -}}
-          {{- if eq (strings.TrimSuffix "/" (strings.TrimPrefix $siteDocsRoot.RelPermalink .RelPermalink)) $currentSlug -}}
-            {{- $existsAnywhere = true -}}
-          {{- end -}}
-        {{- end -}}
+    {{- range $derived.list -}}
+      {{- if eq .id $currentSlug -}}
+        {{- $existsAnywhere = true -}}
       {{- end -}}
     {{- end -}}
     {{- if not $existsAnywhere -}}

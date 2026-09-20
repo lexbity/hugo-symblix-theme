@@ -1,2 +1,13 @@
+{{/* Pre-paint sidebar opener (D-09): open sidebar on desktop (≥72rem) before first paint.
+   Runs inline during parse, after sidebar element exists. Mirrors CSS breakpoint exactly. */}}
+<script>
+  (function () {
+    try {
+      if (window.matchMedia("(min-width: 72rem)").matches) {
+        document.querySelectorAll("[data-sidebar]").forEach(function (d) { d.open = true; });
+      }
+    } catch (error) {}
+  })();
+</script>
 {{ $js := resources.Get "js/main.js" | js.Build | minify | fingerprint }}
 <script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>

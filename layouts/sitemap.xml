@@ -1,12 +1,12 @@
 {{ printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  {{- $versions := hugo.Data.docs_versions.versions | default slice -}}
+  {{- $derived := partialCached "docs/helpers/versions.html" . .Site.Language.Lang -}}
   {{- $noindexArchived := site.Params.docs.versions.noindexArchived | default false -}}
   {{- range .Data.Pages -}}
     {{- $version := partial "docs/helpers/current-version.html" . | strings.TrimSpace -}}
     {{- $archived := false -}}
-    {{- range where $versions "id" $version -}}
+    {{- range where $derived.list "id" $version -}}
       {{- $archived = .archived -}}
     {{- end -}}
     {{- if and $noindexArchived $archived -}}

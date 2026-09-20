@@ -24,38 +24,10 @@ root = "docs"
 
 And here is a wide table:
 
-<div class="table-wrap">
-  <table>
-    <thead>
-      <tr>
-        <th>Column A</th>
-        <th>Column B</th>
-        <th>Column C</th>
-        <th>Column D</th>
-        <th>Column E</th>
-        <th>Column F</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>One</td>
-        <td>Two</td>
-        <td>Three</td>
-        <td>Four</td>
-        <td>Five</td>
-        <td>Six</td>
-      </tr>
-      <tr>
-        <td>Alpha</td>
-        <td>Beta</td>
-        <td>Gamma</td>
-        <td>Delta</td>
-        <td>Epsilon</td>
-        <td>Zeta</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+| Column A | Column B | Column C | Column D | Column E | Column F |
+|---|---|---|---|---|---|
+| One | Two | Three | Four | Five | Six |
+| Alpha | Beta | Gamma | Delta | Epsilon | Zeta |
 
 Here is the same image rendered through Markdown image syntax:
 

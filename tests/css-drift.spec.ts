@@ -9,7 +9,7 @@ import { join } from "node:path";
 
 test("compiled theme.css matches a fresh Tailwind build of the source layers", () => {
   test.setTimeout(60_000);
-  const outDir = mkdtempSync(join(tmpdir(), "docworkbench-css-"));
+  const outDir = mkdtempSync(join(tmpdir(), "symblix-css-"));
   const outFile = join(outDir, "theme.css");
   execSync(
     "npx --no-install @tailwindcss/cli -i assets/css/input.css -o " + outFile,

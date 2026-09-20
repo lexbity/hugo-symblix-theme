@@ -133,3 +133,10 @@ export function searchEntries(entries, query, filters = {}) {
       return left.title.localeCompare(right.title);
     });
 }
+
+export function precomputeEntries(entries) {
+  return entries.map((entry) => ({
+    ...entry,
+    _hay: fieldValue(entry),
+  }));
+}

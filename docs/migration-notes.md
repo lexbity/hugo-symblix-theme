@@ -1,4 +1,13 @@
-# Docworkbench Changelog and Migration Notes
+# Symblix Changelog and Migration Notes
+
+## Renamed to Symblix (2026-09-20)
+
+- The theme is now published as `hugo-theme-symblix` (module/theme id). The `theme.toml` name, `package.json` name, `exampleSite/themes/` symlink, and all `--theme` flags in `package.json` scripts are updated.
+- The JS global `window.DocworkbenchTheme` is renamed to `window.SymblixTheme` (no compatibility alias).
+- User-visible strings in the example site (home page titles, hero, footer copyright, logo alt) now read "Symblix".
+- Example CLI commands and download URLs now use `symblix` as the binary name and `OWNER/hugo-theme-symblix` as the placeholder repo.
+- The `data-docs-*` attributes, CSS custom-property prefix (`--docs-*`), `params.docs.*` config namespace, localStorage key (`docs-theme`), and CSS class namespace (`docs-*`) are **unchanged** — they are generic and renaming them buys nothing but diff noise.
+- Historical mentions of "Docworkbench" in this file are preserved as the rename allowlist; the grep gate in CI permits matches only in `docs/migration-notes.md`.
 
 ## Robustness, search scale, and project chrome (2026-09)
 
@@ -55,3 +64,98 @@ The theme ships pre-built CSS (`assets/css/compiled/theme.css`); Hugo sites do n
 ## Historical note
 
 An earlier revision of this file described the removal of search, copy-code, and sidebar behaviors as intentional. That removal was accidental fallout from a cleanup pass, not a design decision; the features are restored above (sidebar persistence and scroll-observation remain retired).
+
+## Symblix Rework — Full Release (2026-09-20)
+
+This release completes the transition from "works well for its author" to "reusable, configurable, and publishable."
+
+### Slice 0 — Identity Rename
+- Theme id: `hugo-theme-docworkbench` → `hugo-theme-symblix`
+- JS global: `window.DocworkbenchTheme` → `window.SymblixTheme` (no alias)
+- Example site titles, hero, footer, logo alt, download URLs: all Symblix
+- CSS namespace (`--docs-*`, `docs-*`), `params.docs.*`, localStorage `docs-theme` **unchanged**
+- Allowlist for grep gate: `docs/migration-notes.md` only
+
+### Slice 1 — Token Consolidation
+- `assets/css/theme.css` is now the single definition site for all `--docs-*` tokens
+- Dead tokens removed: `--docs-component-gap`, `--docs-component-padding`
+- Font tokens: `--docs-font-body`, `--docs-font-mono` (system stacks; `Inter` dropped)
+- Callout/status/warning colors promoted to tokens (light/dark/forced)
+- Syntax-highlight palette moved from `code.css` into `theme.css` (deduped)
+- All components consume tokens only; no raw palette hexes in components
+- Cross-reference comment in `theme.css` documents D-03 cascade contract
+
+### Slice 2 — Palette & Fonts Config, Head Hook, Templated Favicon
+- New config under `[params.docs.theme]`: `colors` (accent shorthand or full light/dark 7-key maps), `fonts` (body/mono stacks)
+- Validation: hex-only colors, enum checks, dark completeness (all-or-none), unknown keys
+- Palette override emitted in `head.html` with exact D-03 selector/media shape:
+  - Fonts: `:root` only
+  - Non-accent: `@media (forced-colors: none)` with `:root, html[data-theme="light"]`, `html[data-theme="dark"]`, `@media (prefers-color-scheme: dark)` for system
+  - Accent/border: additionally `@media (prefers-contrast: no-preference)`
+  - `prefers-contrast: more`, `forced-colors: active` defeat user palette
+  - `preset = "high-contrast"`: build-time suppression (no override emitted)
+- Favicon: `static/favicon.svg` deleted; `assets/favicon.svg` template uses resolved light accent; precedence: param > template
+- `docs/custom-head.html`: empty extension hook, invoked last in `head.html`
+
+### Slice 3 — Truthful Switchers, Linked Banner, Guarded x-default
+- New strict helper: `version-root-strict.html` (no fallback to docs root, no cross-language scan)
+- Version switcher: skips versions without content section in current language
+- Language switcher: option appears iff target language has current version tree; omitted entirely if only 1 qualifies; removed docs-root/home fallback links
+- Version banner: links equivalent page in latest version with derived label; two i18n keys (`warning_old_version` + `warning_latest_link`), no HTML in translations
+- x-default hreflang: emitted only when default-language equivalent page actually exists
+
+### Slice 4 — Sidebar No-JS Default State
+- Sidebar markup ships **closed** (no `open` attribute)
+- Pre-paint inline script opens on desktop (`matchMedia("(min-width: 72rem)")`) before first paint
+- Desktop collapsed state via `.docs-shell:has(> .docs-sidebar:not([open]))` — grid column shrinks, toggle visible
+- No-JS mobile: no un-dismissed overlay; toggle works; content fully reachable
+- Graceful degradation: browsers without `:has()` show empty-strip layout; toggle remains clickable
+
+### Slice 5 — Derived Versioning
+- Version list derived from default language's section tree (pure function)
+- `data/docs_versions.yaml` demoted to optional per-field override (`label`, `archived`)
+- SemVer dirs parsed, weight-sorted desc; `keepLive` (default 1) determines archived boundary
+- Reserved dirs: `latest`/`current` (alias), others must match semver
+- All consumers migrated: `head.html`, `sitemap.xml`, `searchindex.json`, switchers, banner, `version-root.html`
+- Example site: v1.0 moved to `archives/` and mounted; `docs_versions.yaml` shrunk to override
+
+### Slice 6 — i18n Completion & Search Runtime Polish
+- 14 new keys ×4 locales: callout titles, hero buttons, heading anchor, reference meta, figure fallback, search filter placeholders, search lifecycle, clear button, results heading, filter heading, banner link
+- Fixed `browse_docs` → `browse_docs_home` mismatch
+- Deleted dead keys: `search_results`, `download`
+- Enforcement tests: referenced⊆defined, defined⊆referenced (with shortcode/JS allowlist)
+- Search: haystacks precomputed once (`precomputeEntries`); query semantics frozen + golden test
+- Search page: localized "All" placeholders (`data-all-*`), loading/empty/error states, clear button, filter heading, results aria-label
+
+### Slice 7 — Publication Hardening
+- `unsafe = true` removed from example site; all raw HTML converted to shortcodes/markdown
+- `theme.toml` `min_version = "0.158.0"` (was 0.124)
+- CI matrix: Hugo 0.158.0 + 0.166.0 (floor verified)
+- README: Non-Goals, Revisit Triggers, Privacy (zero external requests), CSP (two inline snippets), PDF export future note
+- `npm run screenshots` script + `tests/screenshots.spec.ts` for curated README images
+- `docs/migration-notes.md`: one entry per slice with honest tradeoffs
+
+### Breaking Changes Summary
+| Area | Before | After |
+|------|--------|-------|
+| Theme id | `hugo-theme-docworkbench` | `hugo-theme-symblix` |
+| JS global | `window.DocworkbenchTheme` | `window.SymblixTheme` (no alias) |
+| Favicon | `static/favicon.svg` (drop-in) | `assets/favicon.svg` template; param `params.docs.favicon` wins |
+| `unsafe` | Required in example | Removed; extend via shortcodes |
+| `data/docs_versions.yaml` | Primary source | Optional per-field override only |
+| Sidebar no-JS | `open` (mobile overlay) | Closed; toggle works; pre-paint opens on desktop |
+| Language switcher | Falls back to docs root/home | Omitted if no other language qualifies |
+| x-default hreflang | Always emitted | Only when default-lang page exists |
+| Search filter "All" | Hardcoded "All" | Localized via i18n + data attributes |
+
+### Migration Notes for Downstream Sites
+1. Update `theme = "hugo-theme-symblix"` in `hugo.toml`
+2. Update symlink: `exampleSite/themes/hugo-theme-symblix → ../..`
+3. Rename `window.DocworkbenchTheme` → `window.SymblixTheme` if used
+4. Remove `[markup.goldmark.renderer] unsafe = true`; convert raw HTML to shortcodes
+5. If using custom favicon, set `params.docs.favicon = "your-favicon.svg"`
+6. If using `data/docs_versions.yaml`, trim to only `label`/`archived` overrides; remove `current`, `weight`, full version list
+7. Set `[params.docs.versions] keepLive = N` if you want more than 1 live version (default 1)
+8. Add `docs/custom-head.html` in your site to inject analytics/fonts/verification tags
+9. Review palette config if you want brand colors: `[params.docs.theme.colors.accent = "#yourhex"]`
+10. Test no-JS: sidebar toggle works, switchers are plain links, search fallback renders

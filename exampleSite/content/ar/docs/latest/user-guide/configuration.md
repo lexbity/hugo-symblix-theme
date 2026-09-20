@@ -9,7 +9,7 @@ related = ["/ar/docs/latest/getting-started/", "/ar/docs/latest/navigation/"]
 
 ## إعداد Hugo الأدنى
 
-هذا هو الشكل الأبسط العملي لموقع Docworkbench:
+هذا هو الشكل الأبسط العملي لموقع Symblix:
 
 ```toml
 baseURL = "https://example.com/"

@@ -48,20 +48,20 @@
   }
 
   .docs-callout-note,
-  .docs-callout--note { border-inline-start-color: #64748b; }
+  .docs-callout--note { border-inline-start-color: var(--docs-callout-note); }
   .docs-callout-tip,
-  .docs-callout--tip { border-inline-start-color: #10b981; }
+  .docs-callout--tip { border-inline-start-color: var(--docs-callout-tip); }
   .docs-callout-info,
-  .docs-callout--info { border-inline-start-color: #3b82f6; }
+  .docs-callout--info { border-inline-start-color: var(--docs-callout-info); }
   .docs-callout-warning,
-  .docs-callout--warning { border-inline-start-color: #f59e0b; }
+  .docs-callout--warning { border-inline-start-color: var(--docs-callout-warning); }
   .docs-callout-danger,
-  .docs-callout--danger { border-inline-start-color: #ef4444; }
+  .docs-callout--danger { border-inline-start-color: var(--docs-callout-danger); }
   .docs-callout-success,
-  .docs-callout--success { border-inline-start-color: #22c55e; }
+  .docs-callout--success { border-inline-start-color: var(--docs-callout-success); }
   .docs-callout-deprecated,
-  .docs-callout--deprecated { border-inline-start-color: #8b5cf6; }
+  .docs-callout--deprecated { border-inline-start-color: var(--docs-callout-deprecated); }
   .docs-callout-experimental,
-  .docs-callout--experimental { border-inline-start-color: #f97316; }
+  .docs-callout--experimental { border-inline-start-color: var(--docs-callout-experimental); }
 
 }

@@ -12,7 +12,7 @@ The project front page shortcodes turn a homepage into a software landing page: 
 
 ## Release badge
 
-{{< release version="v0.1.0" date="May 2026" href="https://github.com/lex/hugo-theme-symblix/releases" >}}
+{{< release version="v0.1.0" date="May 2026" href="https://github.com/OWNER/hugo-theme-symblix/releases" >}}
 
 The `release` shortcode renders the latest version with an optional release date and changelog link. The version, date, label, and href are plain strings — they are HTML-escaped, so author input cannot inject markup.
 
@@ -27,7 +27,7 @@ The `release` shortcode renders the latest version with an optional release date
 
 A single command needs no wrapper:
 
-{{< install >}}brew install docworkbench{{< /install >}}
+{{< install >}}brew install symblix{{< /install >}}
 
 The `install` shortcode renders the command body as a copyable block. The command text is preserved exactly — interior whitespace, newlines, pipes, ampersands, and quotes survive — and the block carries the standard copy-to-clipboard contract as a JavaScript enhancement.
 
@@ -41,17 +41,17 @@ Multi-line commands keep their interior indentation:
 
 {{< install label="From script" >}}
 curl -fsSL https://example.com/install.sh | sh
-  && docworkbench --version
+  && symblix --version
 {{< /install >}}
 
 Special characters are rendered literally — redirects, comparisons, and HTML-lookalikes never become markup:
 
-{{< install label="Redirects and comparisons" >}}docworkbench render < input.md > output.html && diff <(docworkbench check < input.md) output.html{{< /install >}}
+{{< install label="Redirects and comparisons" >}}symblix render < input.md > output.html && diff <(symblix check < input.md) output.html{{< /install >}}
 
 When the body contains two or more `install-method` blocks, the container renders as a tabbed switcher with keyboard and aria support:
 
 {{< install >}}
-{{< install-method label="Homebrew" >}}brew install docworkbench{{< /install-method >}}
+{{< install-method label="Homebrew" >}}brew install symblix{{< /install-method >}}
 
 {{< install-method label="Script" >}}curl -fsSL https://example.com/install.sh | sh{{< /install-method >}}
 {{< /install >}}
@@ -68,11 +68,11 @@ Nested `install` inside a `tab` is not supported: the tab body passes content th
 ## Downloads
 
 {{< downloads >}}
-{{< download label="Linux x86_64" platform="linux" href="https://github.com/lex/hugo-theme-symblix/releases/latest/download/docworkbench-linux-amd64.tar.gz" checksum="https://github.com/lex/hugo-theme-symblix/releases/latest/download/docworkbench-linux-amd64.tar.gz.sha256" size="4.2 MB" primary="true" >}}
+{{< download label="Linux x86_64" platform="linux" href="https://github.com/OWNER/hugo-theme-symblix/releases/latest/download/symblix-linux-amd64.tar.gz" checksum="https://github.com/OWNER/hugo-theme-symblix/releases/latest/download/symblix-linux-amd64.tar.gz.sha256" size="4.2 MB" primary="true" >}}
 
-{{< download label="macOS arm64" platform="macos" href="https://github.com/lex/hugo-theme-symblix/releases/latest/download/docworkbench-darwin-arm64.tar.gz" size="3.9 MB" >}}
+{{< download label="macOS arm64" platform="macos" href="https://github.com/OWNER/hugo-theme-symblix/releases/latest/download/symblix-darwin-arm64.tar.gz" size="3.9 MB" >}}
 
-{{< download label="Windows x86_64" platform="windows" href="https://github.com/lex/hugo-theme-symblix/releases/latest/download/docworkbench-windows-x86_64.zip" size="4.6 MB" >}}
+{{< download label="Windows x86_64" platform="windows" href="https://github.com/OWNER/hugo-theme-symblix/releases/latest/download/symblix-windows-x86_64.zip" size="4.6 MB" >}}
 {{< /downloads >}}
 
 The `downloads` container wraps one or more `download` rows. Every row renders unconditionally — nothing is hidden, reordered, or filtered at render time. Rows with a known platform value carry the metadata used by the optional platform-detection enhancement; unknown values render as ordinary rows and never match detection. The container accepts `id` and `class`.

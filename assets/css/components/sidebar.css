@@ -162,7 +162,7 @@
     padding: 0.75rem 0.9rem;
     border: 1px solid var(--docs-border);
     border-radius: var(--docs-component-radius);
-    background: color-mix(in srgb, var(--docs-surface) 88%, #f59e0b);
+    background: color-mix(in srgb, var(--docs-surface) 88%, var(--docs-warn));
     color: var(--docs-text);
   }
 
@@ -232,49 +232,61 @@
     body.docs-sidebar-open {
       overflow: hidden;
     }
+
+    .docs-switcher-summary {
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .docs-switcher-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .docs-switcher-list {
+      display: grid;
+      gap: 0.25rem;
+      margin: 0.25rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .docs-switcher-link {
+      display: block;
+      padding: 0.35rem 0.5rem;
+      border: 1px solid transparent;
+      color: var(--docs-text);
+      text-decoration: none;
+    }
+
+    .docs-switcher-link:hover,
+    .docs-switcher-link:focus-visible {
+      border-color: var(--docs-border);
+      background: color-mix(in srgb, var(--docs-surface) 92%, var(--docs-bg));
+      text-decoration: underline;
+      text-underline-offset: 0.15em;
+    }
+
+    .docs-switcher-link[aria-current="page"] {
+      border-color: var(--docs-accent);
+      color: var(--docs-accent);
+      font-weight: 700;
+    }
+
+    .docs-sidebar-search-form {
+      display: grid;
+      gap: 0.35rem;
+    }
+  }
+
+  @media (min-width: 72rem) {
+    .docs-sidebar:not([open]) {
+      width: auto;
+    }
+    .docs-sidebar:not([open]) .docs-sidebar-toggle {
+      display: inline-flex;
+    }
+    .docs-shell:has(> .docs-sidebar:not([open])) {
+      grid-template-columns: auto minmax(0, 1fr) minmax(0, var(--docs-toc-width));
+    }
   }
 }
-
-  .docs-switcher-summary {
-    cursor: pointer;
-    list-style: none;
-  }
-
-  .docs-switcher-summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .docs-switcher-list {
-    display: grid;
-    gap: 0.25rem;
-    margin: 0.25rem 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .docs-switcher-link {
-    display: block;
-    padding: 0.35rem 0.5rem;
-    border: 1px solid transparent;
-    color: var(--docs-text);
-    text-decoration: none;
-  }
-
-  .docs-switcher-link:hover,
-  .docs-switcher-link:focus-visible {
-    border-color: var(--docs-border);
-    background: color-mix(in srgb, var(--docs-surface) 92%, var(--docs-bg));
-    text-decoration: underline;
-    text-underline-offset: 0.15em;
-  }
-
-  .docs-switcher-link[aria-current="page"] {
-    border-color: var(--docs-accent);
-    color: var(--docs-accent);
-    font-weight: 700;
-  }
-
-  .docs-sidebar-search-form {
-    display: grid;
-    gap: 0.35rem;
-  }

@@ -1,8 +1,40 @@
 {{ $currentSlug := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
-{{ $currentVersion := hugo.Data.docs_versions.current | default "latest" }}
+{{ $derived := partialCached "docs/helpers/versions.html" . .Site.Language.Lang }}
+{{ $currentVersion := $derived.current }}
+{{ $currentVersionData := where $derived.list "id" $currentSlug }}
+{{ $currentLabel := $currentSlug }}
+{{ if gt (len $currentVersionData) 0 }}
+  {{ $currentLabel = (index $currentVersionData 0).label }}
+{{ end }}
 
 {{ if ne $currentSlug $currentVersion }}
-  <aside class="docs-version-warning" role="note" aria-label="{{ i18n "warning_old_version" (dict "Current" $currentSlug "Latest" $currentVersion) }}">
-    <strong>{{ i18n "warning_old_version" (dict "Current" $currentSlug "Latest" $currentVersion) }}</strong>
+  {{ $currentRootPermalink := partialCached "docs/helpers/version-root-strict.html" (dict "Page" . "VersionSlug" $currentSlug) (site.Language.Lang) $currentSlug | strings.TrimSpace }}
+  {{ $latestRootPermalink := partialCached "docs/helpers/version-root-strict.html" (dict "Page" . "VersionSlug" $currentVersion) (site.Language.Lang) $currentVersion | strings.TrimSpace }}
+  {{ $targetLink := "" }}
+  {{ if and $currentRootPermalink $latestRootPermalink }}
+    {{ with where site.Pages "RelPermalink" $currentRootPermalink }}
+      {{ $currentRoot := index . 0 }}
+      {{ with where site.Pages "RelPermalink" $latestRootPermalink }}
+        {{ $latestRoot := index . 0 }}
+        {{ $equivalent := partial "docs/helpers/equivalent-page.html" (dict "Page" $ "CurrentRoot" $currentRoot "TargetRoot" $latestRoot) }}
+        {{ with $equivalent }}
+          {{ $targetLink = . }}
+        {{ end }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+  {{ if not $targetLink }}
+    {{ $targetLink = $latestRootPermalink }}
+  {{ end }}
+  {{ $latestLabel := $currentVersion }}
+  {{ $latestVersionData := where $derived.list "id" $currentVersion }}
+  {{ if gt (len $latestVersionData) 0 }}
+    {{ $latestLabel = (index $latestVersionData 0).label }}
+  {{ end }}
+  <aside class="docs-version-warning" role="note" aria-label="{{ i18n "warning_old_version" (dict "Current" $currentLabel "Latest" $latestLabel) }}">
+    <strong>{{ i18n "warning_old_version" (dict "Current" $currentLabel "Latest" $latestLabel) }}</strong>
+    {{ if $targetLink }}
+      <a href="{{ $targetLink }}">{{ i18n "warning_latest_link" }}</a>
+    {{ end }}
   </aside>
 {{ end }}

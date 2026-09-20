@@ -5,10 +5,18 @@
   <meta name="description" content="{{ . | plainify }}">
 {{ end }}
 <link rel="canonical" href="{{ .Permalink }}">
+{{/* Favicon: param > templated asset (uses resolved light accent) */}}
 {{ with site.Params.docs.favicon }}
   <link rel="icon" href="{{ . | relURL }}">
 {{ else }}
-  <link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
+  {{ $palette := partial "docs/helpers/palette.html" . }}
+  {{ if and $palette.emits $palette.light.accent }}
+    {{ $favicon := resources.Get "favicon.svg" | resources.ExecuteAsTemplate "favicon.svg" (dict "accent" $palette.light.accent) | minify }}
+    <link rel="icon" href="{{ $favicon.RelPermalink }}" type="image/svg+xml">
+  {{ else }}
+    {{ $favicon := resources.Get "favicon.svg" | resources.ExecuteAsTemplate "favicon.svg" (dict "accent" "#2563eb") | minify }}
+    <link rel="icon" href="{{ $favicon.RelPermalink }}" type="image/svg+xml">
+  {{ end }}
 {{ end }}
 {{ $rss := .OutputFormats.Get "rss" }}
 {{ if not $rss }}{{ $rss = .Site.Home.OutputFormats.Get "rss" }}{{ end }}
@@ -27,7 +35,13 @@
     {{ $relativePath := replaceRE "^/[^/]+/" "/" .RelPermalink }}
     {{ $xDefault = printf "%s%s" $defaultPrefix $relativePath | absURL }}
   {{ end }}
-  <link rel="alternate" hreflang="x-default" href="{{ $xDefault }}">
+  {{/* x-default only when default-language equivalent page actually exists */}}
+  {{ with $defaultSite }}
+    {{ $defaultPage := where .Pages "RelPermalink" $xDefault }}
+    {{ if gt (len $defaultPage) 0 }}
+      <link rel="alternate" hreflang="x-default" href="{{ $xDefault }}">
+    {{ end }}
+  {{ end }}
 {{ end }}
 {{ if site.Params.features.themeSwitcher }}
   <script>
@@ -42,16 +56,22 @@
   </script>
   <noscript><style>.docs-switcher--theme,[data-sidebar-search]{display:none !important}</style></noscript>
 {{ end }}
-{{ $versions := hugo.Data.docs_versions.versions | default slice }}
+{{ $derived := partialCached "docs/helpers/versions.html" . .Site.Language.Lang }}
 {{ $currentVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
-{{ $currentVersionData := where $versions "id" $currentVersion }}
 {{ $noindexArchived := site.Params.docs.versions.noindexArchived | default false }}
-{{ if and $noindexArchived (gt (len $currentVersionData) 0) }}
-  {{ $versionInfo := index $currentVersionData 0 }}
-  {{ if $versionInfo.archived }}
-    <meta name="robots" content="noindex,follow">
+{{ if and $noindexArchived (ne $currentVersion $derived.current) }}
+  {{/* Current version is not the "current" (latest) version */}}
+  {{ $versionInfo := where $derived.list "id" $currentVersion }}
+  {{ if gt (len $versionInfo) 0 }}
+    {{ $info := index $versionInfo 0 }}
+    {{ if $info.archived }}
+      <meta name="robots" content="noindex,follow">
+    {{ end }}
   {{ end }}
 {{ end }}
+{{/* Validate theme config early; partialCached per site */}}
+{{ partialCached "docs/helpers/validate-theme-config.html" . .Site.Language.Lang }}
+{{ $palette := partial "docs/helpers/palette.html" . }}
 {{ $seo := site.Params.seo | default dict }}
 {{ if $seo.openGraph }}
   {{ $ogTitle := .Title }}
@@ -91,3 +111,63 @@
   {{ $css := resources.Get "css/compiled/theme.css" | minify | fingerprint }}
   <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
 {{ end }}
+{{/* Palette override block (D-03) - emitted immediately after stylesheet link */}}
+{{ if $palette.emits }}
+  <style>
+    {{/* Fonts: no mode dimension, no a11y guard needed */}}
+    :root {
+      {{ if $palette.fonts.body }}--docs-font-body: "{{ $palette.fonts.body }}";{{ end }}
+      {{ if $palette.fonts.mono }}--docs-font-mono: "{{ $palette.fonts.mono }}";{{ end }}
+    }
+    {{/* Non-accent tokens guarded by (forced-colors: none) */}}
+    @media (forced-colors: none) {
+      {{ if $palette.light }}
+        :root, html[data-theme="light"] {
+          {{ range $key, $val := $palette.light }}
+            --docs-{{ $key }}: {{ $val }};
+          {{ end }}
+        }
+      {{ end }}
+      {{ if $palette.dark }}
+        html[data-theme="dark"] {
+          {{ range $key, $val := $palette.dark }}
+            --docs-{{ $key }}: {{ $val }};
+          {{ end }}
+        }
+        {{/* System theme follows OS preference */}}
+        @media (prefers-color-scheme: dark) {
+          :root, html[data-theme="system"] {
+            {{ range $key, $val := $palette.dark }}
+              --docs-{{ $key }}: {{ $val }};
+            {{ end }}
+          }
+        }
+      {{ end }}
+      {{/* Accent & border additionally guarded: compound (forced-colors: none) and (prefers-contrast: no-preference) */}}
+      {{ if or ($palette.light.accent) ($palette.dark.accent) }}
+        @media (prefers-contrast: no-preference) {
+          {{ if $palette.light.accent }}
+            :root, html[data-theme="light"] {
+              --docs-accent: {{ $palette.light.accent }};
+              --docs-border: {{ if $palette.light.border }}{{ $palette.light.border }}{{ else }}{{ $palette.light.accent }}{{ end }};
+            }
+          {{ end }}
+          {{ if $palette.dark.accent }}
+            html[data-theme="dark"] {
+              --docs-accent: {{ $palette.dark.accent }};
+              --docs-border: {{ if $palette.dark.border }}{{ $palette.dark.border }}{{ else }}{{ $palette.dark.accent }}{{ end }};
+            }
+            @media (prefers-color-scheme: dark) {
+              :root, html[data-theme="system"] {
+                --docs-accent: {{ $palette.dark.accent }};
+                --docs-border: {{ if $palette.dark.border }}{{ $palette.dark.border }}{{ else }}{{ $palette.dark.accent }}{{ end }};
+              }
+            }
+          {{ end }}
+        }
+      {{ end }}
+    }
+  </style>
+{{ end }}
+{{/* Extension hook - site can override anything including palette */}}
+{{ partial "docs/custom-head.html" . }}

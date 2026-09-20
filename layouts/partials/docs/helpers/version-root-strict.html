@@ -1,0 +1,19 @@
+{{- /* Strict version root resolver.
+   Returns the version's section RelPermalink in the CURRENT site only.
+   Returns empty string if the version has no content section in the current language.
+   No fallback to docs root, no cross-language scan. */ -}}
+{{- $page := .Page -}}
+{{- $versionSlug := .VersionSlug -}}
+{{- $site := .Site | default site -}}
+{{- $rootName := $site.Params.docs.root | default "docs" -}}
+{{- $docsRoot := index (where $site.Home.Sections "Section" $rootName) 0 -}}
+{{- $rootPermalink := "" -}}
+{{- if $docsRoot -}}
+  {{- range $docsRoot.Sections -}}
+    {{- $segment := strings.TrimSuffix "/" (strings.TrimPrefix $docsRoot.RelPermalink .RelPermalink) -}}
+    {{- if eq $segment $versionSlug -}}
+      {{- $rootPermalink = .RelPermalink -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $rootPermalink -}}

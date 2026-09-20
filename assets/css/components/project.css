@@ -22,7 +22,7 @@
 
   .docs-release__version {
     font-weight: 800;
-    font-family: var(--docs-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
+    font-family: var(--docs-font-mono);
   }
 
   .docs-release__date {
@@ -70,7 +70,7 @@
     border-inline-start: 3px solid var(--docs-accent);
     border-radius: var(--docs-component-radius);
     background: color-mix(in srgb, var(--docs-surface) 88%, var(--docs-border));
-    font-family: var(--docs-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
+    font-family: var(--docs-font-mono);
     font-size: 0.92rem;
     line-height: 1.65;
   }

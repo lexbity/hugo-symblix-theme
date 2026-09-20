@@ -1,9 +1,9 @@
 +++
-title = "Docworkbench"
+title = "Symblix"
 description = "توثيق Hugo متعدد اللغات ومُعنون بالإصدارات بدون JavaScript."
 +++
 
-{{< hero eyebrow="الوثائق" title="Docworkbench" subtitle="توثيق Hugo متعدد اللغات ومُعنون بالإصدارات بدون JavaScript." headingLevel="1" primaryHref="/ar/docs/latest/" primaryLabel="فتح أحدث الوثائق" secondaryHref="/ar/docs/latest/components/" secondaryLabel="تصفح المكونات" >}}
+{{< hero eyebrow="الوثائق" title="Symblix" subtitle="توثيق Hugo متعدد اللغات ومُعنون بالإصدارات بدون JavaScript." headingLevel="1" primaryHref="/ar/docs/latest/" primaryLabel="فتح أحدث الوثائق" secondaryHref="/ar/docs/latest/components/" secondaryLabel="تصفح المكونات" >}}
 {{< /hero >}}
 
 {{< feature-grid >}}

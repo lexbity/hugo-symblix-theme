@@ -14,7 +14,7 @@ Configuration is where the theme becomes your site rather than the example site.
 
 ## Minimal Hugo config
 
-This is the smallest useful shape for a Docworkbench-style site:
+This is the smallest useful shape for a Symblix-style site:
 
 ```toml
 baseURL = "https://example.com/"

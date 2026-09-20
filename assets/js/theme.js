@@ -58,7 +58,7 @@ export function initTheme() {
     }
   });
 
-  window.DocworkbenchTheme = {
+  window.SymblixTheme = {
     set(theme) {
       if (!THEMES.has(theme)) {
         return false;
