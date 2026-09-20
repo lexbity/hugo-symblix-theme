@@ -12,7 +12,7 @@ The project front page shortcodes turn a homepage into a software landing page: 
 
 ## Release badge
 
-{{< release version="v0.1.0" date="May 2026" href="https://github.com/lex/hugo-theme-docworkbench/releases" >}}
+{{< release version="v0.1.0" date="May 2026" href="https://github.com/lex/hugo-theme-symblix/releases" >}}
 
 The `release` shortcode renders the latest version with an optional release date and changelog link. The version, date, label, and href are plain strings — they are HTML-escaped, so author input cannot inject markup.
 
@@ -68,11 +68,11 @@ Nested `install` inside a `tab` is not supported: the tab body passes content th
 ## Downloads
 
 {{< downloads >}}
-{{< download label="Linux x86_64" platform="linux" href="https://github.com/lex/hugo-theme-docworkbench/releases/latest/download/docworkbench-linux-amd64.tar.gz" checksum="https://github.com/lex/hugo-theme-docworkbench/releases/latest/download/docworkbench-linux-amd64.tar.gz.sha256" size="4.2 MB" primary="true" >}}
+{{< download label="Linux x86_64" platform="linux" href="https://github.com/lex/hugo-theme-symblix/releases/latest/download/docworkbench-linux-amd64.tar.gz" checksum="https://github.com/lex/hugo-theme-symblix/releases/latest/download/docworkbench-linux-amd64.tar.gz.sha256" size="4.2 MB" primary="true" >}}
 
-{{< download label="macOS arm64" platform="macos" href="https://github.com/lex/hugo-theme-docworkbench/releases/latest/download/docworkbench-darwin-arm64.tar.gz" size="3.9 MB" >}}
+{{< download label="macOS arm64" platform="macos" href="https://github.com/lex/hugo-theme-symblix/releases/latest/download/docworkbench-darwin-arm64.tar.gz" size="3.9 MB" >}}
 
-{{< download label="Windows x86_64" platform="windows" href="https://github.com/lex/hugo-theme-docworkbench/releases/latest/download/docworkbench-windows-x86_64.zip" size="4.6 MB" >}}
+{{< download label="Windows x86_64" platform="windows" href="https://github.com/lex/hugo-theme-symblix/releases/latest/download/docworkbench-windows-x86_64.zip" size="4.6 MB" >}}
 {{< /downloads >}}
 
 The `downloads` container wraps one or more `download` rows. Every row renders unconditionally — nothing is hidden, reordered, or filtered at render time. Rows with a known platform value carry the metadata used by the optional platform-detection enhancement; unknown values render as ordinary rows and never match detection. The container accepts `id` and `class`.
@@ -92,4 +92,4 @@ With JavaScript enabled, rows whose platform matches the visitor's system gain a
 
 ## Placeholder URLs
 
-The release and download URLs in the demos use `https://github.com/lex/hugo-theme-docworkbench/...` as placeholders. Replace them with the real release URLs for your project — the release tag, asset names, and checksum path must point at artifacts your release process actually publishes.
+The release and download URLs in the demos use `https://github.com/lex/hugo-theme-symblix/...` as placeholders. Replace them with the real release URLs for your project — the release tag, asset names, and checksum path must point at artifacts your release process actually publishes.

@@ -1,5 +1,17 @@
 # Docworkbench Changelog and Migration Notes
 
+## Robustness, search scale, and project chrome (2026-09)
+
+- **Fixes:** `toc.html` no longer emits an `isset` warning (and thus no `--panicOnWarning` build failure) when a downstream site does not define `[params.docs]`. The CI workflow installs Hugo (it previously never did, so `npm run check` failed on a clean runner). The version-root helper warns when a version id has no content section in any language; `versions.warnUnresolved = true` opts into warnings when page-equivalent resolution falls back to a version root. The manual nav label fallback compares against the configured default language instead of a hardcoded `en`.
+- **404:** the theme now provides `layouts/404.html` with the full docs shell, localized across all four locales. Hosts serving a single root 404 (GitHub Pages) should point that setting at the default language's `404.html`.
+- **Sitemap:** the custom sitemap now emits `xhtml:link` hreflang alternates (self + translations) for translated pages; the namespace was previously declared but unused.
+- **Language tags:** `<html lang>`, head alternates, and language-switcher anchors all use one helper (`partials/docs/helpers/language-code.html`) built on `.Language.Locale` — `LanguageCode` is deprecated since Hugo 0.158. Sites that configure per-language `locale` get consistent tags everywhere.
+- **Search:** the per-language index strips `<pre>` blocks before plainifying (code dominated payload size without helping ranking) and excludes archived versions when `versions.noindexArchived = true`, matching the sitemap/noindex policy. Results now render a context snippet around the first query match. The filter bar is server-rendered `hidden` and only revealed once the index loads, so no-JS readers never see empty selects. The scoring adapter was renamed `assets/js/search/adapters/matcher.js` (it is a hand-rolled scorer, not Fuse).
+- **Versioned navigation:** a data file named `{nav.data}_{version}` (e.g. `data/docs_nav_v1.0.yaml`) overrides the sidebar tree for pages in that version. The example site ships one for v1.0.
+- **Project chrome:** the theme ships a default `static/favicon.svg` (a site's own file wins); new `params.docs.social` list renders `rel="me"` links in the site footer; `params.docs.footer` (copyright, licenseURL, licenseLabel, poweredBy) replaces the title-only footer stub. `layouts/partials/footer.html` was renamed `scripts.html` — it was always the JS loader, and the name collided with the new footer partial. The `home` archetype now derives hero and card hrefs from `site.Home.RelPermalink` and `params.docs.root` instead of hardcoding `/docs/latest/`.
+- **CSS build contract:** `assets/css/input.css` now pins Tailwind's candidate detection with `source(none)` plus explicit `@source` entries for `layouts/` and `assets/js/`. Auto-detection also scanned docs prose, where ordinary words matching utility names ("filter", "container", …) silently changed the compiled stylesheet and tripped the css-drift gate. Regenerating after this change is required once; downstream builds from source need no action.
+- **Tests:** suite grew from 42 to 47 specs — archived-version index exclusion, per-version sidebar nav, no-JS filter hiding, themed 404, and footer links.
+
 ## Project front page (2026-09)
 
 The front page can be composed as a software project landing page with three new content-driven shortcode families plus a platform-detection enhancement — all complete without JavaScript.

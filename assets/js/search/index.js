@@ -1,4 +1,4 @@
-import { searchEntries } from "./adapters/fuse.js";
+import { searchEntries } from "./adapters/matcher.js";
 
 function populateSelect(select, values) {
   if (!select) {
@@ -37,7 +37,57 @@ function currentFilters(root) {
   };
 }
 
-function renderResults(root, results) {
+const SNIPPET_BEFORE = 60;
+const SNIPPET_AFTER = 100;
+
+function buildSnippet(content, query) {
+  const text = String(content || "").replace(/\s+/g, " ").trim();
+  if (!text) {
+    return null;
+  }
+
+  const firstToken = String(query || "").trim().split(/\s+/)[0];
+  if (!firstToken) {
+    return { before: text.slice(0, SNIPPET_BEFORE + SNIPPET_AFTER), match: "", after: "" };
+  }
+
+  const at = text.toLowerCase().indexOf(firstToken.toLowerCase());
+  if (at < 0) {
+    return { before: text.slice(0, SNIPPET_BEFORE + SNIPPET_AFTER), match: "", after: "" };
+  }
+
+  const start = Math.max(0, at - SNIPPET_BEFORE);
+  const end = Math.min(text.length, at + firstToken.length + SNIPPET_AFTER);
+  return {
+    before: (start > 0 ? "…" : "") + text.slice(start, at),
+    match: text.slice(at, at + firstToken.length),
+    after: text.slice(at + firstToken.length, end) + (end < text.length ? "…" : ""),
+  };
+}
+
+function appendSnippet(item, entry, query) {
+  const snippet = buildSnippet(entry.content, query);
+  if (!snippet || (!snippet.match && !snippet.before && !snippet.after)) {
+    return;
+  }
+
+  const paragraph = document.createElement("p");
+  paragraph.className = "docs-search-result-snippet";
+  if (snippet.before) {
+    paragraph.appendChild(document.createTextNode(snippet.before));
+  }
+  if (snippet.match) {
+    const mark = document.createElement("mark");
+    mark.textContent = snippet.match;
+    paragraph.appendChild(mark);
+  }
+  if (snippet.after) {
+    paragraph.appendChild(document.createTextNode(snippet.after));
+  }
+  item.appendChild(paragraph);
+}
+
+function renderResults(root, results, query) {
   const container = root.querySelector("[data-search-results]");
   const status = root.querySelector("[data-search-status]");
   const fallback = root.querySelector("[data-search-fallback]");
@@ -96,6 +146,8 @@ function renderResults(root, results) {
       item.appendChild(metaLine);
     }
 
+    appendSnippet(item, entry, query);
+
     list.appendChild(item);
   });
   container.appendChild(list);
@@ -103,7 +155,7 @@ function renderResults(root, results) {
 
 async function runSearch(root, index, query) {
   const results = query.trim() ? searchEntries(index, query, currentFilters(root)) : [];
-  renderResults(root, results);
+  renderResults(root, results, query);
 }
 
 export function initSearchPage() {
@@ -155,6 +207,10 @@ export function initSearchPage() {
           populateSelect(versionSelect, Array.from(versions));
           populateSelect(docTypeSelect, Array.from(docTypes));
           populateSelect(topicSelect, Array.from(topics));
+          const filters = root.querySelector("[data-search-filters]");
+          if (filters) {
+            filters.hidden = false;
+          }
           const currentVersion = root.dataset.searchVersion || "";
           if (versionSelect && Array.from(versionSelect.options).some((option) => option.value === currentVersion)) {
             versionSelect.value = currentVersion;

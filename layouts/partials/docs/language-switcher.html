@@ -67,7 +67,7 @@
         {{ end }}
 
         <li>
-          <a class="docs-switcher-link" href="{{ $targetLink }}"{{ if eq $targetLang $currentLang }} aria-current="page"{{ end }} hreflang="{{ $targetLang }}">{{ $targetLabel }}</a>
+          <a class="docs-switcher-link" href="{{ $targetLink }}"{{ if eq $targetLang $currentLang }} aria-current="page"{{ end }} hreflang="{{ partial "docs/helpers/language-code.html" (dict "Site" $targetSite) }}">{{ $targetLabel }}</a>
         </li>
       {{ end }}
     </ul>

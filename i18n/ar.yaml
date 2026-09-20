@@ -136,3 +136,11 @@
   translation: sha256
 - id: suggested_for_system
   translation: مقترح لنظامك
+- id: page_not_found
+  translation: الصفحة غير موجودة
+- id: page_not_found_message
+  translation: "الصفحة المطلوبة غير موجودة. ربما تم نقلها أو حذفها، مثلاً عند أرشفة إصدار من التوثيق."
+- id: license
+  translation: الترخيص
+- id: powered_by
+  translation: Powered by Hugo

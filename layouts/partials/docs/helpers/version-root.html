@@ -14,8 +14,27 @@
 {{- end -}}
 {{- if not $rootPermalink -}}
   {{- if and $docsRoot (eq $currentSlug (hugo.Data.docs_versions.current | default "latest")) -}}
+    {{- /* The current version may live directly under the docs root without a
+           version subdirectory; the docs root is then its version root. */ -}}
     {{- $rootPermalink = $docsRoot.RelPermalink -}}
   {{- else if $docsRoot -}}
+    {{- /* Translated trees legitimately track only the current version, so a
+           version without a tree in *this* language is normal. Warn only when
+           no language has a tree for the version at all. */ -}}
+    {{- $existsAnywhere := false -}}
+    {{- range hugo.Sites -}}
+      {{- $siteDocsRoot := index (where .Home.Sections "Section" $rootName) 0 -}}
+      {{- with $siteDocsRoot -}}
+        {{- range .Sections -}}
+          {{- if eq (strings.TrimSuffix "/" (strings.TrimPrefix $siteDocsRoot.RelPermalink .RelPermalink)) $currentSlug -}}
+            {{- $existsAnywhere = true -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if not $existsAnywhere -}}
+      {{- warnf "docs_versions: no content section matches version %q in any language; check data/docs_versions against the content tree (falling back to the docs root)" $currentSlug -}}
+    {{- end -}}
     {{- $rootPermalink = $docsRoot.RelPermalink -}}
   {{- end -}}
 {{- end -}}

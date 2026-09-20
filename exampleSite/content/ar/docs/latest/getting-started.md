@@ -7,5 +7,5 @@ weight: 10
 ابدأ هنا للتأكد من أن موقع الوثائق مضبوط بشكل صحيح.
 
 ```bash
-hugo server --source exampleSite --theme hugo-theme-docworkbench
+hugo server --source exampleSite --theme hugo-theme-symblix
 ```

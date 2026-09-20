@@ -1,0 +1,5 @@
+{{- /* BCP-47 language tag for <html lang> and hreflang: the per-language
+       locale ("en-US") when configured, else the bare language key. Hugo
+       deprecates LanguageCode in favor of Locale (0.158+). */ -}}
+{{- $site := .Site | default site -}}
+{{- or $site.Language.Locale $site.Language.Lang -}}

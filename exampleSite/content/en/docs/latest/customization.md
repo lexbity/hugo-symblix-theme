@@ -49,6 +49,33 @@ The theme's shortcodes cover the major documentation patterns:
 - reference blocks
 - navigation and browse helpers
 
+## Site chrome: favicon, footer, and project links
+
+The chrome around the docs is parameterized in the site config:
+
+```toml
+[params.docs]
+# Defaults to the theme's favicon.svg; drop your own favicon.svg into your
+# site's static/ folder (or point this at any file).
+favicon = "favicon.svg"
+
+[[params.docs.social]]
+name = "GitHub"
+url = "https://github.com/you/project"
+
+[[params.docs.social]]
+name = "Mastodon"
+url = "https://mastodon.social/@you"
+
+[params.docs.footer]
+copyright = "Your project authors"          # defaults to the site title
+licenseURL = "https://opensource.org/licenses/MIT"
+licenseLabel = "MIT"                        # defaults to "License"
+poweredBy = true                            # "Powered by Hugo" line
+```
+
+Social links render at the top of the site footer with `rel="me"`, so they double as identity verification links (Mastodon and friends). The footer appears on every page, docs and landing alike.
+
 ## Accessibility and performance
 
 The theme keeps the public output static, semantic, and printable. That means any downstream customization should preserve headings, landmarks, and text-first navigation rather than replacing them with script-driven widgets.

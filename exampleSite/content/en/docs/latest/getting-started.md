@@ -12,7 +12,7 @@ Start here to confirm the documentation site is wired correctly and to understan
 The example site runs from the repository root:
 
 ```bash
-hugo server --source exampleSite --theme hugo-theme-docworkbench
+hugo server --source exampleSite --theme hugo-theme-symblix
 ```
 
 You can also build the site without the live server:

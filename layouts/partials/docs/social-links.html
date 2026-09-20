@@ -1,0 +1,15 @@
+{{- /* Repo and social links from params.docs.social, e.g.
+       [[params.docs.social]]
+         name = "GitHub"
+         url = "https://github.com/you/project"
+       Rendered in the site footer on every page. */ -}}
+{{- $links := site.Params.docs.social | default slice -}}
+{{- if gt (len $links) 0 -}}
+<ul class="docs-social-links">
+  {{- range $links -}}
+  <li>
+    <a class="docs-social-link" href="{{ .url }}" rel="me noopener" target="_blank">{{ .name | default .url }}</a>
+  </li>
+  {{- end -}}
+</ul>
+{{- end -}}

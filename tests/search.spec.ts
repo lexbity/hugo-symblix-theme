@@ -19,6 +19,12 @@ test("search page publishes a per-language index", async ({ request }) => {
   expect(sample.content.length).toBeGreaterThan(50);
 });
 
+test("archived versions are excluded from the search index", async ({ request }) => {
+  const response = await request.get("/en/search-index.json");
+  const entries = await response.json();
+  expect(entries.some((entry: { version: string }) => entry.version === "v1.0")).toBe(false);
+});
+
 test("search page offers interactive results with filters", async ({ page }) => {
   await page.goto("/en/docs/latest/search/");
 
@@ -26,15 +32,18 @@ test("search page offers interactive results with filters", async ({ page }) => 
   await expect(root).toBeVisible();
   await expect(root.locator("[data-search-input]")).toBeVisible();
 
-  await root.locator("[data-search-input]").fill("version");
+  await root.locator("[data-search-input]").fill("code");
   const results = root.locator("[data-search-results] .docs-search-result");
   await expect(results.first()).toBeVisible();
 
-  const versionFilter = root.locator("[data-search-filter-version]");
-  await expect(versionFilter).toBeVisible();
-  await versionFilter.selectOption("v1.0");
-  await expect(results).toHaveCount(1);
-  await expect(root.locator("[data-search-results] .docs-search-result-meta")).toContainText("v1.0");
+  // Results carry a snippet with the first query token highlighted.
+  await expect(root.locator("[data-search-results] mark").first()).toBeVisible();
+
+  const docTypeFilter = root.locator("[data-search-filter-doctype]");
+  await expect(docTypeFilter).toBeVisible();
+  await docTypeFilter.selectOption("reference");
+  await expect(results.first()).toBeVisible();
+  await expect(root.locator("[data-search-results] .docs-search-result-meta").first()).toContainText("reference");
 });
 
 test("search page replaces the catalog with results when JavaScript runs", async ({ page }) => {

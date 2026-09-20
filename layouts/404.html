@@ -1,0 +1,29 @@
+{{ define "main" }}
+  <a class="skip-link" href="#main-content">{{ i18n "skip_to_content" | default "Skip to content" }}</a>
+  <div class="docs-shell">
+    {{ partial "docs/sidebar.html" . }}
+    <main id="main-content" class="docs-main" tabindex="-1">
+      <article class="docs-article">
+        <header class="docs-page-header">
+          <h1>{{ i18n "page_not_found" | default "Page not found" }}</h1>
+        </header>
+        <div class="docs-content">
+          <p>{{ i18n "page_not_found_message" | default "The page you requested does not exist. It may have moved or been removed, for example when a documentation version was archived." }}</p>
+          <ul>
+            <li><a href="{{ site.Home.RelPermalink }}">{{ i18n "home_open_docs" | default "Open the latest docs" }}</a></li>
+            {{ $currentVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
+            {{ $versionRootPermalink := partialCached "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $currentVersion "Site" site) (site.Language.Lang) $currentVersion | strings.TrimSpace }}
+            {{ with where site.Pages "RelPermalink" $versionRootPermalink }}
+              {{ with (index . 0).GetPage "search" }}
+                <li><a href="{{ .RelPermalink }}">{{ i18n "search" | default "Search" }}</a></li>
+              {{ end }}
+              {{ with (index . 0).GetPage "all-pages" }}
+                <li><a href="{{ .RelPermalink }}">{{ i18n "browse_all_pages" | default "Browse all pages" }}</a></li>
+              {{ end }}
+            {{ end }}
+          </ul>
+        </div>
+      </article>
+    </main>
+  </div>
+{{ end }}

@@ -4,11 +4,11 @@
     "tailwindcss": "^4.3.0"
   },
   "scripts": {
-    "dev": "HUGO_PARAMS_DOCS_TAILWINDSOURCE=true hugo server --source exampleSite --theme hugo-theme-docworkbench",
-    "dev:prebuilt": "hugo server --source exampleSite --theme hugo-theme-docworkbench",
-    "serve:test": "hugo server --source exampleSite --theme hugo-theme-docworkbench --bind 127.0.0.1 --port 1313 --disableFastRender --buildDrafts --buildFuture",
-    "build": "hugo --source exampleSite --theme hugo-theme-docworkbench --cleanDestinationDir",
-    "check": "hugo --source exampleSite --theme hugo-theme-docworkbench --panicOnWarning --cleanDestinationDir",
+    "dev": "HUGO_PARAMS_DOCS_TAILWINDSOURCE=true hugo server --source exampleSite --theme hugo-theme-symblix",
+    "dev:prebuilt": "hugo server --source exampleSite --theme hugo-theme-symblix",
+    "serve:test": "hugo server --source exampleSite --theme hugo-theme-symblix --bind 127.0.0.1 --port 1313 --disableFastRender --buildDrafts --buildFuture",
+    "build": "hugo --source exampleSite --theme hugo-theme-symblix --cleanDestinationDir",
+    "check": "hugo --source exampleSite --theme hugo-theme-symblix --panicOnWarning --cleanDestinationDir",
     "build:css": "tailwindcss -i assets/css/input.css -o assets/css/compiled/theme.css",
     "test": "playwright test",
     "test:install": "playwright install --with-deps chromium"

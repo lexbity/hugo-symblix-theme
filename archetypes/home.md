@@ -5,7 +5,7 @@ description: ""
 
 <!-- Project front page scaffold — see the project component docs for the full parameter reference. -->
 
-{{< hero eyebrow="Documentation" title="{{ or (replace .Name "-" " " | title) "Home" }}" subtitle="Replace this subtitle with a one-line project description." headingLevel="1" primaryHref="/docs/latest/" primaryLabel="Open the docs" >}}
+{{< hero eyebrow="Documentation" title="{{ or (replace .Name "-" " " | title) "Home" }}" subtitle="Replace this subtitle with a one-line project description." headingLevel="1" primaryHref="{{ printf "%s%s/" site.Home.RelPermalink (site.Params.docs.root | default "docs") }}" primaryLabel="Open the docs" >}}
 {{< /hero >}}
 
 {{< release version="v0.1.0" date="" href="https://example.com/your-project/releases" >}}
@@ -39,15 +39,15 @@ Describe a third capability.
 {{< /feature-grid >}}
 
 {{< cards columns="3" >}}
-{{< card title="Getting Started" href="/docs/latest/getting-started/" icon="start" badge="Docs" >}}
+{{< card title="Getting Started" href="{{ printf "%s%s/latest/getting-started/" site.Home.RelPermalink (site.Params.docs.root | default "docs") }}" icon="start" badge="Docs" >}}
 Point to the first guide.
 {{< /card >}}
 
-{{< card title="Reference" href="/docs/latest/reference/" icon="blocks" badge="Docs" >}}
+{{< card title="Reference" href="{{ printf "%s%s/latest/reference/" site.Home.RelPermalink (site.Params.docs.root | default "docs") }}" icon="blocks" badge="Docs" >}}
 Point to the reference pages.
 {{< /card >}}
 
-{{< card title="Components" href="/docs/latest/components/" icon="browse" badge="Docs" >}}
+{{< card title="Components" href="{{ printf "%s%s/latest/components/" site.Home.RelPermalink (site.Params.docs.root | default "docs") }}" icon="browse" badge="Docs" >}}
 Point to the component library.
 {{< /card >}}
 {{< /cards >}}

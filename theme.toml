@@ -1,8 +1,8 @@
-name = "hugo-theme-docworkbench"
+name = "hugo-theme-symblix"
 license = "MIT"
 licenselink = "https://opensource.org/licenses/MIT"
 description = "A Hugo documentation theme for versioned, multilingual software project docs with a no-JavaScript baseline, server-side syntax highlighting, and static-first search."
-homepage = "https://example.com/hugo-theme-docworkbench"
+homepage = "https://example.com/hugo-theme-symblix"
 tags = ["documentation", "docs", "hugo", "multilingual", "versioned", "search"]
 features = [
   "No-JS baseline",

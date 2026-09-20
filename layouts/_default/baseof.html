@@ -1,6 +1,6 @@
 <!doctype html>
 <html
-  lang="{{ .Site.Language.Locale }}"
+  lang="{{ partial "docs/helpers/language-code.html" . }}"
   dir="{{ or .Site.Language.Direction "ltr" }}"
   {{ with site.Params.docs.theme.density }}data-docs-density="{{ . }}"{{ end }}
   {{ with site.Params.docs.theme.preset }}data-docs-preset="{{ . }}"{{ end }}
@@ -12,9 +12,7 @@
     <main>
       {{ block "main" . }}{{ end }}
     </main>
-    {{ partial "footer.html" . }}
-    <footer class="site-footer">
-      <p>{{ .Site.Title }}</p>
-    </footer>
+    {{ partial "scripts.html" . }}
+    {{ partial "docs/site-footer.html" . }}
   </body>
 </html>

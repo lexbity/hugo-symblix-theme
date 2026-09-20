@@ -36,4 +36,11 @@ test.describe("no-JS", () => {
     await expect(fallback.locator(".docs-search-fallback-note")).toBeVisible();
     await expect(fallback.getByRole("link", { name: "Getting Started" }).first()).toBeVisible();
   });
+
+  test("search filters stay hidden without JavaScript", async ({ page }) => {
+    await page.goto("/en/docs/latest/search/");
+
+    await expect(page.locator("[data-search-filters]")).toBeHidden();
+    await expect(page.locator("[data-search-fallback]")).toBeVisible();
+  });
 });

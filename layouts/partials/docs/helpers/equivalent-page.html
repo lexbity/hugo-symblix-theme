@@ -26,6 +26,9 @@
     {{- end -}}
   {{- end -}}
   {{- if not $equivalent -}}
+    {{- if $site.Params.docs.versions.warnUnresolved -}}
+      {{- warnf "version switcher: no page equivalent to %s under %s; linking the version root instead" $page.RelPermalink $targetRoot.RelPermalink -}}
+    {{- end -}}
     {{- $equivalent = $targetRoot.RelPermalink -}}
   {{- end -}}
 {{- end -}}

@@ -90,7 +90,7 @@
 
     {{ $isOpen := or $isCurrent $hasCurrentDescendant (and (not $isExternal) (hasPrefix $normalizedCurrent $normalizedLink)) }}
     {{ $label := $title }}
-    {{ if and $resolvedPage (ne $currentLang "en") }}
+    {{ if and $resolvedPage (ne $currentLang $defaultLang) }}
       {{ $label = $resolvedPage.LinkTitle | default $resolvedPage.Title }}
     {{ end }}
     {{ if not $label }}

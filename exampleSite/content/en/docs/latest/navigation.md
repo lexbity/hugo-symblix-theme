@@ -39,10 +39,10 @@ When you need an explicit sidebar order, use `data/docs_nav.yaml`. The example s
 Pages can be hidden from navigation with front matter:
 
 ```toml
-hidden = true
+nav = { hidden = true }
 ```
 
-That keeps draft, internal, or temporary content out of the sidebar while leaving the page buildable.
+That keeps draft, internal, or temporary content out of the sidebar, the search index, and the browse pages while leaving the page buildable. The flag lives inside the `nav` map — a bare `hidden = true` at the top level of front matter is not read by the theme.
 
 ## Browse fallback
 

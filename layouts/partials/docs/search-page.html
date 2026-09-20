@@ -34,7 +34,7 @@
     <p class="docs-search-scope">
       {{ i18n "search_scope" | default "Scope" }}: {{ $currentVersion }} · {{ site.Language.Label | default site.Language.Lang }}
     </p>
-    <div class="docs-search-filters">
+    <div class="docs-search-filters" data-search-filters hidden>
       <label class="docs-search-filter">
         <span>{{ i18n "search_filter_version" | default "Version" }}</span>
         <select class="docs-search-select" data-search-filter data-search-filter-version></select>

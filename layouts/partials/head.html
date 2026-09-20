@@ -7,6 +7,8 @@
 <link rel="canonical" href="{{ .Permalink }}">
 {{ with site.Params.docs.favicon }}
   <link rel="icon" href="{{ . | relURL }}">
+{{ else }}
+  <link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
 {{ end }}
 {{ $rss := .OutputFormats.Get "rss" }}
 {{ if not $rss }}{{ $rss = .Site.Home.OutputFormats.Get "rss" }}{{ end }}
@@ -16,7 +18,7 @@
 {{ if hugo.IsMultilingual }}
   {{ $translations := .AllTranslations }}
   {{ range $translations }}
-    <link rel="alternate" hreflang="{{ .Site.Language.Locale }}" href="{{ .Permalink }}">
+    <link rel="alternate" hreflang="{{ partial "docs/helpers/language-code.html" (dict "Site" .) }}" href="{{ .Permalink }}">
   {{ end }}
   {{ $defaultSite := index (where hugo.Sites "Language.IsDefault" true) 0 }}
   {{ $xDefault := .Permalink }}

@@ -5,11 +5,28 @@
 {{- end -}}
 {{- $entries := slice -}}
 {{- with $docsRoot -}}
+  {{- $versions := hugo.Data.docs_versions.versions | default slice -}}
+  {{- $noindexArchived := site.Params.docs.versions.noindexArchived | default false -}}
   {{- range .RegularPagesRecursive -}}
     {{- if and .Params.nav .Params.nav.hidden -}}
       {{- continue -}}
     {{- end -}}
-    {{- $content := trim (plainify .Content) " \n\t" -}}
+    {{- /* Archived versions excluded from the index match the noindex and
+           sitemap policy: they are not surfaced to readers or crawlers. */ -}}
+    {{- if $noindexArchived -}}
+      {{- $pageVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace -}}
+      {{- $archived := false -}}
+      {{- range where $versions "id" $pageVersion -}}
+        {{- $archived = .archived -}}
+      {{- end -}}
+      {{- if $archived -}}
+        {{- continue -}}
+      {{- end -}}
+    {{- end -}}
+    {{- /* Code blocks dominate index size and rarely improve ranking; drop
+           them before plainifying. */ -}}
+    {{- $prose := replaceRE `(?s)<pre\b.*?</pre>` " " .Content -}}
+    {{- $content := trim (plainify $prose) " \n\t" -}}
     {{- $description := trim (plainify (.Description | default "")) " \n\t" -}}
     {{- $entries = $entries | append (dict
       "title" .Title

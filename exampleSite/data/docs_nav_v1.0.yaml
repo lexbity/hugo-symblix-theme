@@ -1,0 +1,9 @@
+# Sidebar navigation for the archived v1.0 tree. A per-version file named
+# "{docs_nav data file}_{version id}" overrides the base tree for pages in
+# that version; pages in other versions keep using docs_nav.yaml.
+items:
+  - title: Home
+    page: /en/docs/v1.0/
+
+  - title: Getting Started
+    page: /en/docs/v1.0/getting-started/

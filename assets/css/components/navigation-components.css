@@ -205,6 +205,17 @@
   text-transform: lowercase;
 }
 
+.docs-search-result-snippet {
+  margin: 0.25rem 0 0;
+  color: var(--docs-muted);
+  font-size: 0.92rem;
+}
+
+.docs-search-result-snippet mark {
+  background: color-mix(in srgb, var(--docs-accent) 22%, transparent);
+  color: inherit;
+}
+
 .docs-search-fallback-note {
   margin: 0 0 0.5rem;
   padding: 0.75rem 1rem;

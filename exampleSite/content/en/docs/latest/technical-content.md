@@ -10,7 +10,7 @@ weight = 15
 Technical documentation has to stay readable when it gets dense.
 
 This page exists to exercise the content styling layer. It includes long prose,
-inline code like `hugo --source exampleSite --theme hugo-theme-docworkbench`,
+inline code like `hugo --source exampleSite --theme hugo-theme-symblix`,
 a blockquote, a code block, a table, and an image.
 
 > Good docs optimize for scanning first and deep reading second.

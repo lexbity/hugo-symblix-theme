@@ -1,7 +1,13 @@
 {{ $page := .Page }}
 {{ $site := .Site | default site }}
 {{ $dataName := $site.Params.docs.nav.data | default "docs_nav" }}
-{{ $navData := index hugo.Data $dataName }}
+{{/* A per-version data file named "{data}_{version}" (e.g. docs_nav_v1.0.yaml)
+     overrides the base tree when the rendered page belongs to that version. */}}
+{{ $versionedDataName := printf "%s_%s" $dataName (partial "docs/helpers/current-version.html" $page | strings.TrimSpace) }}
+{{ $navData := index hugo.Data $versionedDataName }}
+{{ if not $navData }}
+  {{ $navData = index hugo.Data $dataName }}
+{{ end }}
 {{ $items := slice }}
 
 {{ with $navData }}

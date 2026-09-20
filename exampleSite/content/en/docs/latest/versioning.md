@@ -45,6 +45,34 @@ The `id` must match the folder name under the docs root (in every language). `we
 4. Keep fixing forward in `latest/`; backport only if the archived release is still supported.
 5. When an archived release reaches end of life, either mark it clearly in the switcher or remove its tree and data entry.
 
+The `current` slug is not limited to the name `latest` — projects that prefer a `stable` tree can name the folder `content/<lang>/docs/stable/` and set `current: stable`. Everything else in this page works the same.
+
+## Versioned navigation
+
+A version tree can ship its own sidebar navigation. Create a data file named after the base nav file plus the version id — for the default `data = "docs_nav"` setting, `data/docs_nav_v1.0.yaml` is used for every page under `docs/v1.0/`, while all other versions keep using `docs_nav.yaml`:
+
+```yaml
+items:
+  - title: Home
+    page: /en/docs/v1.0/
+
+  - title: Getting Started
+    page: /en/docs/v1.0/getting-started/
+```
+
+The example site ships exactly this file, so switching to v1.0 also switches the sidebar.
+
+## Translations and archived versions
+
+Translated trees only need to track the **current** version. An archived release that exists only in the default language is normal: the version switcher and language switcher both degrade gracefully (per language, then to the version root, then to the language home).
+
+## Resolution warnings
+
+Two build-time warnings help catch versioning drift:
+
+- A `warnf` fires when a version id in `data/docs_versions.yaml` has no matching content section in **any** language (a data/content mismatch). A version missing from only some languages is expected and stays silent.
+- Set `versions.warnUnresolved = true` under `[params.docs]` to also warn whenever the version switcher cannot find a page equivalent and falls back to linking the version root. Useful as a lint pass when pruning or renaming pages between releases; off by default because falling back is often intended.
+
 ## Equivalent pages
 
 Version switching keeps the reader as close to their current page as possible: it first looks for the same path in the target version, then for a sibling page with the same file name, and finally lands on the target version root.

@@ -154,9 +154,27 @@
 
   .site-footer {
     border-top: 1px solid var(--docs-border);
-    padding: 1rem clamp(1rem, 2vw, 2rem);
+    padding: 1.25rem clamp(1rem, 2vw, 2rem);
     color: var(--docs-muted);
     background: color-mix(in srgb, var(--docs-surface) 88%, var(--docs-bg));
+  }
+
+  .site-footer p {
+    margin: 0.25rem 0;
+  }
+
+  .site-footer a {
+    color: inherit;
+  }
+
+  .docs-social-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1rem;
+    margin: 0 0 0.35rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.92rem;
   }
 
   @media (max-width: 72rem) {

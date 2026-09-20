@@ -9,7 +9,7 @@ This page is intentionally compact but dense.
 
 ```bash
 set -euo pipefail
-hugo --source exampleSite --theme hugo-theme-docworkbench --cleanDestinationDir
+hugo --source exampleSite --theme hugo-theme-symblix --cleanDestinationDir
 ```
 
 <div class="table-wrap">

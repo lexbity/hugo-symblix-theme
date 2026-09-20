@@ -1,4 +1,4 @@
-# hugo-theme-docworkbench
+# hugo-theme-symblix
 
 A Hugo documentation theme for structured, navigable, versioned, multilingual technical documentation. Documentation versions track releases of the matching software project.
 
@@ -11,14 +11,17 @@ A Hugo documentation theme for structured, navigable, versioned, multilingual te
 - **Multilingual:** per-language content trees, translation status warnings, and a language switcher that falls back gracefully when a page is untranslated.
 - **Pre-built CSS:** ships compiled CSS so sites need only Hugo. Tailwind CSS v4 is an optional development dependency for styling from source.
 - **Project front page:** `release`, `install`, and `downloads` shortcodes compose a software landing page — release badge, copyable install commands, and binary downloads — complete without JavaScript. Platform detection annotates the right download row as a JavaScript enhancement only.
+- **Project chrome:** default SVG favicon (drop in your own to override), site footer with `rel="me"` social links, license line, and copyright — configured entirely from `hugo.toml`.
 
 ## Requirements
 
 - Hugo (extended) — the template floor is 0.124; the optional Tailwind source build needs 0.161+.
+- A top-level docs section (`content/<lang>/docs/…` by default, configurable via `params.docs.root`). Versioning features additionally read `data/docs_versions.yaml`; see the [Versioning](#example-site) docs page in the example site for the full model.
+- With `defaultContentLanguageInSubdir = true`, Hugo renders the themed 404 per language (`/en/404.html`, …). Hosts that serve a single root 404 (GitHub Pages) should point their 404 setting at the default language's `404.html`.
 
 ## Development
 
-The example site doubles as the theme documentation and links to itself through the symlink `exampleSite/themes/hugo-theme-docworkbench → ../..`. On Windows, enable symlink support before cloning (`git config --global core.symlinks true`, or run Git with developer mode); if the symlink was checked out as a plain file, recreate it manually.
+The example site doubles as the theme documentation and links to itself through the symlink `exampleSite/themes/hugo-theme-symblix → ../..`. On Windows, enable symlink support before cloning (`git config --global core.symlinks true`, or run Git with developer mode); if the symlink was checked out as a plain file, recreate it manually.
 
 ```bash
 npm install        # only needed for Tailwind source builds and tests
@@ -39,10 +42,10 @@ The theme includes archetypes for common documentation page types.
 Create a new page with one of the archetypes:
 
 ```bash
-hugo new --source exampleSite --theme hugo-theme-docworkbench content/en/docs/latest/my-page.md
-hugo new --source exampleSite --theme hugo-theme-docworkbench --kind how-to content/en/docs/latest/user-guide/my-task.md
-hugo new --source exampleSite --theme hugo-theme-docworkbench --kind tutorial content/en/docs/latest/tutorials/my-tutorial.md
-hugo new --source exampleSite --theme hugo-theme-docworkbench --kind home content/en/_index.md
+hugo new --source exampleSite --theme hugo-theme-symblix content/en/docs/latest/my-page.md
+hugo new --source exampleSite --theme hugo-theme-symblix --kind how-to content/en/docs/latest/user-guide/my-task.md
+hugo new --source exampleSite --theme hugo-theme-symblix --kind tutorial content/en/docs/latest/tutorials/my-tutorial.md
+hugo new --source exampleSite --theme hugo-theme-symblix --kind home content/en/_index.md
 ```
 
 Available archetypes: `default`, `home`, `tutorial`, `how-to`, `reference`, `explanation`, `migration`, `release-note`. The archetypes do not force any folder structure — use them wherever they fit your documentation tree. The `home` archetype scaffolds a project front page with the release, install, and downloads shortcodes.

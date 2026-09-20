@@ -24,3 +24,12 @@ test("theme switcher updates the active theme", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect.poll(async () => page.evaluate(() => window.localStorage.getItem("docs-theme"))).toBe("dark");
 });
+
+test("archived version pages use their own sidebar navigation", async ({ page }) => {
+  await page.goto("/en/docs/v1.0/getting-started/");
+
+  const nav = page.locator("#docs-sidebar-nav");
+  await expect(nav.getByRole("link", { name: "Getting Started" })).toBeVisible();
+  // docs_nav_v1.0.yaml has no Components entry; the latest tree must not leak in.
+  await expect(nav.getByRole("link", { name: "Components" })).toHaveCount(0);
+});

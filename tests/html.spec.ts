@@ -37,3 +37,20 @@ test("code blocks expose copy metadata for the JS enhancement", async ({ page })
   await expect(page.locator(".docs-copy-button").first()).toBeVisible();
   await expect(page.locator(".docs-copy-button").first()).toHaveText("Copy code");
 });
+
+test("404 page keeps the docs shell", async ({ page }) => {
+  await page.goto("/en/404.html");
+
+  await expect(page.locator(".docs-shell")).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
+  await expect(page.locator("#docs-sidebar-nav")).toBeVisible();
+});
+
+test("site footer carries project links and license", async ({ page }) => {
+  await page.goto("/en/");
+
+  const footer = page.locator(".site-footer");
+  await expect(footer.locator(".docs-social-link")).toHaveCount(1);
+  await expect(footer.locator('a[rel~="license"]')).toHaveText("MIT");
+  await expect(footer.locator(".site-footer__copyright")).toContainText("Docworkbench authors");
+});

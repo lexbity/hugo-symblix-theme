@@ -19,9 +19,12 @@ This is the smallest useful shape for a Docworkbench-style site:
 ```toml
 baseURL = "https://example.com/"
 title = "My Docs"
-theme = "hugo-theme-docworkbench"
+theme = "hugo-theme-symblix"
 defaultContentLanguage = "en"
 defaultContentLanguageInSubdir = true
+
+[languages.en]
+contentDir = "content/en"
 
 [taxonomies]
 tag = "tags"
@@ -37,6 +40,8 @@ home = ["HTML", "RSS", "SearchIndex"]
 mode = "manual"
 data = "docs_nav"
 ```
+
+The `[languages]` block matters even for a single language: without `contentDir = "content/en"`, Hugo treats `content/` as the content root and pages under `content/en/` publish to doubled paths like `/en/en/docs/…`, which breaks manual-navigation lookups.
 
 The `root` parameter is the name of the top-level docs section under each language's content directory (`docs` in the example site, but any folder name works). Set `[outputs] home` so the theme publishes the per-language `search-index.json` used by the search page.
 
@@ -63,13 +68,13 @@ The example site adds more pages, but the core idea stays the same: use folders 
 | --- | --- | --- |
 | `params.docs.root` | `docs` | Section name of the documentation tree. |
 | `params.docs.rightToc` | `true` | Show the "On this page" table of contents. |
-| `params.docs.favicon` | `""` | Emits a `<link rel="icon">` when set. |
-| `params.docs.versions.noindexArchived` | `false` | Adds `noindex` to archived versions and drops them from the sitemap. |
+| `params.docs.favicon` | theme's `favicon.svg` | Set to any path to override the shipped icon. |
+| `params.docs.versions.noindexArchived` | `false` | Adds `noindex` to archived versions, drops them from the sitemap, and excludes them from the search index. |
 | `params.docs.components.reference.headingLevel` | `3` | Heading level used by reference shortcodes. |
 | `params.docs.theme.preset` | `minimal` | Visual preset: `minimal`, `rounded`, or `high-contrast`. |
 | `params.docs.theme.density` | `comfortable` | Spacing density for callouts and code blocks: `comfortable`, `compact`, or `dense`. |
-| `params.features.themeSwitcher` | `true` | Renders the light/dark/system preference control. |
-| `params.seo.openGraph` / `params.seo.twitterCards` | `true` | Emit OG and Twitter card meta tags. |
+| `params.features.themeSwitcher` | off unless set | Renders the light/dark/system preference control. |
+| `params.seo.openGraph` / `params.seo.twitterCards` | off unless set | Emit OG and Twitter card meta tags. |
 | `params.images` / page `images` | — | Image URLs used for `og:image` / `twitter:image`. |
 
 ## CSS customization

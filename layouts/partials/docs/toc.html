@@ -3,7 +3,7 @@
   {{ $show = .Params.rightToc }}
 {{ else if isset .Params "toc" }}
   {{ $show = .Params.toc }}
-{{ else if isset site.Params.docs "rightToc" }}
+{{ else if isset (site.Params.docs | default dict) "rightToc" }}
   {{ $show = site.Params.docs.rightToc }}
 {{ end }}
 

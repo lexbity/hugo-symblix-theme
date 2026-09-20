@@ -1,0 +1,13 @@
+<footer class="site-footer">
+  {{ partial "docs/social-links.html" . }}
+  <p class="site-footer__copyright">
+    {{- $owner := site.Params.docs.footer.copyright | default site.Title -}}
+    © {{ now.Year }} {{ $owner -}}
+    {{- with site.Params.docs.footer.licenseURL }}
+      · <a href="{{ . }}" rel="license noopener">{{ site.Params.docs.footer.licenseLabel | default (i18n "license" | default "License") }}</a>
+    {{- end }}
+  </p>
+  {{ if site.Params.docs.footer.poweredBy }}
+    <p class="site-footer__powered">{{ i18n "powered_by" | default "Powered by Hugo" }}</p>
+  {{ end }}
+</footer>

@@ -1,4 +1,9 @@
-@import "tailwindcss";
+/* Pin Tailwind's candidate detection to the theme's real class sources.
+   Auto-detection also scans docs content, where prose words that happen to
+   match utility names (e.g. "filter") would silently change compiled output. */
+@import "tailwindcss" source(none);
+@source "../layouts";
+@source "../js";
 
 @import "./theme.css";
 @import "./components/shortcodes.css";

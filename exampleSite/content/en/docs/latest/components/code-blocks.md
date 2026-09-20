@@ -12,7 +12,7 @@ The code block render hook keeps examples readable in static HTML and in print.
 ## Basic example
 
 ```bash
-hugo server --source exampleSite --theme hugo-theme-docworkbench
+hugo server --source exampleSite --theme hugo-theme-symblix
 ```
 
 ## With metadata

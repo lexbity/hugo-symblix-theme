@@ -136,3 +136,11 @@
   translation: sha256
 - id: suggested_for_system
   translation: このシステム向け
+- id: page_not_found
+  translation: ページが見つかりません
+- id: page_not_found_message
+  translation: "要求されたページは存在しません。ドキュメントのバージョンのアーカイブ化などにより、移動または削除された可能性があります。"
+- id: license
+  translation: ライセンス
+- id: powered_by
+  translation: Powered by Hugo

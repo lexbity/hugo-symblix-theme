@@ -14,7 +14,7 @@ related = ["/ar/docs/latest/getting-started/", "/ar/docs/latest/navigation/"]
 ```toml
 baseURL = "https://example.com/"
 title = "My Docs"
-theme = "hugo-theme-docworkbench"
+theme = "hugo-theme-symblix"
 defaultContentLanguage = "ar"
 defaultContentLanguageInSubdir = true
 

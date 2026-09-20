@@ -136,3 +136,11 @@
   translation: sha256
 - id: suggested_for_system
   translation: Suggested for your system
+- id: page_not_found
+  translation: Page not found
+- id: page_not_found_message
+  translation: "The page you requested does not exist. It may have moved or been removed, for example when a documentation version was archived."
+- id: license
+  translation: License
+- id: powered_by
+  translation: Powered by Hugo

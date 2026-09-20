@@ -17,7 +17,10 @@
     <loc>{{ .Permalink }}</loc>{{ if not .Lastmod.IsZero }}
     <lastmod>{{ .Lastmod.Format "2006-01-02T15:04:05Z07:00" | safeHTML }}</lastmod>{{ end }}{{ with .Sitemap.ChangeFreq }}
     <changefreq>{{ . }}</changefreq>{{ end }}{{ if ge .Sitemap.Priority 0.0 }}
-    <priority>{{ .Sitemap.Priority }}</priority>{{ end }}
+    <priority>{{ .Sitemap.Priority }}</priority>{{ end }}{{ if .IsTranslated }}{{ $selfCode := partial "docs/helpers/language-code.html" . }}{{ range .Translations }}
+    <xhtml:link rel="alternate" hreflang="{{ partial "docs/helpers/language-code.html" . }}" href="{{ .Permalink }}"/>{{ end }}
+    <xhtml:link rel="alternate" hreflang="{{ $selfCode }}" href="{{ .Permalink }}"/>
+    {{- end }}
   </url>
     {{- end -}}
   {{- end -}}
