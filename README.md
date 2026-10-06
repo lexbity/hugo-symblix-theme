@@ -94,6 +94,4 @@ The theme emits exactly two inline bootstrap scripts (both wrapped in try/catch,
 
 Everything else is deferred via `main.js`. Strict-CSP sites must hash-allowlist the two snippets (hashes change when edited — documented as a maintenance note) or relax to `'unsafe-inline'` for bootstrap only.
 
-## PDF Export
 
-Whole-version PDF export is a possible future feature. No commitment, no timeline. The `custom-head.html` hook can be used to integrate external export tools.
