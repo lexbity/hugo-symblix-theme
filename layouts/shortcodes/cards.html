@@ -10,6 +10,6 @@
 {{- if and (ne $columns "auto") ($columns) -}}
   {{- $style = printf "grid-template-columns: repeat(%s, minmax(0, 1fr));" $columns -}}
 {{- end -}}
-<div class="{{ $classes }}"{{ with $style }} style="{{ . }}"{{ end }}>
+<div class="{{ $classes }}"{{ with $style }} style="{{ . | safeCSS }}"{{ end }}>
   {{ .Inner }}
 </div>
