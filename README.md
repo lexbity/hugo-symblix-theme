@@ -7,10 +7,11 @@ A Hugo documentation theme for structured, navigable, versioned, multilingual te
 - **No-JavaScript baseline:** reading, navigation, the table of contents, the version/language switchers, tabs, and search fallback all work with JavaScript disabled. JavaScript only adds enhancements (instant search, code copy buttons, saved theme preference, sidebar filtering).
 - **Search:** each language publishes a `search-index.json`; the search page runs instant in-browser search over it (version/type/topic filters), and falls back to a server-rendered page catalog plus the browse index without JavaScript.
 - **Syntax highlighting:** server-side Chroma highlighting with a theme-aware token palette — no client-side highlighter.
+- **Mermaid diagrams:** fenced `mermaid` blocks are rendered to static SVG at build time (light + dark variants, cached by content hash) by `npm run diagrams`; unrendered blocks fall back to a plain code block. No client-side Mermaid library, no external requests.
 - **Versioning:** current + archived docs trees, a version switcher with page-equivalent resolution, `noindex` and sitemap exclusion for archived releases.
 - **Multilingual:** per-language content trees, translation status warnings, and a language switcher that falls back gracefully when a page is untranslated.
 - **Pre-built CSS:** ships compiled CSS so sites need only Hugo. Tailwind CSS v4 is an optional development dependency for styling from source.
-- **Project front page:** `release`, `install`, and `downloads` shortcodes compose a software landing page — release badge, copyable install commands, and binary downloads — complete without JavaScript. Platform detection annotates the right download row as a JavaScript enhancement only.
+- **Project front page:** `release`, `install`, and `downloads` shortcodes compose a software landing page — release badge, copyable install commands, and binary downloads — complete without JavaScript. Platform detection annotates the right download row as a JavaScript enhancement only. A front-page header puts site links (a Hugo `header` menu) and GitHub/social links in the top right; on narrow screens they collapse into a radial menu built on a no-JS `<details>` element.
 - **Project chrome:** default SVG favicon (drop in your own to override), site footer with `rel="me"` social links, license line, and copyright — configured entirely from `hugo.toml`.
 
 ## Requirements
@@ -24,9 +25,10 @@ A Hugo documentation theme for structured, navigable, versioned, multilingual te
 The example site doubles as the theme documentation and links to itself through the symlink `exampleSite/themes/hugo-theme-symblix → ../..`. On Windows, enable symlink support before cloning (`git config --global core.symlinks true`, or run Git with developer mode); if the symlink was checked out as a plain file, recreate it manually.
 
 ```bash
-npm install        # only needed for Tailwind source builds and tests
+npm install        # only needed for Tailwind source builds, diagrams, and tests
 npm run dev        # example site, CSS compiled from Tailwind source (watches)
 npm run dev:prebuilt
+npm run diagrams   # pre-render ```mermaid blocks to assets/diagrams (cached)
 npm run build      # production build using the committed pre-built CSS
 npm run check      # build with --panicOnWarning (CI mode)
 npm test           # Playwright suite (needs `npm run test:install` once)
@@ -61,7 +63,31 @@ Start with these pages:
 - [Multilingual](/en/docs/latest/multilingual/)
 - [Search](/en/docs/latest/search/)
 - [Components](/en/docs/latest/components/)
+- [Diagrams](/en/docs/latest/components/diagrams/)
 - [Customization](/en/docs/latest/customization/)
+
+## Mermaid diagrams
+
+Fenced `mermaid` blocks render as static SVG at build time — the published pages carry no Mermaid JavaScript and make no external requests.
+
+1. `npm run diagrams` scans content for `mermaid` blocks, renders each with `mermaid-cli` (installed as a dev dependency; override the binary with `MMDC_BIN`), and writes `assets/diagrams/<sha256>.svg` plus a dark-theme `<sha256>.dark.svg`. Rendering is cached by the content hash, so only new or changed diagrams cost build time.
+2. The render hook serves those SVGs as `<img>` elements; the dark variant swaps with the theme switcher via CSS alone.
+3. A block with no pre-rendered diagram falls back to a plain code block, so drafting never breaks a build. Set `[params.docs.mermaid] enforce = true` to warn instead (and fail `--panicOnWarning` builds) until the pipeline runs.
+
+`npm run build`, `npm run check`, and `npm test` run the pipeline automatically. Site repositories adopt the same pattern: run `node <theme>/scripts/render-diagrams.mjs --content content --out assets/diagrams` before `hugo`.
+
+## Front-page header
+
+The project front page renders a header with the site logo on the left and navigation in the top right. Plain links come from a Hugo menu (defined per language so `pageRef` resolves inside each language tree):
+
+```toml
+[[languages.en.menus.header]]
+name = "Docs"
+pageRef = "/docs/latest/"
+weight = 10
+```
+
+GitHub and social links reuse the footer's `params.docs.social` list. On screens under 48rem the links collapse into a radial menu on a `<details>` element — it opens and closes without JavaScript; the script bundle only adds close-on-outside-click and Escape.
 
 ## Non-Goals
 

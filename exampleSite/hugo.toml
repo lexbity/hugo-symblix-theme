@@ -92,3 +92,21 @@ locale = "ar"
 direction = "rtl"
 weight = 4
 contentDir = "content/ar"
+
+# Front-page header links, rendered top right. Defined per language so
+# pageRef resolves inside each language's content tree; languages without a
+# header menu show the logo only.
+[[languages.en.menus.header]]
+name = "Docs"
+pageRef = "/docs/latest/"
+weight = 10
+
+[[languages.en.menus.header]]
+name = "Components"
+pageRef = "/docs/latest/components/"
+weight = 20
+
+[[languages.en.menus.header]]
+name = "Search"
+pageRef = "/docs/latest/search/"
+weight = 30

@@ -1,17 +1,34 @@
-{{ define "main" }}
-  {{ $currentVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
-  {{ $versionRootPermalink := partialCached "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $currentVersion "Site" site) (site.Language.Lang) $currentVersion | strings.TrimSpace }}
-  <section class="docs-home">
-    {{ .Content }}
-  </section>
-  {{ if not .Content }}
-    {{ partial "docs/components/hero.html" (dict
-      "Title" .Site.Title
-      "Subtitle" (or .Site.Params.description .Site.Title)
-      "Eyebrow" (i18n "home_eyebrow" | default "Documentation")
-      "HeadingLevel" "1"
-      "PrimaryHref" $versionRootPermalink
-      "PrimaryLabel" (i18n "home_open_docs" | default "Open the latest docs")
-    ) }}
-  {{ end }}
-{{ end }}
+{{- $currentVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace -}}
+{{- $versionRootPermalink := partialCached "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $currentVersion "Site" site) (site.Language.Lang) $currentVersion | strings.TrimSpace -}}
+<!doctype html>
+<html
+  lang="{{ partial "docs/helpers/language-code.html" . }}"
+  dir="{{ or .Site.Language.Direction "ltr" }}"
+  {{ with site.Params.docs.theme.density }}data-docs-density="{{ . }}"{{ end }}
+  {{ with site.Params.docs.theme.preset }}data-docs-preset="{{ . }}"{{ end }}
+>
+  <head>
+    {{ partial "head.html" . }}
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">{{ i18n "skip_to_content" | default "Skip to content" }}</a>
+    {{ partial "docs/site-header.html" . }}
+    <main id="main-content" class="docs-home-main" tabindex="-1">
+      <section class="docs-home">
+        {{ .Content }}
+        {{ if not .Content }}
+          {{ partial "docs/components/hero.html" (dict
+            "Title" .Site.Title
+            "Subtitle" (or .Site.Params.description .Site.Title)
+            "Eyebrow" (i18n "home_eyebrow" | default "Documentation")
+            "HeadingLevel" "1"
+            "PrimaryHref" $versionRootPermalink
+            "PrimaryLabel" (i18n "home_open_docs" | default "Open the latest docs")
+          ) }}
+        {{ end }}
+      </section>
+    </main>
+    {{ partial "scripts.html" . }}
+    {{ partial "docs/site-footer.html" . }}
+  </body>
+</html>

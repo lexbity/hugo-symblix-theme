@@ -1,0 +1,52 @@
+{{- /* Mermaid code blocks render at build time through the diagram pipeline
+       (scripts/render-diagrams.mjs), which hashes the trimmed block source and
+       writes assets/diagrams/<sha256>.svg (light) and <sha256>.dark.svg (dark
+       theme). The hook serves those SVGs as static images, so published pages
+       stay JavaScript-free. A missing diagram falls back to a plain code
+       block; set params.docs.mermaid.enforce to warn (fails --panicOnWarning
+       builds) when a diagram was not pre-rendered. */ -}}
+{{- $src := replaceRE "\r\n" "\n" .Inner | strings.TrimSpace -}}
+{{- $hash := sha256 $src -}}
+{{- $light := "" -}}
+{{- with resources.Get (printf "diagrams/%s.svg" $hash) -}}
+  {{- $light = . | minify -}}
+{{- end -}}
+{{- $dark := "" -}}
+{{- with resources.Get (printf "diagrams/%s.dark.svg" $hash) -}}
+  {{- $dark = . | minify -}}
+{{- end -}}
+{{- $title := "" -}}
+{{- with .Attributes.title -}}
+  {{- $title = . -}}
+{{- end -}}
+{{- if $light -}}
+  {{- $alt := "" -}}
+  {{- with .Attributes.alt -}}
+    {{- $alt = . -}}
+  {{- end -}}
+  {{- $alt = or $alt (or $title (i18n "diagram" | default "Diagram")) }}
+<figure class="docs-diagram">
+  {{- with $dark }}
+  <img class="docs-diagram__image docs-diagram__image--dark" src="{{ .RelPermalink }}" alt="" aria-hidden="true" loading="lazy" decoding="async">
+  {{- end }}
+  <img class="docs-diagram__image{{ if $dark }} docs-diagram__image--light{{ end }}" src="{{ $light.RelPermalink }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+  {{- with $title }}
+  <figcaption class="docs-diagram__caption">{{ . }}</figcaption>
+  {{- end }}
+</figure>
+{{- else -}}
+  {{- with site.Params.docs.mermaid.enforce -}}
+    {{- warnf "mermaid block %s has no pre-rendered diagram; run the diagram pipeline (npm run diagrams)" $hash -}}
+  {{- end -}}
+<figure class="docs-codeblock docs-codeblock--mermaid">
+  <div
+    class="docs-codeblock__body"
+    data-codeblock
+    data-copy-label="{{ i18n "copy_code" | default "Copy code" }}"
+    data-copied-label="{{ i18n "copied" | default "Copied" }}"
+    data-copy-failed-label="{{ i18n "copy_failed" | default "Copy failed" }}"
+  >
+    {{- transform.Highlight $src "mermaid" (dict "noClasses" false) -}}
+  </div>
+</figure>
+{{- end -}}

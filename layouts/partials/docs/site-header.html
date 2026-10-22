@@ -1,0 +1,47 @@
+{{- /* Front-page header: logo left, navigation links top right.
+       Plain links come from a Hugo menu, social links from params.docs.social
+       (the same source the site footer uses). On narrow screens the links
+       collapse into a radial (pie) menu built on a no-JS <details> element;
+       JavaScript only adds close-on-outside-click and Escape. */ -}}
+{{- $links := site.Menus.header | default slice -}}
+{{- $social := site.Params.docs.social | default slice -}}
+<header class="docs-site-header">
+  <div class="docs-site-header__inner">
+    {{ partial "docs/logo.html" . }}
+    {{ if or $links $social }}
+      <nav class="docs-header-nav" aria-label="{{ i18n "header_navigation" | default "Site navigation" }}">
+        <ul class="docs-header-links">
+          {{- range $links -}}
+            <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+          {{- end -}}
+          {{- range $social -}}
+            <li class="docs-header-links__social">
+              <a href="{{ .url }}" rel="me noopener" target="_blank">{{ .name | default .url }}</a>
+            </li>
+          {{- end -}}
+        </ul>
+        {{- $count := add (len $links) (len $social) -}}
+        {{- if gt $count 0 -}}
+          <details class="docs-header-menu" data-header-menu>
+            <summary class="docs-header-menu__toggle">
+              <span class="docs-header-menu__toggle-label">{{ i18n "menu" | default "Menu" }}</span>
+            </summary>
+            <ul class="docs-header-menu__items" style="--n: {{ math.Max $count 2 }}">
+              {{- $i := 0 -}}
+              {{- range $links -}}
+                <li style="--i: {{ $i }}"><a href="{{ .URL }}">{{ .Name }}</a></li>
+                {{- $i = add $i 1 -}}
+              {{- end -}}
+              {{- range $social -}}
+                <li style="--i: {{ $i }}">
+                  <a href="{{ .url }}" rel="me noopener" target="_blank">{{ .name | default .url }}</a>
+                </li>
+                {{- $i = add $i 1 -}}
+              {{- end -}}
+            </ul>
+          </details>
+        {{- end -}}
+      </nav>
+    {{ end }}
+  </div>
+</header>

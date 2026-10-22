@@ -10,6 +10,15 @@
     gap: calc(var(--docs-density-component-gap) * 0.75);
   }
 
+  /* Explicit column counts apply only from 48rem up; below it the base
+     auto-fit rule collapses the grid naturally. The shortcode sets
+     --docs-card-cols inline so this stays overridable per grid. */
+  @media (min-width: 48rem) {
+    .docs-card-grid--cols {
+      grid-template-columns: repeat(var(--docs-card-cols, 3), minmax(0, 1fr));
+    }
+  }
+
   .docs-card-grid--2 {
     --docs-card-min: 18rem;
   }
@@ -20,6 +29,7 @@
 
   .docs-card {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: calc(var(--docs-density-component-gap) * 0.8);
     padding: var(--docs-density-component-padding);
     border: 1px solid var(--docs-border);

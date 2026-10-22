@@ -1,0 +1,175 @@
+@layer components {
+  .docs-site-header {
+    border-bottom: 1px solid var(--docs-border);
+    background: color-mix(in srgb, var(--docs-surface) 92%, var(--docs-bg));
+  }
+
+  .docs-site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    max-width: var(--docs-home-width, 72rem);
+    margin-inline: auto;
+    padding: 0.65rem max(1.25rem, 3vw);
+  }
+
+  .docs-header-nav {
+    position: relative;
+    --fan-x: -1;
+    --fan-radius: 8.25rem;
+  }
+
+  [dir="rtl"] .docs-header-nav {
+    --fan-x: 1;
+  }
+
+  .docs-header-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem 1.1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 600;
+  }
+
+  .docs-header-links a {
+    color: color-mix(in srgb, var(--docs-text) 86%, var(--docs-muted));
+  }
+
+  .docs-header-links a:hover {
+    color: var(--docs-accent);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .docs-header-links__social a {
+    color: var(--docs-muted);
+  }
+
+  /* Radial (pie) menu: <details> keeps it working without JavaScript. Items
+     are pinned to the toggle centre and fanned out along a down-and-inward
+     arc with CSS trig; --fan-x mirrors the arc for RTL. */
+  .docs-header-menu {
+    display: none;
+    position: relative;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .docs-header-menu__toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--docs-border);
+    border-radius: calc(var(--docs-component-radius) + 0.25rem);
+    background: var(--docs-surface);
+    box-shadow: var(--docs-shadow);
+    cursor: pointer;
+    list-style: none;
+    font-size: 1.15rem;
+    line-height: 1;
+  }
+
+  .docs-header-menu__toggle::-webkit-details-marker {
+    display: none;
+  }
+
+  .docs-header-menu__toggle::before {
+    content: "☰";
+  }
+
+  .docs-header-menu__toggle-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .docs-header-menu__items {
+    position: static;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .docs-header-menu__items li {
+    position: absolute;
+    top: calc(2.75rem / 2);
+    inset-inline-end: calc(2.75rem / 2);
+    z-index: 60;
+  }
+
+  .docs-header-menu__items a {
+    display: inline-block;
+    padding: 0.45rem 0.85rem;
+    border: 1px solid var(--docs-border);
+    border-radius: calc(var(--docs-component-radius) + 0.15rem);
+    background: var(--docs-surface);
+    box-shadow: var(--docs-shadow);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 48rem) {
+    .docs-header-links {
+      display: none;
+    }
+
+    .docs-header-menu {
+      display: block;
+    }
+
+    .docs-header-menu__items li {
+      transform: translate(
+        calc(var(--fan-x) * sin(var(--menu-angle)) * var(--fan-radius) - 50%),
+        calc(cos(var(--menu-angle)) * var(--fan-radius) - 50%)
+      );
+      --menu-angle: calc(10deg + var(--i) * (85deg / (var(--n) - 1)));
+    }
+
+    .docs-header-menu[open] .docs-header-menu__items li {
+      animation: docs-header-fan 150ms ease-out backwards;
+      animation-delay: calc(var(--i) * 25ms);
+    }
+  }
+
+  /* Without CSS trig functions the fan would stack on one point; fall back to
+     a plain dropdown under the toggle. */
+  @supports not (width: calc(sin(45deg) * 1px)) {
+    @media (max-width: 48rem) {
+      .docs-header-menu__items li {
+        position: static;
+        margin-block-start: 0.4rem;
+        text-align: end;
+        transform: none;
+      }
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .docs-header-menu {
+      display: none;
+    }
+  }
+}
+
+@keyframes docs-header-fan {
+  from {
+    opacity: 0;
+    scale: 0.85;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}

@@ -4,6 +4,7 @@ import { initTabs } from "./tabs.js";
 import { initCopyCode } from "./copy-code.js";
 import { initDownloads } from "./downloads.js";
 import { initSearchPage } from "./search/index.js";
+import { initSiteHeader } from "./site-header.js";
 
 try {
   initTheme();
@@ -40,3 +41,5 @@ try {
 } catch (error) {
   console.warn("Search bootstrap failed", error);
 }
+
+initSiteHeader();

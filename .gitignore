@@ -5,5 +5,7 @@ resources/
 node_modules/
 exampleSite/public/
 exampleSite/resources/
+exampleSite/assets/diagrams/
+exampleSite/assets/jsconfig.json
 test-results/
 tests/tests/

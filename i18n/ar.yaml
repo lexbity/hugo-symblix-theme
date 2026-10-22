@@ -170,3 +170,7 @@
   translation: الحالة
 - id: figure_missing_alt
   translation: صورة
+- id: header_navigation
+  translation: تنقل الموقع
+- id: diagram
+  translation: مخطط

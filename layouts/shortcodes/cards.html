@@ -1,15 +1,23 @@
 {{- $columns := .Get "columns" | default "auto" -}}
 {{- $variant := .Get "variant" | default "default" -}}
 {{- $compact := partial "docs/helpers/boolean.html" (dict "Value" (.Get "compact" | default false)) -}}
-{{- $classes := partial "docs/helpers/classname.html" (dict
-  "Base" (slice "docs-card-grid" (printf "docs-card-grid--%s" $variant))
-  "Modifiers" (cond (eq $compact "true") (slice "docs-card-grid--compact") (slice))
-  "Extra" (.Get "class" | default "")
-) -}}
+{{- $modifiers := slice -}}
+{{- if eq $compact "true" -}}
+  {{- $modifiers = $modifiers | append "docs-card-grid--compact" -}}
+{{- end -}}
 {{- $style := "" -}}
 {{- if and (ne $columns "auto") ($columns) -}}
-  {{- $style = printf "grid-template-columns: repeat(%s, minmax(0, 1fr));" $columns -}}
+  {{- /* Column count rides in as a custom property so the CSS media query can
+         collapse the grid on small screens; an inline grid-template-columns
+         would override the responsive fallback at every width. */ -}}
+  {{- $style = printf "--docs-card-cols: %s;" $columns -}}
+  {{- $modifiers = $modifiers | append "docs-card-grid--cols" -}}
 {{- end -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict
+  "Base" (slice "docs-card-grid" (printf "docs-card-grid--%s" $variant))
+  "Modifiers" $modifiers
+  "Extra" (.Get "class" | default "")
+) -}}
 <div class="{{ $classes }}"{{ with $style }} style="{{ . | safeCSS }}"{{ end }}>
   {{ .Inner }}
 </div>

@@ -170,3 +170,7 @@
   translation: État
 - id: figure_missing_alt
   translation: Image
+- id: header_navigation
+  translation: Navigation du site
+- id: diagram
+  translation: Schéma

@@ -140,6 +140,8 @@ test("i18n closed key set: no defined-but-unreferenced keys", () => {
     "latest_release", "changelog",
     // page meta / home
     "home_eyebrow", "license", "link_to",
+    // mermaid render hook (i18n call sits mid-expression)
+    "diagram",
   ]);
 
   const unusedKeys = Array.from(definedKeys).filter((k) => !refKeys.has(k) && !jsAllowlist.has(k) && !shortcodeAllowlist.has(k));

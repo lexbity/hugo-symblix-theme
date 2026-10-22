@@ -170,3 +170,7 @@
   translation: Status
 - id: figure_missing_alt
   translation: Image
+- id: header_navigation
+  translation: Site navigation
+- id: diagram
+  translation: Diagram

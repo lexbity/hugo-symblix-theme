@@ -1,11 +1,16 @@
 @layer components {
   .docs-home {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: calc(var(--docs-density-component-gap) * 2.25);
+    max-width: var(--docs-home-width, 72rem);
+    margin-inline: auto;
+    padding-inline: max(1.25rem, 3vw);
   }
 
   .docs-hero {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: calc(var(--docs-density-component-gap) * 1.1);
     padding: clamp(var(--docs-density-component-padding), 4vw, calc(var(--docs-density-component-padding) * 2.6));
     border: 1px solid var(--docs-border);
@@ -91,6 +96,7 @@
 
   .docs-feature {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: calc(var(--docs-density-component-gap) * 0.75);
     padding: var(--docs-density-component-padding);
     border: 1px solid var(--docs-border);

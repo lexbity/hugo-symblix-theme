@@ -23,4 +23,56 @@
     font-size: 0.9rem;
     font-weight: 600;
   }
+
+  /* Build-time-rendered Mermaid diagrams. The pipeline writes one SVG per
+     theme; the dark variant is hidden and swapped by the theme attribute or
+     OS preference. */
+  .docs-diagram {
+    margin: var(--docs-density-component-gap) 0;
+  }
+
+  .docs-diagram__image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .docs-diagram__image--dark {
+    display: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html[data-theme="system"] .docs-diagram__image--dark {
+      display: block;
+    }
+
+    html[data-theme="system"] .docs-diagram__image--light {
+      display: none;
+    }
+  }
+
+  html[data-theme="dark"] .docs-diagram__image--dark {
+    display: block;
+  }
+
+  html[data-theme="dark"] .docs-diagram__image--light {
+    display: none;
+  }
+
+  .docs-diagram__caption {
+    margin-top: calc(var(--docs-density-component-gap) * 0.5);
+    color: var(--docs-muted);
+    font-size: 0.92rem;
+  }
+
+  @media print {
+    .docs-diagram__image--dark {
+      display: none !important;
+    }
+
+    .docs-diagram__image--light {
+      display: block !important;
+    }
+  }
 }
+

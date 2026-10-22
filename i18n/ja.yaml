@@ -170,3 +170,7 @@
   translation: ステータス
 - id: figure_missing_alt
   translation: 画像
+- id: header_navigation
+  translation: サイトナビゲーション
+- id: diagram
+  translation: 図

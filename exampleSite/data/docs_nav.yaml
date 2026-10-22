@@ -51,6 +51,8 @@ items:
         page: /en/docs/latest/components/methods/
       - title: Code Groups
         page: /en/docs/latest/components/code-groups/
+      - title: Diagrams
+        page: /en/docs/latest/components/diagrams/
       - title: Cards
         page: /en/docs/latest/components/cards/
       - title: Steps
