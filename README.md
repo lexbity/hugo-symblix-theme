@@ -11,7 +11,7 @@ A Hugo documentation theme for structured, navigable, versioned, multilingual te
 - **Versioning:** current + archived docs trees, a version switcher with page-equivalent resolution, `noindex` and sitemap exclusion for archived releases.
 - **Multilingual:** per-language content trees, translation status warnings, and a language switcher that falls back gracefully when a page is untranslated.
 - **Pre-built CSS:** ships compiled CSS so sites need only Hugo. Tailwind CSS v4 is an optional development dependency for styling from source.
-- **Project front page:** `release`, `install`, and `downloads` shortcodes compose a software landing page — release badge, copyable install commands, and binary downloads — complete without JavaScript. Platform detection annotates the right download row as a JavaScript enhancement only. A front-page header puts site links (a Hugo `header` menu) and GitHub/social links in the top right; on narrow screens they collapse into a radial menu built on a no-JS `<details>` element.
+- **Project front page:** `release`, `install`, and `downloads` shortcodes compose a software landing page — release badge, copyable install commands, and binary downloads — complete without JavaScript. Platform detection annotates the right download row as a JavaScript enhancement only. A front-page header puts site links and social icons in the top right; on narrow screens they collapse into a dropdown menu built on a no-JS `<details>` element.
 - **Project chrome:** default SVG favicon (drop in your own to override), site footer with `rel="me"` social links, license line, and copyright — configured entirely from `hugo.toml`.
 
 ## Requirements
@@ -78,16 +78,23 @@ Fenced `mermaid` blocks render as static SVG at build time — the published pag
 
 ## Front-page header
 
-The project front page renders a header with the site logo on the left and navigation in the top right. Plain links come from a Hugo menu (defined per language so `pageRef` resolves inside each language tree):
+The project front page renders a header with the site logo on the left and navigation in the top right: a Hugo menu of plain links (defined per language so `pageRef` resolves inside each language tree) next to a bar of social SVG icons. Icons are inline — no icon font, no external requests.
 
 ```toml
 [[languages.en.menus.header]]
 name = "Docs"
 pageRef = "/docs/latest/"
 weight = 10
+
+[[params.docs.social]]
+name = "GitHub"
+url = "https://github.com/you/project"
+icon = "github"   # optional; falls back to the lowercased name
 ```
 
-GitHub and social links reuse the footer's `params.docs.social` list. On screens under 48rem the links collapse into a radial menu on a `<details>` element — it opens and closes without JavaScript; the script bundle only adds close-on-outside-click and Escape.
+Shipped icons: `github`, `x`, `bluesky`, `youtube`, `rss`; any other name renders a globe glyph. Override `layouts/partials/docs/helpers/social-icon.html` to add more brands.
+
+On screens under 48rem the links and icons collapse into a dropdown menu on a `<details>` element — it opens and closes without JavaScript; the script bundle only adds close-on-outside-click and Escape.
 
 ## Non-Goals
 

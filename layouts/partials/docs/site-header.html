@@ -1,8 +1,9 @@
-{{- /* Front-page header: logo left, navigation links top right.
-       Plain links come from a Hugo menu, social links from params.docs.social
-       (the same source the site footer uses). On narrow screens the links
-       collapse into a radial (pie) menu built on a no-JS <details> element;
-       JavaScript only adds close-on-outside-click and Escape. */ -}}
+{{- /* Front-page header: logo left, navigation top right. Plain links come
+       from a Hugo menu; social links from params.docs.social, rendered as
+       inline SVG icons (icon key falls back to the entry name, unknown names
+       get a globe). On narrow screens everything collapses into a dropdown
+       built on a no-JS <details> element: the configured links plus a social
+       icon bar. JavaScript only adds close-on-outside-click and Escape. */ -}}
 {{- $links := site.Menus.header | default slice -}}
 {{- $social := site.Params.docs.social | default slice -}}
 <header class="docs-site-header">
@@ -14,31 +15,43 @@
           {{- range $links -}}
             <li><a href="{{ .URL }}">{{ .Name }}</a></li>
           {{- end -}}
-          {{- range $social -}}
-            <li class="docs-header-links__social">
-              <a href="{{ .url }}" rel="me noopener" target="_blank">{{ .name | default .url }}</a>
-            </li>
-          {{- end -}}
         </ul>
-        {{- $count := add (len $links) (len $social) -}}
-        {{- if gt $count 0 -}}
+        {{- with $social -}}
+          <ul class="docs-header-icons">
+            {{- range . -}}
+              <li>
+                <a class="docs-header-icon" href="{{ .url }}" rel="me noopener" target="_blank" aria-label="{{ .name | default .url }}" title="{{ .name | default .url }}">
+                  {{- partial "docs/helpers/social-icon.html" (dict "Name" (.icon | default .name)) -}}
+                </a>
+              </li>
+            {{- end -}}
+          </ul>
+        {{- end -}}
+        {{- if gt (add (len $links) (len $social)) 0 -}}
           <details class="docs-header-menu" data-header-menu>
             <summary class="docs-header-menu__toggle">
               <span class="docs-header-menu__toggle-label">{{ i18n "menu" | default "Menu" }}</span>
             </summary>
-            <ul class="docs-header-menu__items" style="--n: {{ math.Max $count 2 }}">
-              {{- $i := 0 -}}
-              {{- range $links -}}
-                <li style="--i: {{ $i }}"><a href="{{ .URL }}">{{ .Name }}</a></li>
-                {{- $i = add $i 1 -}}
+            <div class="docs-header-menu__panel">
+              {{- with $links -}}
+                <ul class="docs-header-menu__links">
+                  {{- range . -}}
+                    <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+                  {{- end -}}
+                </ul>
               {{- end -}}
-              {{- range $social -}}
-                <li style="--i: {{ $i }}">
-                  <a href="{{ .url }}" rel="me noopener" target="_blank">{{ .name | default .url }}</a>
-                </li>
-                {{- $i = add $i 1 -}}
+              {{- with $social -}}
+                <ul class="docs-header-menu__icons">
+                  {{- range . -}}
+                    <li>
+                      <a class="docs-header-icon" href="{{ .url }}" rel="me noopener" target="_blank" aria-label="{{ .name | default .url }}" title="{{ .name | default .url }}">
+                        {{- partial "docs/helpers/social-icon.html" (dict "Name" (.icon | default .name)) -}}
+                      </a>
+                    </li>
+                  {{- end -}}
+                </ul>
               {{- end -}}
-            </ul>
+            </div>
           </details>
         {{- end -}}
       </nav>
