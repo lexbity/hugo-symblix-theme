@@ -59,6 +59,8 @@ items:
         page: /en/docs/latest/components/steps/
       - title: Landing
         page: /en/docs/latest/components/landing/
+      - title: Presets
+        page: /en/docs/latest/components/presets/
 
   - title: Hidden Example
     hidden: true

@@ -98,16 +98,6 @@
     color: color-mix(in srgb, var(--docs-muted) 88%, var(--docs-text));
   }
 
-  .docs-switcher-select {
-    width: 100%;
-    padding: 0.62rem 0.7rem;
-    border: 1px solid var(--docs-border);
-    border-radius: var(--docs-component-radius);
-    background: var(--docs-surface);
-    color: var(--docs-text);
-    font: inherit;
-  }
-
   .docs-sidebar-links-list {
     display: grid;
     gap: 0.25rem;

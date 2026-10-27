@@ -12,7 +12,7 @@ test("example site renders representative pages", async ({ page }) => {
   await expect(page).toHaveTitle(/Latest/);
   await expect(page.getByRole("heading", { level: 1, name: "Latest" })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("lang", "en-US");
-  await expect(page.locator('select[data-theme-select]')).toBeVisible();
+  await expect(page.locator('details.docs-switcher--preset[data-preset-switcher]')).toBeVisible();
   await expect(page.locator('.docs-switcher--language')).toBeVisible();
   await expect(page.locator('.docs-switcher--version')).toBeVisible();
   await expect(page.locator('details.docs-nav-group[open]')).toHaveCount(2);

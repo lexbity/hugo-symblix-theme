@@ -52,4 +52,94 @@ test.describe("Curated screenshots for README", () => {
       fullPage: true,
     });
   });
+
+  // Phase 6-7: Per-preset visual regression screenshots
+  test.describe("preset visual regression (Phase 6-7)", () => {
+    const PRESETS = [
+      "symblix-light",
+      "symblix-dark",
+      "ocean-dark",
+      "forest-light",
+      "sunset-dark",
+      "solarized-light",
+      "high-contrast",
+    ];
+
+    for (const preset of PRESETS) {
+      test(`docs page with ${preset} preset - desktop`, async ({ page }) => {
+        await page.goto("/en/docs/latest/");
+        await page.waitForLoadState("networkidle");
+        await page.setViewportSize({ width: 1440, height: 900 });
+
+        // Set the preset
+        await page.evaluate((p) => {
+          window.SymblixTheme.setPreset(p);
+        }, preset);
+
+        // Wait for preset to apply
+        await page.waitForTimeout(200);
+
+        await page.screenshot({
+          path: join(SCREENSHOT_DIR, `preset-${preset}-desktop.png`),
+          fullPage: true,
+        });
+      });
+
+      test(`docs page with ${preset} preset - mobile`, async ({ page }) => {
+        await page.goto("/en/docs/latest/");
+        await page.waitForLoadState("networkidle");
+        await page.setViewportSize({ width: 375, height: 667 });
+
+        // Set the preset
+        await page.evaluate((p) => {
+          window.SymblixTheme.setPreset(p);
+        }, preset);
+
+        // Open sidebar for mobile
+        await page.locator(".docs-sidebar-toggle").click();
+
+        // Wait for preset to apply
+        await page.waitForTimeout(200);
+
+        await page.screenshot({
+          path: join(SCREENSHOT_DIR, `preset-${preset}-mobile.png`),
+          fullPage: true,
+        });
+      });
+    }
+
+    // Test switcher UI in different presets
+    test("sidebar preset switcher open - symblix-light", async ({ page }) => {
+      await page.goto("/en/docs/latest/");
+      await page.waitForLoadState("networkidle");
+      await page.setViewportSize({ width: 1440, height: 900 });
+
+      // The sidebar is permanently visible at desktop width; open the
+      // switcher dropdown directly.
+      await page.locator(".docs-switcher--preset summary").click();
+
+      await page.waitForTimeout(100);
+
+      await page.screenshot({
+        path: join(SCREENSHOT_DIR, "sidebar-preset-switcher-open.png"),
+        fullPage: false,
+      });
+    });
+
+    test("header preset switcher open - symblix-light", async ({ page }) => {
+      await page.goto("/en/");
+      await page.waitForLoadState("networkidle");
+      await page.setViewportSize({ width: 1440, height: 900 });
+
+      // Open header switcher
+      await page.locator(".docs-header-preset summary").click();
+
+      await page.waitForTimeout(100);
+
+      await page.screenshot({
+        path: join(SCREENSHOT_DIR, "header-preset-switcher-open.png"),
+        fullPage: false,
+      });
+    });
+  });
 });

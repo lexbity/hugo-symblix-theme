@@ -27,34 +27,33 @@
             {{- end -}}
           </ul>
         {{- end -}}
-        {{- if gt (add (len $links) (len $social)) 0 -}}
-          <details class="docs-header-menu" data-header-menu>
-            <summary class="docs-header-menu__toggle">
-              <span class="docs-header-menu__toggle-label">{{ i18n "menu" | default "Menu" }}</span>
-            </summary>
-            <div class="docs-header-menu__panel">
-              {{- with $links -}}
-                <ul class="docs-header-menu__links">
-                  {{- range . -}}
-                    <li><a href="{{ .URL }}">{{ .Name }}</a></li>
-                  {{- end -}}
-                </ul>
-              {{- end -}}
-              {{- with $social -}}
-                <ul class="docs-header-menu__icons">
-                  {{- range . -}}
-                    <li>
-                      <a class="docs-header-icon" href="{{ .url }}" rel="me noopener" target="_blank" aria-label="{{ .name | default .url }}" title="{{ .name | default .url }}">
-                        {{- partial "docs/helpers/social-icon.html" (dict "Name" (.icon | default .name)) -}}
-                      </a>
-                    </li>
-                  {{- end -}}
-                </ul>
-              {{- end -}}
-            </div>
-          </details>
-        {{- end -}}
+        <details class="docs-header-menu" data-header-menu>
+          <summary class="docs-header-menu__toggle">
+            <span class="docs-header-menu__toggle-label">{{ i18n "menu" | default "Menu" }}</span>
+          </summary>
+          <div class="docs-header-menu__panel">
+            {{- with $links -}}
+              <ul class="docs-header-menu__links">
+                {{- range . -}}
+                  <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+                {{- end -}}
+              </ul>
+            {{- end -}}
+            {{- with $social -}}
+              <ul class="docs-header-menu__icons">
+                {{- range . -}}
+                  <li>
+                    <a class="docs-header-icon" href="{{ .url }}" rel="me noopener" target="_blank" aria-label="{{ .name | default .url }}" title="{{ .name | default .url }}">
+                      {{- partial "docs/helpers/social-icon.html" (dict "Name" (.icon | default .name)) -}}
+                    </a>
+                  </li>
+                {{- end -}}
+              </ul>
+            {{- end -}}
+          </div>
+        </details>
       </nav>
     {{ end }}
+    {{ partial "docs/header-preset-switcher.html" . }}
   </div>
 </header>

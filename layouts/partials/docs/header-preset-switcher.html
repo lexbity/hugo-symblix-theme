@@ -1,0 +1,46 @@
+{{- /* Compact preset switcher for site header (SYM-VIS-001 Phase 6).
+     Renders as an icon button that expands to show preset swatches.
+     Hidden on mobile (handled by header menu). Uses presets helper for data.
+*/ -}}
+{{- $presets := partial "docs/helpers/presets.html" . -}}
+{{- $current := $presets.current -}}
+{{- $currentPreset := dict -}}
+{{- range $presets.available -}}
+  {{- if eq .id $current -}}
+    {{- $currentPreset = . -}}
+  {{- end -}}
+{{- end -}}
+
+{{ if site.Params.features.themeSwitcher }}
+<details class="docs-header-preset" data-preset-switcher>
+  <summary class="docs-header-preset__toggle" aria-label="{{ i18n "select_preset" | default "Select theme preset" }}">
+    <span class="docs-header-preset__swatch" aria-hidden="true">
+      <span class="docs-header-preset__swatch-bg" data-preset-swatch-bg style="background-color: {{ $currentPreset.swatchBg | safeCSS }}"></span>
+      <span class="docs-header-preset__swatch-accent" data-preset-swatch-accent style="background-color: {{ $currentPreset.swatchAccent | safeCSS }}"></span>
+    </span>
+  </summary>
+  <div class="docs-header-preset__panel">
+    <p class="docs-header-preset__title">{{ i18n "theme_preset" | default "Theme" }}</p>
+    <ul class="docs-header-preset__list">
+      {{ range $presets.available }}
+      <li>
+        <button
+          type="button"
+          class="docs-header-preset__option"
+          data-preset-id="{{ .id }}"
+          data-preset-mode="{{ .mode }}"
+          data-preset-label="{{ .label }}"
+          {{ if eq .id $current }}aria-current="true"{{ end }}
+        >
+          <span class="docs-preset-swatch" aria-hidden="true">
+            <span class="docs-preset-swatch__bg" style="background-color: {{ .swatchBg | safeCSS }}"></span>
+            <span class="docs-preset-swatch__accent" style="background-color: {{ .swatchAccent | safeCSS }}"></span>
+          </span>
+          <span class="docs-preset-name">{{ .label }}</span>
+        </button>
+      </li>
+      {{ end }}
+    </ul>
+  </div>
+</details>
+{{ end }}

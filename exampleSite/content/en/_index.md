@@ -6,7 +6,7 @@ description = "Versioned, multilingual Hugo documentation without JavaScript."
 {{< hero eyebrow="Documentation" title="Symblix" subtitle="Versioned, multilingual Hugo documentation without JavaScript." headingLevel="1" primaryHref="/en/docs/latest/" primaryLabel="Open the latest docs" secondaryHref="/en/docs/latest/components/" secondaryLabel="Browse components" >}}
 {{< /hero >}}
 
-{{< release version="v0.1.0" date="May 2026" href="https://github.com/OWNER/hugo-theme-symblix/releases" >}}
+{{< release version="v0.1.0" date="May 2026" href="https://github.com/lexbity/hugo-symblix-theme/releases" >}}
 
 {{< install >}}
 {{< install-method label="Homebrew" >}}brew install symblix{{< /install-method >}}
@@ -15,11 +15,11 @@ description = "Versioned, multilingual Hugo documentation without JavaScript."
 {{< /install >}}
 
 {{< downloads >}}
-{{< download label="Linux x86_64" platform="linux" href="https://github.com/OWNER/hugo-theme-symblix/releases/latest/download/symblix-linux-amd64.tar.gz" checksum="https://github.com/OWNER/hugo-theme-symblix/releases/latest/download/symblix-linux-amd64.tar.gz.sha256" size="4.2 MB" primary="true" >}}
+{{< download label="Linux x86_64" platform="linux" href="https://github.com/lexbity/hugo-symblix-theme/releases/latest/download/symblix-linux-amd64.tar.gz" checksum="https://github.com/lexbity/hugo-symblix-theme/releases/latest/download/symblix-linux-amd64.tar.gz.sha256" size="4.2 MB" primary="true" >}}
 
-{{< download label="macOS arm64" platform="macos" href="https://github.com/OWNER/hugo-theme-symblix/releases/latest/download/symblix-darwin-arm64.tar.gz" size="3.9 MB" >}}
+{{< download label="macOS arm64" platform="macos" href="https://github.com/lexbity/hugo-symblix-theme/releases/latest/download/symblix-darwin-arm64.tar.gz" size="3.9 MB" >}}
 
-{{< download label="Windows x86_64" platform="windows" href="https://github.com/OWNER/hugo-theme-symblix/releases/latest/download/symblix-windows-x86_64.zip" size="4.6 MB" >}}
+{{< download label="Windows x86_64" platform="windows" href="https://github.com/lexbity/hugo-symblix-theme/releases/latest/download/symblix-windows-x86_64.zip" size="4.6 MB" >}}
 {{< /downloads >}}
 
 {{< feature-grid >}}

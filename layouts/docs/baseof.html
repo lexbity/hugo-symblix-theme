@@ -3,7 +3,9 @@
   lang="{{ partial "docs/helpers/language-code.html" . }}"
   dir="{{ or .Site.Language.Direction "ltr" }}"
   {{ with site.Params.docs.theme.density }}data-docs-density="{{ . }}"{{ end }}
-  {{ with site.Params.docs.theme.preset }}data-docs-preset="{{ . }}"{{ end }}
+  data-preset="{{ partial "docs/helpers/current-preset.html" . }}"
+  data-preset-source="default"
+  data-syntax="{{ partial "docs/helpers/current-syntax.html" . }}"
 >
   <head>
     {{ partial "head.html" . }}

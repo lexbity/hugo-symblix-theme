@@ -1,0 +1,42 @@
+{{- /* Preset switcher for sidebar footer (SYM-VIS-001 Phase 6).
+     Renders a <details> dropdown with visual swatches for each available preset.
+     Uses the presets helper for data. Hidden without JavaScript.
+*/ -}}
+{{- $presets := partial "docs/helpers/presets.html" . -}}
+{{- $current := $presets.current -}}
+
+{{ if site.Params.features.themeSwitcher }}
+<details class="docs-switcher docs-switcher--preset" data-preset-switcher>
+  <summary class="docs-switcher-summary">
+    <span class="docs-switcher-label">{{ i18n "theme_preset" | default "Theme" }}:</span>
+    <span class="docs-switcher-current" data-preset-current>
+      {{ range $presets.available }}{{ if eq .id $current }}{{ .label }}{{ end }}{{ end }}
+    </span>
+  </summary>
+  <ul class="docs-switcher-list" role="list">
+    {{ range $presets.available }}
+    <li>
+      <button
+        type="button"
+        class="docs-preset-option"
+        data-preset-id="{{ .id }}"
+        data-preset-mode="{{ .mode }}"
+        data-preset-label="{{ .label }}"
+        {{ if eq .id $current }}aria-current="true"{{ end }}
+      >
+        <span class="docs-preset-swatch" aria-hidden="true">
+          <span class="docs-preset-swatch__bg" style="background-color: {{ .swatchBg | safeCSS }}"></span>
+          <span class="docs-preset-swatch__accent" style="background-color: {{ .swatchAccent | safeCSS }}"></span>
+        </span>
+        <span class="docs-preset-info">
+          <span class="docs-preset-name">{{ .label }}</span>
+          {{ with .description }}
+          <span class="docs-preset-description">{{ . }}</span>
+          {{ end }}
+        </span>
+      </button>
+    </li>
+    {{ end }}
+  </ul>
+</details>
+{{ end }}

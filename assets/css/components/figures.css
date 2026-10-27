@@ -41,6 +41,29 @@
     display: none;
   }
 
+  /* Use data-syntax for preset-aware diagram switching (SYM-VIS-001 Phase 7) */
+  html[data-syntax="dark"] .docs-diagram__image--dark {
+    display: block;
+  }
+
+  html[data-syntax="dark"] .docs-diagram__image--light {
+    display: none;
+  }
+
+  /* OS dark preference for visitors who have not chosen a preset (no-JS
+     readers; JS visitors are flipped by the pre-paint script instead).
+     Keep the selector in sync with the presets.css media fallback. */
+  @media (prefers-color-scheme: dark) {
+    html[data-preset="symblix-light"]:not([data-preset-source="user"]) .docs-diagram__image--dark {
+      display: block;
+    }
+
+    html[data-preset="symblix-light"]:not([data-preset-source="user"]) .docs-diagram__image--light {
+      display: none;
+    }
+  }
+
+  /* Legacy data-theme support for backward compatibility */
   @media (prefers-color-scheme: dark) {
     html[data-theme="system"] .docs-diagram__image--dark {
       display: block;

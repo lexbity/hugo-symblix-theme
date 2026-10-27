@@ -8,6 +8,8 @@ A Hugo documentation theme for structured, navigable, versioned, multilingual te
 - **Search:** each language publishes a `search-index.json`; the search page runs instant in-browser search over it (version/type/topic filters), and falls back to a server-rendered page catalog plus the browse index without JavaScript.
 - **Syntax highlighting:** server-side Chroma highlighting with a theme-aware token palette — no client-side highlighter.
 - **Mermaid diagrams:** fenced `mermaid` blocks are rendered to static SVG at build time (light + dark variants, cached by content hash) by `npm run diagrams`; unrendered blocks fall back to a plain code block. No client-side Mermaid library, no external requests.
+- **Preset color system:** seven swappable color themes (light/dark modes) with bundled fonts, adaptive callouts, and automatic syntax highlighting switching.
+- **Bundled fonts:** self-hosted Inter (body) and JetBrains Mono (code) variable fonts with `font-display: swap` — zero external requests.
 - **Versioning:** current + archived docs trees, a version switcher with page-equivalent resolution, `noindex` and sitemap exclusion for archived releases.
 - **Multilingual:** per-language content trees, translation status warnings, and a language switcher that falls back gracefully when a page is untranslated.
 - **Pre-built CSS:** ships compiled CSS so sites need only Hugo. Tailwind CSS v4 is an optional development dependency for styling from source.
@@ -65,6 +67,50 @@ Start with these pages:
 - [Components](/en/docs/latest/components/)
 - [Diagrams](/en/docs/latest/components/diagrams/)
 - [Customization](/en/docs/latest/customization/)
+- [Presets System](/en/docs/latest/components/presets/)
+
+## Presets (Visual Identity)
+
+Symblix includes a comprehensive visual identity system with seven built-in **color presets**, bundled typography, and adaptive callout colors.
+
+### Color Presets
+
+Choose from seven complete color themes that define base colors, callout colors, and badge colors:
+
+- `symblix-light` (light, blue accent)
+- `symblix-dark` (dark, blue accent)
+- `ocean-dark` (dark, cyan-teal accent)
+- `forest-light` (light, green accent)
+- `sunset-dark` (dark, amber accent)
+- `solarized-light` (light, classic Solarized)
+- `high-contrast` (light, WCAG AAA compliant)
+
+Configure in `hugo.toml`:
+
+```toml
+[params.docs.theme]
+preset = "symblix-light"
+availablePresets = ["symblix-light", "symblix-dark", "ocean-dark"]
+```
+
+### Bundled Typography
+
+The theme bundles Inter (body text) and JetBrains Mono (code) as WOFF2 variable fonts under the SIL Open Font License 1.1. Both are self-hosted with `font-display: swap` and system fallbacks.
+
+### Adaptive Features
+
+- **Callout colors** adapt to each preset's accent color
+- **Syntax highlighting** automatically switches between light/dark palettes based on preset mode
+- **Mermaid diagrams** render light/dark variants matching the active preset
+
+Users switch presets via dropdowns in the sidebar footer (docs pages) and header (landing pages). Selections persist in `localStorage`. Visitors who have not picked a preset — including no-JS readers — get the OS color scheme: a pure-CSS `prefers-color-scheme: dark` fallback maps the light default to its dark tokens.
+
+### Dual Switcher Locations
+
+- Sidebar footer: Full preset list with swatches and descriptions
+- Front-page header: Compact icon button with dropdown panel
+
+Both stay in sync and are hidden without JavaScript (falling back to the configured default).
 
 ## Mermaid diagrams
 
@@ -103,7 +149,7 @@ The theme intentionally omits the following. They are not bugs; they are design 
 1. **No client-side dependency additions.** No search library, no font loader, no framework. Bundle budget stays ~12 KB minified JS.
 2. **No fuzzy/typo-tolerant search.** The hand-rolled exact-token matcher stays. Revisit only with evidence.
 3. **No "edit on GitHub", analytics bundling, or feedback widgets.** The `custom-head.html` hook is the sanctioned extension point; the theme ships none of them.
-4. **No webfont bundling.** The theme MUST NOT load fonts from the network. Font configuration accepts stack declarations only.
+4. **Self-hosted fonts only.** The theme bundles Inter and JetBrains Mono fonts locally. Font configuration accepts stack declarations with bundled fonts as the first choice, followed by system fallbacks.
 5. **No PDF / whole-version export.** Recorded as a possible future feature, not a commitment.
 6. **No JS-required navigation of any kind.** ⌘K-style palettes are excluded by the no-JS contract.
 7. **No whole-system refactor of parked areas.** Sidebar collapse/scroll-spy, per-version index splitting, and `render-image` improvements are out of blast radius and recorded as follow-ons.

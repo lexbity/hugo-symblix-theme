@@ -19,7 +19,7 @@ test("release badge renders version and changelog link", async ({ page }) => {
   await expect(badge).toBeVisible();
   await expect(badge.locator(".docs-release__version")).toHaveText("v0.1.0");
   await expect(badge.getByRole("link", { name: "Changelog" })).toHaveAttribute("href",
-    "https://github.com/OWNER/hugo-theme-symblix/releases");
+    "https://github.com/lexbity/hugo-symblix-theme/releases");
 });
 
 test("install renders the command byte-exact with the copy contract", async ({ page }) => {

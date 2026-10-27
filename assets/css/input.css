@@ -6,7 +6,6 @@
 @source "../js";
 
 @import "./theme.css";
-@import "./fonts.css";
 @import "./presets.css";
 @import "./syntax-light.css";
 @import "./syntax-dark.css";
@@ -33,3 +32,4 @@
 @import "./components/choice-groups.css";
 @import "./components/print-components.css";
 @import "./components/print.css";
+@import "./components/preset-switcher.css";

@@ -5,16 +5,19 @@
    - Inter: body text (weights 100-900)
    - JetBrains Mono: code/monospace (weights 100-800)
 
-   Font files are in static/fonts/ and served from the same origin.
+   Font files live in static/fonts/ and are served from the same origin.
    font-display: swap ensures text renders immediately with fallback fonts.
 
-   System font fallbacks are provided via --docs-font-body and --docs-font-mono
-   tokens in theme.css.
+   This file is a Hugo template (see layouts/partials/head.html): the URL
+   placeholders are filled with relURL values so the fonts resolve on subpath
+   deployments too. It is NOT imported by input.css — head.html publishes it
+   as a separate fingerprinted stylesheet for both the prebuilt and the
+   Tailwind-source CSS paths.
    ============================================================================ */
 
 @font-face {
   font-family: "Inter";
-  src: url("/fonts/inter/Inter-Variable.woff2") format("woff2-variations");
+  src: url("{{ .interUrl }}") format("woff2-variations");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -22,7 +25,7 @@
 
 @font-face {
   font-family: "Inter";
-  src: url("/fonts/inter/Inter-Variable-Italic.woff2") format("woff2-variations");
+  src: url("{{ .interItalicUrl }}") format("woff2-variations");
   font-weight: 100 900;
   font-style: italic;
   font-display: swap;
@@ -30,7 +33,7 @@
 
 @font-face {
   font-family: "JetBrains Mono";
-  src: url("/fonts/jetbrains-mono/JetBrainsMono[wght].woff2") format("woff2-variations");
+  src: url("{{ .monoUrl }}") format("woff2-variations");
   font-weight: 100 800;
   font-style: normal;
   font-display: swap;
@@ -38,7 +41,7 @@
 
 @font-face {
   font-family: "JetBrains Mono";
-  src: url("/fonts/jetbrains-mono/JetBrainsMono-Italic[wght].woff2") format("woff2-variations");
+  src: url("{{ .monoItalicUrl }}") format("woff2-variations");
   font-weight: 100 800;
   font-style: italic;
   font-display: swap;

@@ -97,12 +97,21 @@ test.describe("bundled fonts (Phase 3)", () => {
     expect(css).toContain("woff2-variations");
   });
 
-  test("compiled CSS contains @font-face rules", () => {
+  test("compiled CSS carries no @font-face rules (they are a templated resource)", () => {
     const compiledCssPath = join(REPO_ROOT, "assets", "css", "compiled", "theme.css");
     const css = require("node:fs").readFileSync(compiledCssPath, "utf-8");
 
+    // @font-face lives in fonts.css, rendered by head.html with relURL
+    // values so font requests survive subpath deployments. The compiled
+    // bundle must not re-import it (the template syntax would break CSS).
     const fontFaceCount = (css.match(/@font-face/g) || []).length;
-    expect(fontFaceCount).toBe(4);
+    expect(fontFaceCount).toBe(0);
+  });
+
+  test("built pages link the templated font stylesheet", async ({ page }) => {
+    await page.goto("/en/docs/latest/");
+    const fontCss = page.locator('link[rel="stylesheet"][href*="fonts"]');
+    await expect(fontCss).toHaveCount(1);
   });
 
   test("theme.css font tokens reference bundled fonts with system fallbacks", () => {

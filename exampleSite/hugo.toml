@@ -36,7 +36,7 @@ versions = { noindexArchived = true }
 # for identity verification (e.g. Mastodon).
 [[params.docs.social]]
 name = "GitHub"
-url = "https://github.com/OWNER/hugo-theme-symblix"
+url = "https://github.com/lexbity/hugo-symblix-theme"
 
 [params.docs.footer]
 copyright = "Symblix authors"
@@ -74,8 +74,8 @@ availablePresets = [
 visualPreset = "minimal"
 # Density: comfortable, compact, or dense
 density = "comfortable"
-# Font stacks (system fallbacks used if bundled fonts not available)
-# fonts = { body = "Inter", mono = "JetBrains Mono" }
+# Font stacks (bundled fonts with system fallbacks)
+fonts = { body = "Inter, ui-sans-serif, system-ui, -apple-system, sans-serif", mono = "JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, monospace" }
 
 [params.features]
 themeSwitcher = true

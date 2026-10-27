@@ -51,7 +51,8 @@ function getPresetMode(presetId) {
   return guessModeFromId(presetId);
 }
 
-/* Get stored preset from localStorage, with legacy migration */
+/* Get stored preset from localStorage, with legacy migration.
+   Returns null when the visitor has made no explicit choice. */
 function getStoredPreset() {
   try {
     /* Try new key first */
@@ -75,8 +76,7 @@ function getStoredPreset() {
     /* localStorage unavailable (private mode, quota, etc.) */
   }
 
-  /* Fall back to default from HTML attribute */
-  return document.documentElement.getAttribute("data-preset") || "symblix-light";
+  return null;
 }
 
 /* Fallback list of default preset IDs for validation when DOM has no switcher info.
@@ -113,8 +113,10 @@ function setPreset(presetId) {
     return false;
   }
 
-  /* Set preset attribute */
+  /* Set preset attribute. An explicit choice disables the CSS
+     prefers-color-scheme fallback (see presets.css). */
   document.documentElement.setAttribute("data-preset", presetId);
+  document.documentElement.setAttribute("data-preset-source", "user");
 
   /* Sync syntax attribute based on preset mode */
   const mode = getPresetMode(presetId);
@@ -152,25 +154,34 @@ function updateSwitcher(switcher, activePreset) {
     } else {
       el.removeAttribute("aria-current");
     }
-
-    /* Update class for visual active state */
-    if (isActive) {
-      el.classList.add("is-active");
-    } else {
-      el.classList.remove("is-active");
-    }
   });
 
-  /* Update summary/current label if present */
-  const label = switcher.querySelector("[data-preset-label]");
-  if (label) {
-    const activeEl = switcher.querySelector(
-      '[data-preset-id="' + activePreset + '"]'
+  /* Update summary/current label if present. Scoped to [data-preset-current]
+     so option buttons (which carry data-preset-label) can never be matched. */
+  const currentLabel = switcher.querySelector("[data-preset-current]");
+  const activeEl = switcher.querySelector(
+    '[data-preset-id="' + activePreset + '"]'
+  );
+  if (currentLabel && activeEl) {
+    currentLabel.textContent =
+      activeEl.getAttribute("data-preset-label") || activePreset;
+  }
+
+  /* Keep a summary swatch (header switcher) in sync with the active option */
+  const swatchBg = switcher.querySelector("[data-preset-swatch-bg]");
+  const swatchAccent = switcher.querySelector("[data-preset-swatch-accent]");
+  if (swatchBg && swatchAccent && activeEl) {
+    const optionBg = activeEl.querySelector(
+      ".docs-preset-swatch__bg"
     );
-    if (activeEl) {
-      const presetLabel =
-        activeEl.getAttribute("data-preset-label") || activePreset;
-      label.textContent = presetLabel;
+    const optionAccent = activeEl.querySelector(
+      ".docs-preset-swatch__accent"
+    );
+    if (optionBg) {
+      swatchBg.style.backgroundColor = optionBg.style.backgroundColor;
+    }
+    if (optionAccent) {
+      swatchAccent.style.backgroundColor = optionAccent.style.backgroundColor;
     }
   }
 }
@@ -202,18 +213,19 @@ function initSwitcher(switcher) {
 
 /* Initialize the theme system */
 export function initTheme() {
-  /* Get and apply the stored/default preset */
-  let currentPreset = getStoredPreset();
+  const storedPreset = getStoredPreset();
 
-  /* If the stored preset is invalid, fall back to default */
-  if (!setPreset(currentPreset)) {
-    const htmlPreset = document.documentElement.getAttribute("data-preset");
-    if (htmlPreset && isPresetAvailable(htmlPreset)) {
-      currentPreset = htmlPreset;
-    } else {
-      currentPreset = "symblix-light";
-    }
-    setPreset(currentPreset);
+  if (storedPreset && setPreset(storedPreset)) {
+    /* Explicit (or migrated) choice applied above. */
+  } else {
+    /* No explicit choice: leave the server-rendered default preset in place
+       so the CSS prefers-color-scheme fallback (presets.css) can adjust it
+       for visitors who have not picked a preset. Sync switcher UI only. */
+    const current =
+      document.documentElement.getAttribute("data-preset") || "symblix-light";
+    document.querySelectorAll("[data-preset-switcher]").forEach((switcher) => {
+      updateSwitcher(switcher, current);
+    });
   }
 
   /* Initialize all switchers */

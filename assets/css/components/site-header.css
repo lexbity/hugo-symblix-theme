@@ -7,11 +7,17 @@
   .docs-site-header__inner {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 1rem;
     max-width: var(--docs-home-width, 72rem);
     margin-inline: auto;
     padding: 0.65rem max(1.25rem, 3vw);
+  }
+
+  /* Push the right-hand group (nav and/or preset switcher) away from the
+     logo: the second child (nav when present, else the switcher) carries
+     the auto margin so the whole group stays right-aligned. */
+  .docs-site-header__inner > :nth-child(2) {
+    margin-inline-start: auto;
   }
 
   .docs-header-nav {

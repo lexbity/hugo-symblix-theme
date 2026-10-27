@@ -1,5 +1,4 @@
-{{- /* Returns the syntax mode ("light" or "dark") for the current preset.
-   Used to set data-syntax attribute on <html> for syntax highlighting.
+{{- /* Returns the current syntax mode ("light" or "dark") based on the current preset.
    Usage: {{ partial "docs/helpers/current-syntax.html" . }}
 */ -}}
 {{- $presets := partial "docs/helpers/presets.html" . -}}

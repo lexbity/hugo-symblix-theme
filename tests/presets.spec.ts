@@ -386,10 +386,14 @@ test.describe("CSS architecture (Phase 2)", () => {
     expect(css).toContain('html[data-syntax="dark"]');
   });
 
-  test("compiled CSS contains @font-face declarations", () => {
+  test("compiled CSS carries no @font-face declarations (templated resource)", () => {
+    // Font-face rules moved to fonts.css, a Hugo-templated stylesheet
+    // published by head.html with relURL values (subpath-safe). The bundle
+    // must not contain them, or the raw template syntax would break CSS.
     const css = readFileSync(compiledCssPath, "utf-8");
     const fontFaceCount = (css.match(/@font-face/g) || []).length;
-    expect(fontFaceCount).toBe(4);
+    expect(fontFaceCount).toBe(0);
+    expect(css).not.toContain("{{ .interUrl }}");
   });
 
   test("compiled CSS contains badge token definitions", () => {
@@ -824,3 +828,287 @@ test.describe("JavaScript runtime (Phase 5)", () => {
     expect(totalSize).toBeLessThan(20 * 1024);
   });
 });
+
+// Phase 6 tests: Switcher UI components
+test.describe("Switcher UI (Phase 6)", () => {
+  const sidebarHtmlPath = join(REPO_ROOT, "layouts", "partials", "docs", "sidebar.html");
+  const siteHeaderHtmlPath = join(REPO_ROOT, "layouts", "partials", "docs", "site-header.html");
+  const presetSwitcherPath = join(REPO_ROOT, "layouts", "partials", "docs", "preset-switcher.html");
+  const headerPresetSwitcherPath = join(REPO_ROOT, "layouts", "partials", "docs", "header-preset-switcher.html");
+  const themeSwitcherPath = join(REPO_ROOT, "layouts", "partials", "docs", "theme-switcher.html");
+  const presetSwitcherCssPath = join(REPO_ROOT, "assets", "css", "components", "preset-switcher.css");
+  const inputCssPath = join(REPO_ROOT, "assets", "css", "input.css");
+
+  test("preset-switcher.html exists (sidebar variant)", () => {
+    expect(existsSync(presetSwitcherPath)).toBe(true);
+    const content = readFileSync(presetSwitcherPath, "utf-8");
+    expect(content).toContain("data-preset-switcher");
+    expect(content).toContain("data-preset-id");
+    expect(content).toContain("data-preset-mode");
+    expect(content).toContain("docs-preset-swatch");
+    expect(content).toContain("docs-preset-option");
+  });
+
+  test("header-preset-switcher.html exists (header variant)", () => {
+    expect(existsSync(headerPresetSwitcherPath)).toBe(true);
+    const content = readFileSync(headerPresetSwitcherPath, "utf-8");
+    expect(content).toContain("docs-header-preset");
+    expect(content).toContain("data-preset-switcher");
+    expect(content).toContain("data-preset-id");
+    expect(content).toContain("data-preset-mode");
+  });
+
+  test("theme-switcher.html is deleted (replaced)", () => {
+    expect(existsSync(themeSwitcherPath)).toBe(false);
+  });
+
+  test("sidebar.html includes preset-switcher partial", () => {
+    const content = readFileSync(sidebarHtmlPath, "utf-8");
+    expect(content).toContain("preset-switcher.html");
+    expect(content).not.toContain("theme-switcher.html");
+  });
+
+  test("site-header.html includes header-preset-switcher partial", () => {
+    const content = readFileSync(siteHeaderHtmlPath, "utf-8");
+    expect(content).toContain("header-preset-switcher.html");
+  });
+
+  test("preset-switcher.css exists with styles", () => {
+    expect(existsSync(presetSwitcherCssPath)).toBe(true);
+    const css = readFileSync(presetSwitcherCssPath, "utf-8");
+    expect(css).toContain(".docs-preset-swatch");
+    expect(css).toContain(".docs-preset-option");
+    expect(css).toContain(".docs-header-preset");
+    expect(css).toContain(".docs-switcher--preset");
+  });
+
+  test("input.css imports preset-switcher.css", () => {
+    const content = readFileSync(inputCssPath, "utf-8");
+    expect(content).toContain('"./components/preset-switcher.css"');
+  });
+
+  test("sidebar preset switcher displays all available presets", async ({ page }) => {
+    await page.goto("/en/docs/latest/");
+
+    // The sidebar (and its switcher) is permanently visible at desktop
+    // width; the drawer toggle only exists on mobile.
+    const switcher = page.locator(".docs-switcher--preset");
+    await switcher.locator("summary").click();
+
+    // Check all 7 presets are visible
+    const options = switcher.locator(".docs-preset-option");
+    await expect(options).toHaveCount(7);
+
+    // Check swatches are rendered
+    await expect(options.first().locator(".docs-preset-swatch")).toBeVisible();
+  });
+
+  test("header preset switcher appears on front page", async ({ page }) => {
+    await page.goto("/en/");
+
+    const headerSwitcher = page.locator(".docs-header-preset");
+    await expect(headerSwitcher).toBeVisible();
+
+    // Open it
+    await headerSwitcher.locator("summary").click();
+
+    // Check presets
+    const options = headerSwitcher.locator(".docs-header-preset__option");
+    await expect(options).toHaveCount(7);
+  });
+
+  test("clicking preset in sidebar changes theme", async ({ page }) => {
+    await page.goto("/en/docs/latest/");
+
+    // Open preset switcher (sidebar is permanently visible at desktop width)
+    await page.locator(".docs-switcher--preset summary").click();
+
+    // Click a different preset
+    await page.locator('[data-preset-id="ocean-dark"]').first().click();
+
+    // Check attribute changed
+    const preset = await page.evaluate(() => {
+      return document.documentElement.getAttribute("data-preset");
+    });
+    expect(preset).toBe("ocean-dark");
+
+    // Check syntax attribute updated
+    const syntax = await page.evaluate(() => {
+      return document.documentElement.getAttribute("data-syntax");
+    });
+    expect(syntax).toBe("dark");
+  });
+
+  test("clicking preset in header changes theme", async ({ page }) => {
+    await page.goto("/en/");
+
+    // Open header switcher
+    await page.locator(".docs-header-preset summary").click();
+
+    // Click a different preset
+    await page.locator('[data-preset-id="forest-light"]').first().click();
+
+    // Check attribute changed
+    const preset = await page.evaluate(() => {
+      return document.documentElement.getAttribute("data-preset");
+    });
+    expect(preset).toBe("forest-light");
+
+    // Check syntax attribute updated
+    const syntax = await page.evaluate(() => {
+      return document.documentElement.getAttribute("data-syntax");
+    });
+    expect(syntax).toBe("light");
+  });
+
+  test("both switchers stay in sync", async ({ page }) => {
+    await page.goto("/en/");
+
+    // Change preset in header
+    await page.locator(".docs-header-preset summary").click();
+    await page.locator('[data-preset-id="ocean-dark"]').first().click();
+
+    // Navigate to docs page
+    await page.goto("/en/docs/latest/");
+
+    // Check sidebar switcher shows ocean-dark as active
+    const activeOption = page.locator('.docs-switcher--preset [data-preset-id="ocean-dark"]');
+    await expect(activeOption).toHaveAttribute("aria-current", "true");
+  });
+
+  test("preset switcher hidden without JavaScript", async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto("/en/docs/latest/");
+
+    // Switcher should be hidden
+    await expect(page.locator(".docs-switcher--preset")).toBeHidden();
+    await expect(page.locator(".docs-header-preset")).toBeHidden();
+
+    await context.close();
+  });
+
+  test("i18n keys exist for preset switcher", () => {
+    const locales = ["en", "fr", "ja", "ar"];
+    for (const locale of locales) {
+      const yamlPath = join(REPO_ROOT, "i18n", `${locale}.yaml`);
+      const content = readFileSync(yamlPath, "utf-8");
+      expect(content).toContain("theme_preset");
+      expect(content).toContain("select_preset");
+    }
+  });
+});
+
+// Phase 7 tests: Integration and Polish
+test.describe("Integration & Polish (Phase 7)", () => {
+  const baseofDefaultPath = join(REPO_ROOT, "layouts", "_default", "baseof.html");
+  const baseofDocsPath = join(REPO_ROOT, "layouts", "docs", "baseof.html");
+  const indexHtmlPath = join(REPO_ROOT, "layouts", "index.html");
+  const presetsMdPath = join(REPO_ROOT, "exampleSite", "content", "en", "docs", "latest", "components", "presets.md");
+  const navYamlPath = join(REPO_ROOT, "exampleSite", "data", "docs_nav.yaml");
+  const readmePath = join(REPO_ROOT, "README.md");
+  const migrationNotesPath = join(REPO_ROOT, "docs", "migration-notes.md");
+  const figuresCssPath = join(REPO_ROOT, "assets", "css", "components", "figures.css");
+
+  test("baseof templates have data-preset and data-syntax attributes", () => {
+    const checkAttributes = (path: string, name: string) => {
+      const content = readFileSync(path, "utf-8");
+      expect(content).toContain("data-preset=");
+      expect(content).toContain("data-syntax=");
+      expect(content).toContain("current-preset");
+      expect(content).toContain("current-syntax");
+    };
+
+    checkAttributes(baseofDefaultPath, "_default/baseof.html");
+    checkAttributes(baseofDocsPath, "docs/baseof.html");
+    checkAttributes(indexHtmlPath, "index.html");
+  });
+
+  test("presets.md documentation exists", () => {
+    expect(existsSync(presetsMdPath)).toBe(true);
+    const content = readFileSync(presetsMdPath, "utf-8");
+    expect(content).toContain('title = "Presets"');
+    expect(content).toContain("## Overview");
+    expect(content).toContain("## Configuration");
+    expect(content).toContain("## Custom Presets");
+    expect(content).toContain("color presets");
+  });
+
+  test("docs_nav.yaml has Presets entry", () => {
+    const content = readFileSync(navYamlPath, "utf-8");
+    expect(content).toContain("Presets");
+    expect(content).toContain("components/presets/");
+  });
+
+  test("README.md has Presets section", () => {
+    const content = readFileSync(readmePath, "utf-8");
+    expect(content).toContain("Presets (Visual Identity)");
+    expect(content).toContain("Color Presets");
+    expect(content).toContain("Bundled Typography");
+  });
+
+  test("migration-notes.md has Visual Identity entry", () => {
+    const content = readFileSync(migrationNotesPath, "utf-8");
+    expect(content).toContain("Visual Identity: Preset Color System");
+    expect(content).toContain("Seven Color Presets");
+    expect(content).toContain("Migration Path");
+  });
+
+  test("figures.css uses data-syntax for diagram switching", () => {
+    const content = readFileSync(figuresCssPath, "utf-8");
+    // The dark variant is display:none by default and revealed on
+    // html[data-syntax="dark"]; no "light" rule is needed for that.
+    expect(content).toContain('html[data-syntax="dark"]');
+  });
+
+  test("exampleSite hugo.toml has fonts configuration", () => {
+    const configPath = join(REPO_ROOT, "exampleSite", "hugo.toml");
+    const content = readFileSync(configPath, "utf-8");
+    expect(content).toContain('[params.docs.theme]');
+    expect(content).toContain('preset = "symblix-light"');
+    expect(content).toContain('availablePresets');
+    expect(content).toContain('fonts =');
+  });
+
+  test("pages incremented by 1 (presets.md added)", async ({ page }) => {
+    await page.goto("/en/docs/latest/components/");
+
+    // Check that the presets page link exists in the navigation (the same
+    // href also appears in the page's child-page cards, so take the first).
+    const presetsLink = page.locator('a[href*="components/presets"]').first();
+    await expect(presetsLink).toBeVisible();
+  });
+
+  test("no-JS visitors get the OS color scheme (prefers-color-scheme fallback)", async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false, colorScheme: "dark" });
+    const page = await context.newPage();
+    await page.goto("/en/docs/latest/");
+
+    // No explicit choice exists, so the CSS media fallback maps the
+    // symblix-light default to its dark tokens when the OS asks for dark.
+    const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    expect(bg).toBe("rgb(2, 3, 10)");
+
+    await context.close();
+  });
+
+  test("an explicit preset choice overrides the OS color scheme", async ({ browser }) => {
+    const context = await browser.newContext({ colorScheme: "dark" });
+    const page = await context.newPage();
+    await page.goto("/en/docs/latest/");
+    await page.evaluate(() => {
+      window.localStorage.setItem("docs-preset", "symblix-light");
+    });
+    await page.reload();
+
+    const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    expect(bg).toBe("rgb(248, 250, 252)");
+    const source = await page.evaluate(() =>
+      document.documentElement.getAttribute("data-preset-source"),
+    );
+    expect(source).toBe("user");
+
+    await context.close();
+  });
+});
+

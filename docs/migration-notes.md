@@ -1,5 +1,17 @@
 # Symblix Changelog and Migration Notes
 
+## Layout audit fixes, no-JS auto dark, subpath-safe fonts (2026-10)
+
+- **Preset switcher label sync (bug fix):** `updateSwitcher` matched the first `[data-preset-label]` in the switcher, which on the header switcher was the first *option button* — every page load overwrote that button's swatch and name with the active preset's label. The summary label now uses a dedicated `data-preset-current` attribute, and the header summary swatch (`data-preset-swatch-bg/-accent`) tracks the active option's colors.
+- **OS dark mode without an explicit choice:** a pure-CSS `prefers-color-scheme: dark` fallback in `presets.css` (plus diagram swapping in `figures.css`) maps the light default to its dark tokens for visitors who never picked a preset — including no-JS readers. JS visitors get the same treatment pre-paint in `head.html`. Explicit choices set `data-preset-source="user"`, which disables the fallback.
+- **Tables no longer overflow mobile:** new `render-table.html` hook wraps every Markdown table in the `.table-wrap` scroll container that `tables.css` already styled; previously no wrapper was generated and the 40rem table min-width forced page-level horizontal scroll at phone widths.
+- **Fonts are subpath-safe:** `fonts.css` became a Hugo-templated resource (rendered by `head.html` with `relURL` values) and the font preloads switched from hardcoded `/fonts/…` to `relURL` — on GitHub Pages project sites both previously 404'd. `fonts.css` is no longer imported by `input.css`; the Tailwind-source and prebuilt CSS paths both emit the templated stylesheet.
+- **Palette contrast fixes (WCAG):** light-preset callout colors that sat below the 3:1 UI threshold were darkened — symblix-light tip/warning/success/experimental, forest-light tip/info/warning/success/experimental, solarized-light note/tip/warning/success. Solarized-light body text, muted text, and accent were darkened to clear 4.5:1 against both background and surface (`#516773`, `#54686e`, `#16678f`); forest-light accent is now `#166534`. Update any downstream overrides that copied the old values from `data/docs_presets.yaml` / `presets.css`.
+- **Header layout:** the front-page preset swatch no longer floats mid-header; the right-hand group (nav + switcher) is right-aligned via an auto margin on the last header child.
+- **Example site:** placeholder `github.com/OWNER/hugo-theme-symblix` URLs (footer social link, release/download hrefs, `theme.toml` homepage) now point at the real repository path `lexbity/hugo-symblix-theme`.
+- **Hygiene:** removed the dead `.docs-switcher-select` rule, a redundant condition in `site-header.html`, and the unused `is-active` class writes in `theme.js`; Tailwind packages moved from `dependencies` to `devDependencies`; four i18n keys (`theme`, `light`, `dark`, `system`) removed from all locales.
+- **Tests:** `identity.spec` no longer hardcodes an absolute repo path; FCP/LCP tests navigate before measuring; the duplicate-preset-selector check counts strings instead of building an unescaped RegExp; stale assertions updated for the preset switcher (sidebar tests no longer click the mobile-only drawer toggle at desktop width); new tests cover the table wrapper, the no-JS OS dark fallback, and explicit-choice precedence. CSS budget re-based to 88 KB minified (92 KB hard fail) to reflect the preset system.
+
 ## Renamed to Symblix (2026-09-20)
 
 - The theme is now published as `hugo-theme-symblix` (module/theme id). The `theme.toml` name, `package.json` name, `exampleSite/themes/` symlink, and all `--theme` flags in `package.json` scripts are updated.
@@ -159,3 +171,131 @@ This release completes the transition from "works well for its author" to "reusa
 8. Add `docs/custom-head.html` in your site to inject analytics/fonts/verification tags
 9. Review palette config if you want brand colors: `[params.docs.theme.colors.accent = "#yourhex"]`
 10. Test no-JS: sidebar toggle works, switchers are plain links, search fallback renders
+
+## Visual Identity: Preset Color System, Bundled Typography (SYM-VIS-001)
+
+### Slice 1 — Preset Color System & Font Bundling (Phase 1-6)
+
+This slice introduces a comprehensive visual identity system with seven swappable color presets, bundled fonts, and adaptive callout colors.
+
+#### New Features
+
+1. **Seven Color Presets**: `symblix-light`, `symblix-dark`, `ocean-dark`, `forest-light`, `sunset-dark`, `solarized-light`, `high-contrast`
+2. **Bundled Fonts**: Inter (body) and JetBrains Mono (code) as WOFF2 variable fonts, self-hosted
+3. **Dual Preset Switchers**: Sidebar footer and front-page header
+4. **Adaptive Callouts**: Callout colors adapt to each preset's accent
+5. **Automatic Syntax Switching**: Syntax highlighting switches between light/dark palettes based on preset mode
+6. **Separate `data-syntax` Attribute**: For syntax highlighting, decoupled from preset selection
+
+#### Configuration
+
+```toml
+[params.docs.theme]
+preset = "symblix-light"        # Default preset ID
+availablePresets = ["symblix-light", "symblix-dark", ...]  # Switcher options
+visualPreset = "minimal"        # Visual style (minimal/rounded/high-contrast)
+density = "comfortable"         # Spacing (comfortable/compact/dense)
+fonts = {
+  body = "Inter, ui-sans-serif, system-ui, -apple-system, sans-serif",
+  mono = "JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, monospace"
+}
+```
+
+#### Custom Presets
+
+Create `data/docs_presets.yaml` in your project:
+
+```yaml
+presets:
+  - id: my-theme
+    label: My Theme
+    mode: light
+    colors:
+      bg: "#ffffff"
+      surface: "#f8f9fa"
+      surface2: "#e9ecef"
+      text: "#212529"
+      muted: "#6c757d"
+      border: "#dee2e6"
+      accent: "#0d6efd"
+    callouts:  # Optional; derived if omitted
+      info: "#0d6efd"
+      warning: "#ffc107"
+      # ... all 8 callout types
+    badges:  # Optional; derived if omitted
+      info: "#0d6efd"
+      warning: "#ffc107"
+      # ... all 4 badge types
+```
+
+#### Breaking Changes
+
+| Area | Before | After | Migration |
+|------|--------|-------|----------|
+| Theme switcher | `<select>` with light/dark/system | `<details>` with 7 presets | Remove old `theme-switcher.html`, use `preset-switcher.html` |
+| Theme attribute | `data-theme="light\|dark\|system"` | `data-preset="<id>"` | Legacy values auto-mapped; `data-theme` still works but deprecated |
+| localStorage key | `docs-theme` | `docs-preset` | Auto-migrated on first load |
+| Config key `preset` | Visual preset (minimal/rounded/high-contrast) | Color preset ID | Renamed to `visualPreset` in theme config; use `params.docs.theme.preset` for color preset |
+| Fonts | System fonts only | Bundled Inter + JetBrains Mono | Self-hosted, no external requests |
+| Syntax attribute | N/A | `data-syntax="light\|dark"` | Auto-set based on preset mode |
+
+#### Migration Path
+
+1. **Update configuration**: Add `[params.docs.theme]` with `preset` and `availablePresets`
+2. **Rename `preset` to `visualPreset`**: If you were using `params.docs.theme.preset` for visual styling, it's now `visualPreset`
+3. **Remove old theme-switcher**: Delete `layouts/partials/docs/theme-switcher.html` if it exists
+4. **Verify switcher UI**: The new preset switchers appear in sidebar and header
+5. **Test all presets**: Ensure each preset renders correctly with proper contrast
+6. **Update CSP**: If using strict CSP, allowlist the pre-paint preset script in `head.html`
+
+#### Files Changed
+
+- New: `data/docs_presets.yaml` (theme defaults)
+- New: `layouts/partials/docs/preset-switcher.html` (sidebar)
+- New: `layouts/partials/docs/header-preset-switcher.html` (header)
+- New: `assets/css/components/preset-switcher.css`
+- New: `assets/fonts/inter/*.woff2` (4 files)
+- New: `assets/fonts/jetbrains-mono/*.woff2` (4 files)
+- New: `assets/css/fonts.css` (font-face declarations)
+- New: `assets/css/presets.css` (generated preset colors)
+- New: `assets/css/syntax-light.css`, `assets/css/syntax-dark.css`
+- Modified: All baseof templates (added `data-preset`, `data-syntax`)
+- Modified: `layouts/partials/docs/sidebar.html` (uses new preset-switcher)
+- Modified: `layouts/partials/docs/site-header.html` (added header preset-switcher)
+- Modified: `assets/css/input.css` (added new imports)
+- Modified: All i18n files (added `theme_preset`, `select_preset`)
+- Deleted: `layouts/partials/docs/theme-switcher.html`
+- Deleted: `layouts/partials/docs/helpers/palette.html`
+
+#### Verification
+
+Run the following to verify:
+
+```bash
+npm run check          # Build with --panicOnWarning
+npm test              # Run Playwright test suite
+```
+
+All tests should pass, including:
+- Preset switching works in both locations
+- localStorage persistence works
+- Backward compatibility (data-theme mapping)
+- Fonts load without external requests
+- Accessibility (axe-core passes)
+- Visual regression screenshots
+
+#### Known Limitations
+
+1. **Preset switcher requires JavaScript**: Without JS, users see the default preset only; the switcher is hidden
+2. **Font bundle size**: ~1.07 MB for 4 WOFF2 variable font files
+3. **CSS size increase**: ~25% for preset color definitions
+4. **Safari < 16.2**: `color-mix()` fallbacks provided
+
+#### Backward Compatibility
+
+- `data-theme="light\|dark\|system"` continues to work, mapped to `symblix-light`, `symblix-dark`, `symblix-light`
+- `window.SymblixTheme.set("dark")` maps to `setPreset("symblix-dark")`
+- Legacy `localStorage["docs-theme"]` auto-migrates to `localStorage["docs-preset"]`
+- Sites without preset configuration default to `symblix-light`
+
+Full deprecation of `data-theme` planned for next major version.

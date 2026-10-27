@@ -4,7 +4,7 @@ import { test, expect } from "@playwright/test";
 import { readdirSync, statSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 
-const REPO_ROOT = "/home/lex/Public/WEBSITE/Symblix";
+const REPO_ROOT = join(__dirname, "..");
 const EXCLUDE_DIRS = new Set(["node_modules", "public", "test-results", ".git", "devdocs"]);
 // Allowlist: only docs/migration-notes.md may contain historical "docworkbench" mentions
 const ALLOWLIST = new Set(["docs/migration-notes.md", "tests/identity.spec.ts"]);

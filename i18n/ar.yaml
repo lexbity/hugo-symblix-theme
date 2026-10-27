@@ -100,14 +100,10 @@
   translation: تم النسخ
 - id: copy_failed
   translation: فشل النسخ
-- id: light
-  translation: فاتح
-- id: dark
-  translation: داكن
-- id: system
-  translation: النظام
-- id: theme
+- id: theme_preset
   translation: السمة
+- id: select_preset
+  translation: اختر السمة
 - id: search
   translation: بحث
 - id: search_results_count

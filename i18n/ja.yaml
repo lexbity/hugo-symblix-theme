@@ -100,14 +100,10 @@
   translation: コピーしました
 - id: copy_failed
   translation: コピーに失敗しました
-- id: theme
+- id: theme_preset
   translation: テーマ
-- id: light
-  translation: ライト
-- id: dark
-  translation: ダーク
-- id: system
-  translation: システム
+- id: select_preset
+  translation: テーマを選択
 - id: search
   translation: 検索
 - id: search_results_count

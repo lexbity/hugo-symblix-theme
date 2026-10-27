@@ -42,7 +42,10 @@
 {{ if site.Params.features.themeSwitcher }}
   {{/* Pre-paint preset restore (SYM-VIS-001 Phase 5): restore preset before first paint.
       Reads localStorage["docs-preset"], validates against available presets, migrates
-      from legacy "docs-theme", falls back to default. Sets data-syntax based on mode. */}}
+      from legacy "docs-theme", falls back to default. With no explicit choice, an OS
+      prefers-color-scheme: dark flips symblix-light to symblix-dark; an explicit choice
+      is recorded in data-preset-source="user", which also disables the pure-CSS fallback
+      for the same behavior in presets.css (no-JS visitors). */}}
   {{ $presets := partial "docs/helpers/presets.html" . }}
   {{ $presetModes := dict }}
   {{ range $presets.available }}
@@ -54,6 +57,7 @@
         var validPresets = {{ $presetModes | jsonify | safeJS }};
         var defaultPreset = {{ $presets.default | jsonify | safeJS }};
         var preset = null;
+        var explicit = false;
         try {
           preset = window.localStorage.getItem("docs-preset");
         } catch (e) {}
@@ -61,7 +65,9 @@
         if (preset && !validPresets[preset]) {
           preset = null;
         }
-        if (!preset) {
+        if (preset) {
+          explicit = true;
+        } else {
           /* Migrate from legacy docs-theme key */
           var legacy = null;
           try {
@@ -71,18 +77,33 @@
           else if (legacy === "dark") preset = "symblix-dark";
           else if (legacy === "system") preset = "symblix-light";
           /* Validate migrated preset */
-          if (preset && !validPresets[preset]) {
+          if (preset && validPresets[preset]) {
+            explicit = true;
+          } else {
             preset = null;
           }
         }
         if (!preset) {
-          /* Fall back to default from config */
+          /* Fall back to default from config, following the OS color scheme
+             until the visitor picks a preset (no-JS visitors get the same
+             treatment from the presets.css media query). */
           preset = defaultPreset;
+          if (
+            defaultPreset === "symblix-light" &&
+            validPresets["symblix-dark"] &&
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+          ) {
+            preset = "symblix-dark";
+          }
         }
         document.documentElement.setAttribute("data-preset", preset);
         /* Set syntax mode from preset mode map */
         var mode = validPresets[preset] || "light";
         document.documentElement.setAttribute("data-syntax", mode);
+        if (explicit) {
+          document.documentElement.setAttribute("data-preset-source", "user");
+        }
       } catch (error) {}
     })();
   </script>
@@ -134,20 +155,28 @@
     <meta name="twitter:image" content="{{ . | absURL }}">
   {{ end }}
 {{ end }}
+{{/* Preload critical bundled fonts (SYM-VIS-001 Phase 3). relURL keeps
+   subpath deployments (GitHub Pages project sites, /docs/ previews) working. */}}
+<link rel="preload" href="{{ "fonts/inter/Inter-Variable.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{ "fonts/jetbrains-mono/JetBrainsMono%5Bwght%5D.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
 {{ if site.Params.docs.tailwindSource }}
   {{ $css := resources.Get "css/input.css" | css.TailwindCSS }}
   {{ $css := $css | minify | fingerprint }}
-  {{/* Preload critical bundled fonts (SYM-VIS-001 Phase 3) */}}
-  <link rel="preload" href="/fonts/inter/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/jetbrains-mono/JetBrainsMono%5Bwght%5D.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
 {{ else }}
   {{ $css := resources.Get "css/compiled/theme.css" | minify | fingerprint }}
-  {{/* Preload critical bundled fonts (SYM-VIS-001 Phase 3) */}}
-  <link rel="preload" href="/fonts/inter/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/jetbrains-mono/JetBrainsMono%5Bwght%5D.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
 {{ end }}
+{{/* @font-face declarations are a Hugo-templated resource so font URLs respect
+   the site's basePath — a plain CSS url("/fonts/…") would 404 on subpath
+   deployments. fonts.css is no longer imported by input.css. */}}
+{{ $fontCss := resources.Get "css/fonts.css" | resources.ExecuteAsTemplate "fonts.css" (dict
+  "interUrl" ("fonts/inter/Inter-Variable.woff2" | relURL)
+  "interItalicUrl" ("fonts/inter/Inter-Variable-Italic.woff2" | relURL)
+  "monoUrl" ("fonts/jetbrains-mono/JetBrainsMono%5Bwght%5D.woff2" | relURL)
+  "monoItalicUrl" ("fonts/jetbrains-mono/JetBrainsMono-Italic%5Bwght%5D.woff2" | relURL)
+) | minify | fingerprint }}
+<link rel="stylesheet" href="{{ $fontCss.RelPermalink }}" integrity="{{ $fontCss.Data.Integrity }}">
 {{/* Font override from config (params.docs.theme.fonts) — applied after stylesheet */}}
 {{ $themeFonts := site.Params.docs.theme.fonts | default dict }}
 {{ if $themeFonts }}

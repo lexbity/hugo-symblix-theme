@@ -100,14 +100,10 @@
   translation: Copied
 - id: copy_failed
   translation: Copy failed
-- id: theme
+- id: theme_preset
   translation: Theme
-- id: light
-  translation: Light
-- id: dark
-  translation: Dark
-- id: system
-  translation: System
+- id: select_preset
+  translation: Select theme preset
 - id: search
   translation: Search
 - id: search_results_count

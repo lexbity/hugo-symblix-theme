@@ -21,6 +21,16 @@ test("render hooks emit the expected HTML structure", async ({ page }) => {
   await expect(page.locator("figure.docs-codeblock .highlight pre.chroma code.language-toml")).toHaveCount(1);
 });
 
+test("markdown tables render inside a scroll wrapper", async ({ page }) => {
+  // The table render hook wraps tables in .table-wrap so the 40rem table
+  // min-width cannot stretch narrow viewports (horizontal page scroll).
+  await page.goto("/en/docs/latest/getting-started/");
+  const wrapped = page.locator(".docs-content .table-wrap table");
+  await expect(wrapped.first()).toBeVisible();
+  await expect(wrapped).toHaveCount(1);
+  await expect(page.locator(".docs-content table:not(.table-wrap table)")).toHaveCount(0);
+});
+
 test("code blocks are syntax highlighted server-side", async ({ page }) => {
   await page.goto("/en/docs/latest/technical-content/");
 

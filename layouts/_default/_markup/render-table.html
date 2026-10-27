@@ -1,0 +1,26 @@
+{{- /* Wrap Markdown tables in a horizontal-scroll container so wide tables
+     (min-width: 40rem in tables.css) cannot stretch narrow viewports.
+     Table render hooks replace the default <table> output and have no
+     .Inner passthrough, so GFM structure is rebuilt from the context. */ -}}
+<div class="table-wrap">
+  <table>
+    <thead>
+      {{- range .THead }}
+      <tr>
+        {{- range . }}
+        <th{{ with .Alignment }} style="text-align: {{ . }}"{{ end }}>{{ .Text }}</th>
+        {{- end }}
+      </tr>
+      {{- end }}
+    </thead>
+    <tbody>
+      {{- range .TBody }}
+      <tr>
+        {{- range . }}
+        <td{{ with .Alignment }} style="text-align: {{ . }}"{{ end }}>{{ .Text }}</td>
+        {{- end }}
+      </tr>
+      {{- end }}
+    </tbody>
+  </table>
+</div>
