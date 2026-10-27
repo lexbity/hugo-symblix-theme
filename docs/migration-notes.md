@@ -1,5 +1,18 @@
 # Symblix Changelog and Migration Notes
 
+## Reading UX polish: docs top bar, search order, tablet shell (2026-10)
+
+- **Docs mobile chrome is a real top bar.** The floating "☰ Menu" text button — which overflowed its fixed 48px box, used the unicode ☰ glyph, and sat border-invisible on dark presets — is replaced by a fixed top bar: the sidebar `<details>` itself now renders its `<summary>` as the bar (decorative wordmark left, boxed toggle right, mirroring in RTL). Glyphs are theme SVGs (`menu`/`close`) that swap on open; the label is visually hidden; the drawer slides beneath the bar, which stays visible as the close control. A link inside the summary would nest interactive controls (axe `nested-interactive`), so the bar wordmark is decorative and the drawer keeps the linked logo.
+- **Search label de-duplicated.** The sidebar stacked "SEARCH" heading, "SEARCH DOCS" label, and a "Search docs" placeholder over one input; the field label is now visually hidden (screen readers only).
+- **Search box comes first.** `layouts/docs/search.html` rendered the page prose before `search-page.html`, pushing the actual input three screens down on phones; the form now renders above the prose.
+- **Copy buttons no longer cover code on phones.** `pre` reserves `padding-inline-end: 5.25rem` under 48rem; because the pre is forced LTR while the button follows the page direction, RTL pages reserve the physical left edge instead.
+- **Tablets get the full shell.** The sidebar breakpoint moved from 72rem to 64rem: 768–1151px (iPad landscape) now shows the sidebar column instead of the phone drawer, while the right TOC still waits for 72rem. `scripts.html` pre-paint and `sidebar.js` matchMedia updated — `sidebar.js` uses `max-width: 63.99rem` so the 64rem boundary doesn't double-match and close what the pre-paint opened.
+- **Sidebar group labels read once.** Manual-nav children whose resolved page equals their group's page are hidden, and the group's separate page link was removed — the label is a pure collapsible. Interactive content cannot nest inside a `<summary>` (the previous group link and the bar logo both tripped axe `nested-interactive`), so the label is plain text and the drawer keeps the linked logo.
+- **Heading anchors appear on hover/focus** instead of permanently prefixing every heading (`visibility` keeps the reserved space, so nothing shifts).
+- **Icon aliases:** `start`, `browse`, `static`, and `versions` now map to the glyph set, so content written before `icon-svg.html` existed renders icons instead of words — the translated front pages (fr/ja/ar) previously showed English fallback words inside Arabic/French/Japanese tiles.
+- **Switcher lists at desktop:** the generic `.docs-switcher-list` reset (grid, no markers) was mobile-only, leaving bullet markers on desktop version/language lists; it is now unscoped.
+- **Tests:** sidebar/no-js specs updated for the bar structure, the RTL navigation spec asserts the summary label, and new coverage rides the existing specs (search order, bar toggle, dedup). Verified: axe clean on representative pages and all presets, crawler green, 246/246.
+
 ## Front-page rail, bento blocks, video, expanded footer (2026-10, SYM-VIS-002)
 
 - **Front-page chrome option:** `params.docs.frontPage.chrome` selects `"topbar"` (default) or `"rail"` — a Material-style vertical icon rail from 48rem up (logo mark, `header`-menu items with `params.icon` glyphs, social icons, preset switcher). Below 48rem the header — with its no-JS dropdown — stays the front-page chrome, so the rail is landing-only and mobile keeps one familiar menu. Docs pages are unaffected. Config validation warns on unknown values.

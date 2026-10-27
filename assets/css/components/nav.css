@@ -26,8 +26,11 @@
   }
 
   .docs-nav-summary {
+    display: flex;
+    align-items: center;
     list-style: none;
     cursor: pointer;
+    min-height: 1.9rem;
   }
 
   .docs-nav-summary::-webkit-details-marker {

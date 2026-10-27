@@ -6,8 +6,11 @@
       <article class="docs-article">
         {{ partial "docs/page-header.html" . }}
         <div class="docs-content">
-          {{ .Content }}
+          {{- /* The search box comes first — the page prose below is
+                 reference material, not something to scroll past on a phone
+                 before being able to type. */ -}}
           {{ partial "docs/search-page.html" . }}
+          {{ .Content }}
         </div>
         {{ partial "docs/content-footer.html" . }}
       </article>

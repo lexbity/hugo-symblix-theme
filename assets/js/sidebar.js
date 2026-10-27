@@ -1,4 +1,4 @@
-const MOBILE_QUERY = window.matchMedia("(max-width: 72rem)");
+const MOBILE_QUERY = window.matchMedia("(max-width: 63.99rem)");
 
 function setBodyState(sidebar) {
   document.body.classList.toggle("docs-sidebar-open", sidebar.open && MOBILE_QUERY.matches);

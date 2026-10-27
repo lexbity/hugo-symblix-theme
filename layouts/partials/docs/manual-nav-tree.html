@@ -2,6 +2,10 @@
 {{ $current := .Current }}
 {{ $site := .Site | default site }}
 {{ $currentLang := $site.Language.Lang | default "en" }}
+{{/* Children whose resolved page equals their group's own page are hidden —
+   the group label already links there, so repeating it read as a stutter
+   ("User Guide" inside "User Guide"). */}}
+{{ $parentLink := .ParentLink | default "" }}
 
 {{ $rendered := slice }}
 {{ range $items }}
@@ -47,6 +51,10 @@
       {{ end }}
     {{ else if $url }}
       {{ $link = $url }}
+    {{ end }}
+
+    {{ if and $parentLink (eq (strings.TrimSuffix "/" $link) (strings.TrimSuffix "/" $parentLink)) }}
+      {{ continue }}
     {{ end }}
 
     {{ $isExternal := or ($item.external | default false) (hasPrefix $link "http") }}
@@ -119,16 +127,15 @@
       <li class="docs-nav-item">
         {{ $children := .children | default slice }}
         {{ if gt (len $children) 0 }}
+          {{- /* The group is a pure collapsible: the label is plain text
+                 (interactive controls must not nest inside a summary), the
+                 children carry the links, and a child equal to the group's
+                 own page is hidden so the label never reads twice. */ -}}
           <details class="docs-nav-group" open data-nav-group data-nav-path="{{ .link }}">
             <summary class="docs-nav-summary">
               <span class="docs-nav-summary-label">{{ .label }}</span>
             </summary>
-            {{ if .isExternal }}
-              <a class="docs-nav-link docs-nav-group-link" href="{{ .link }}" rel="external noopener" data-nav-link{{ if .isCurrent }} data-nav-current="true" aria-current="page"{{ end }}>{{ .label }}</a>
-            {{ else }}
-              <a class="docs-nav-link docs-nav-group-link" href="{{ .link }}" data-nav-link{{ if .isCurrent }} data-nav-current="true" aria-current="page"{{ end }}>{{ .label }}</a>
-            {{ end }}
-            {{ partial "docs/manual-nav-tree.html" (dict "Items" $children "Current" $current "Site" $site) }}
+            {{ partial "docs/manual-nav-tree.html" (dict "Items" $children "Current" $current "Site" $site "ParentLink" .link) }}
           </details>
         {{ else }}
           {{ if .isExternal }}

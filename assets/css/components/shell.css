@@ -139,35 +139,42 @@
 
   /* Footer styles live in site-footer.css (SYM-VIS-002 expanded footer). */
 
-  @media (max-width: 72rem) {
+  /* 64–72rem: sidebar column appears, the right TOC waits for 72rem
+     (toc.css). The sidebar details is a fixed top bar below 64rem. */
+  @media (max-width: 71.99rem) {
     .docs-shell {
-      grid-template-columns: minmax(0, 1fr);
-      grid-template-areas:
-        "main"
-        "sidebar"
-        "toc";
+      grid-template-columns: minmax(0, var(--docs-sidebar-width)) minmax(0, 1fr);
+      grid-template-areas: "sidebar main";
     }
 
-    .docs-sidebar,
-    .docs-main,
-    .docs-toc {
+    .docs-shell:has(> .docs-sidebar:not([open])) {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .docs-sidebar {
       margin: 0;
     }
 
-    .docs-main {
-      padding: 4.75rem 1rem 1rem;
-      border-inline: 0;
-      background: var(--docs-bg);
-    }
-
     .docs-toc {
+      grid-column: 1 / -1;
+      margin: 0;
       position: static;
       max-height: none;
       overflow: visible;
     }
+  }
 
-    .docs-sidebar {
-      margin-block-start: 0;
+  /* Below 64rem the sidebar is a fixed top bar over the article. */
+  @media (max-width: 63.99rem) {
+    .docs-shell {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: "main";
+    }
+
+    .docs-main {
+      padding: 4rem 1rem 1rem;
+      border-inline: 0;
+      background: var(--docs-bg);
     }
   }
 }

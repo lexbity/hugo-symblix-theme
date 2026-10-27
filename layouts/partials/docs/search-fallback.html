@@ -11,6 +11,8 @@
 <section class="docs-sidebar-search" aria-labelledby="docs-sidebar-search-title">
   <h2 id="docs-sidebar-search-title" class="docs-sidebar-heading">{{ i18n "search" | default "Search" }}</h2>
   <form class="docs-sidebar-search-form" role="search" method="get" action="{{ $searchLink }}">
+    {{- /* The visible "Search" heading plus the placeholder already name the
+           field; the label stays for screen readers only. */ -}}
     <label class="docs-sidebar-search-label" for="docs-sidebar-search-input">{{ $searchLabel }}</label>
     <input
       id="docs-sidebar-search-input"

@@ -1,12 +1,32 @@
 {{ $sidebarVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
 {{ $sidebarRoot := partialCached "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $sidebarVersion "Site" site) (site.Language.Lang) $sidebarVersion | strings.TrimSpace }}
 {{ $navMode := site.Params.docs.nav.mode | default "auto" }}
+{{- /* The <details> is the docs mobile top bar: its <summary> renders the
+       bar (logo + boxed toggle) and stays fixed above the drawer, so the
+       toggle is always reachable and swaps to a close glyph when open.
+       ≥64rem the bar hides while open and the panel becomes the sidebar
+       column; when closed it collapses to the bar as a slim rail. */ -}}
 <details
   class="docs-sidebar"
   data-sidebar
   data-sidebar-root="{{ site.Language.Lang }}|{{ $sidebarVersion }}|{{ $sidebarRoot }}"
 >
-  <summary class="docs-sidebar-toggle">{{ i18n "menu" | default "Menu" }}</summary>
+  <summary class="docs-sidebar-bar" aria-label="{{ i18n "menu" | default "Menu" }}">
+    {{- /* Decorative wordmark: a link inside the summary would nest
+           interactive controls; the drawer panel carries the linked logo. */ -}}
+    <span class="docs-logo docs-sidebar-bar-logo" aria-hidden="true">
+      {{- with site.Params.docs.logo -}}
+        <img src="{{ . | relURL }}" alt="">
+      {{- else -}}
+        {{ site.Params.docs.logoAlt | default site.Title }}
+      {{- end -}}
+    </span>
+    <span class="docs-sidebar-toggle">
+      <span class="docs-sidebar-toggle-glyph docs-sidebar-toggle-glyph--menu" aria-hidden="true">{{ partial "docs/helpers/icon.html" (dict "Name" "menu") }}</span>
+      <span class="docs-sidebar-toggle-glyph docs-sidebar-toggle-glyph--close" aria-hidden="true">{{ partial "docs/helpers/icon.html" (dict "Name" "close") }}</span>
+    </span>
+    <span class="docs-sidebar-toggle-label">{{ i18n "menu" | default "Menu" }}</span>
+  </summary>
   <div class="docs-sidebar-panel" aria-label="{{ i18n "menu" | default "Menu" }}">
     {{ partial "docs/logo.html" . }}
     {{ partial "docs/search-fallback.html" . }}

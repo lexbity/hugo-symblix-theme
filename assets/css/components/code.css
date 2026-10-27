@@ -125,6 +125,20 @@
     color: var(--docs-accent);
     border-color: var(--docs-accent);
   }
+
+  /* Narrow screens: keep code lines clear of the overlaying copy button.
+     The pre is forced LTR while the button follows the page direction, so
+     RTL pages reserve the physical left edge instead. */
+  @media (max-width: 48rem) {
+    .docs-content pre {
+      padding-inline-end: 5.25rem;
+    }
+
+    [dir="rtl"] .docs-content pre {
+      padding-inline-end: 1rem;
+      padding-left: 5.25rem;
+    }
+  }
 }
 
 /* Chroma syntax-highlight token consumers. Token DEFINITIONS are in theme.css. */
