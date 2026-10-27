@@ -5,18 +5,14 @@
   <meta name="description" content="{{ . | plainify }}">
 {{ end }}
 <link rel="canonical" href="{{ .Permalink }}">
-{{/* Favicon: param > templated asset (uses resolved light accent) */}}
+{{/* Favicon: param > templated asset (uses current preset's accent color) */}}
 {{ with site.Params.docs.favicon }}
   <link rel="icon" href="{{ . | relURL }}">
 {{ else }}
-  {{ $palette := partial "docs/helpers/palette.html" . }}
-  {{ if and $palette.emits $palette.light.accent }}
-    {{ $favicon := resources.Get "favicon.svg" | resources.ExecuteAsTemplate "favicon.svg" (dict "accent" $palette.light.accent) | minify }}
-    <link rel="icon" href="{{ $favicon.RelPermalink }}" type="image/svg+xml">
-  {{ else }}
-    {{ $favicon := resources.Get "favicon.svg" | resources.ExecuteAsTemplate "favicon.svg" (dict "accent" "#2563eb") | minify }}
-    <link rel="icon" href="{{ $favicon.RelPermalink }}" type="image/svg+xml">
-  {{ end }}
+  {{ $presets := partial "docs/helpers/presets.html" . }}
+  {{ $accent := $presets.currentColors.accent | default "#2563eb" }}
+  {{ $favicon := resources.Get "favicon.svg" | resources.ExecuteAsTemplate "favicon.svg" (dict "accent" $accent) | minify }}
+  <link rel="icon" href="{{ $favicon.RelPermalink }}" type="image/svg+xml">
 {{ end }}
 {{ $rss := .OutputFormats.Get "rss" }}
 {{ if not $rss }}{{ $rss = .Site.Home.OutputFormats.Get "rss" }}{{ end }}
@@ -44,17 +40,53 @@
   {{ end }}
 {{ end }}
 {{ if site.Params.features.themeSwitcher }}
+  {{/* Pre-paint preset restore (SYM-VIS-001 Phase 5): restore preset before first paint.
+      Reads localStorage["docs-preset"], validates against available presets, migrates
+      from legacy "docs-theme", falls back to default. Sets data-syntax based on mode. */}}
+  {{ $presets := partial "docs/helpers/presets.html" . }}
+  {{ $presetModes := dict }}
+  {{ range $presets.available }}
+    {{ $presetModes = merge $presetModes (dict .id .mode) }}
+  {{ end }}
   <script>
     (function () {
       try {
-        var theme = window.localStorage.getItem("docs-theme");
-        if (theme === "light" || theme === "dark" || theme === "system") {
-          document.documentElement.setAttribute("data-theme", theme);
+        var validPresets = {{ $presetModes | jsonify | safeJS }};
+        var defaultPreset = {{ $presets.default | jsonify | safeJS }};
+        var preset = null;
+        try {
+          preset = window.localStorage.getItem("docs-preset");
+        } catch (e) {}
+        /* Validate against available presets */
+        if (preset && !validPresets[preset]) {
+          preset = null;
         }
+        if (!preset) {
+          /* Migrate from legacy docs-theme key */
+          var legacy = null;
+          try {
+            legacy = window.localStorage.getItem("docs-theme");
+          } catch (e) {}
+          if (legacy === "light") preset = "symblix-light";
+          else if (legacy === "dark") preset = "symblix-dark";
+          else if (legacy === "system") preset = "symblix-light";
+          /* Validate migrated preset */
+          if (preset && !validPresets[preset]) {
+            preset = null;
+          }
+        }
+        if (!preset) {
+          /* Fall back to default from config */
+          preset = defaultPreset;
+        }
+        document.documentElement.setAttribute("data-preset", preset);
+        /* Set syntax mode from preset mode map */
+        var mode = validPresets[preset] || "light";
+        document.documentElement.setAttribute("data-syntax", mode);
       } catch (error) {}
     })();
   </script>
-  <noscript><style>.docs-switcher--theme,[data-sidebar-search]{display:none !important}</style></noscript>
+  <noscript><style>[data-preset-switcher]{display:none !important}</style></noscript>
 {{ end }}
 {{ $derived := partialCached "docs/helpers/versions.html" . .Site.Language.Lang }}
 {{ $currentVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
@@ -71,7 +103,6 @@
 {{ end }}
 {{/* Validate theme config early; partialCached per site */}}
 {{ partialCached "docs/helpers/validate-theme-config.html" . .Site.Language.Lang }}
-{{ $palette := partial "docs/helpers/palette.html" . }}
 {{ $seo := site.Params.seo | default dict }}
 {{ if $seo.openGraph }}
   {{ $ogTitle := .Title }}
@@ -106,68 +137,26 @@
 {{ if site.Params.docs.tailwindSource }}
   {{ $css := resources.Get "css/input.css" | css.TailwindCSS }}
   {{ $css := $css | minify | fingerprint }}
+  {{/* Preload critical bundled fonts (SYM-VIS-001 Phase 3) */}}
+  <link rel="preload" href="/fonts/inter/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/jetbrains-mono/JetBrainsMono%5Bwght%5D.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
 {{ else }}
   {{ $css := resources.Get "css/compiled/theme.css" | minify | fingerprint }}
+  {{/* Preload critical bundled fonts (SYM-VIS-001 Phase 3) */}}
+  <link rel="preload" href="/fonts/inter/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/jetbrains-mono/JetBrainsMono%5Bwght%5D.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
 {{ end }}
-{{/* Palette override block (D-03) - emitted immediately after stylesheet link */}}
-{{ if $palette.emits }}
+{{/* Font override from config (params.docs.theme.fonts) — applied after stylesheet */}}
+{{ $themeFonts := site.Params.docs.theme.fonts | default dict }}
+{{ if $themeFonts }}
   <style>
-    {{/* Fonts: no mode dimension, no a11y guard needed */}}
     :root {
-      {{ if $palette.fonts.body }}--docs-font-body: "{{ $palette.fonts.body }}";{{ end }}
-      {{ if $palette.fonts.mono }}--docs-font-mono: "{{ $palette.fonts.mono }}";{{ end }}
-    }
-    {{/* Non-accent tokens guarded by (forced-colors: none) */}}
-    @media (forced-colors: none) {
-      {{ if $palette.light }}
-        :root, html[data-theme="light"] {
-          {{ range $key, $val := $palette.light }}
-            --docs-{{ $key }}: {{ $val }};
-          {{ end }}
-        }
-      {{ end }}
-      {{ if $palette.dark }}
-        html[data-theme="dark"] {
-          {{ range $key, $val := $palette.dark }}
-            --docs-{{ $key }}: {{ $val }};
-          {{ end }}
-        }
-        {{/* System theme follows OS preference */}}
-        @media (prefers-color-scheme: dark) {
-          :root, html[data-theme="system"] {
-            {{ range $key, $val := $palette.dark }}
-              --docs-{{ $key }}: {{ $val }};
-            {{ end }}
-          }
-        }
-      {{ end }}
-      {{/* Accent & border additionally guarded: compound (forced-colors: none) and (prefers-contrast: no-preference) */}}
-      {{ if or ($palette.light.accent) ($palette.dark.accent) }}
-        @media (prefers-contrast: no-preference) {
-          {{ if $palette.light.accent }}
-            :root, html[data-theme="light"] {
-              --docs-accent: {{ $palette.light.accent }};
-              --docs-border: {{ if $palette.light.border }}{{ $palette.light.border }}{{ else }}{{ $palette.light.accent }}{{ end }};
-            }
-          {{ end }}
-          {{ if $palette.dark.accent }}
-            html[data-theme="dark"] {
-              --docs-accent: {{ $palette.dark.accent }};
-              --docs-border: {{ if $palette.dark.border }}{{ $palette.dark.border }}{{ else }}{{ $palette.dark.accent }}{{ end }};
-            }
-            @media (prefers-color-scheme: dark) {
-              :root, html[data-theme="system"] {
-                --docs-accent: {{ $palette.dark.accent }};
-                --docs-border: {{ if $palette.dark.border }}{{ $palette.dark.border }}{{ else }}{{ $palette.dark.accent }}{{ end }};
-              }
-            }
-          {{ end }}
-        }
-      {{ end }}
+      {{ with $themeFonts.body }}--docs-font-body: {{ . }};{{ end }}
+      {{ with $themeFonts.mono }}--docs-font-mono: {{ . }};{{ end }}
     }
   </style>
 {{ end }}
-{{/* Extension hook - site can override anything including palette */}}
+{{/* Extension hook - site can override anything */}}
 {{ partial "docs/custom-head.html" . }}

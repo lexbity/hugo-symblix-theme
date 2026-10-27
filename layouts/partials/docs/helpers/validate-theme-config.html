@@ -1,5 +1,13 @@
 {{- /* Validates theme config and emits warnf for violations.
-   Called from head.html via partialCached (per site). */ -}}
+   Called from head.html via partialCached (per site).
+
+   Validates:
+   - Visual preset (minimal/rounded/high-contrast) — renamed from "preset"
+   - Color preset (default preset ID + available presets list)
+   - Density enum
+   - Color hex values (legacy colors config)
+   - Font stack keys
+*/ -}}
 {{- $theme := site.Params.docs.theme | default dict -}}
 {{- /* Only validate if theme config is explicitly set (not just defaults) */ -}}
 {{- $hasThemeConfig := not (eq (len $theme) 0) -}}
@@ -9,19 +17,129 @@
 {{- $colors := $theme.colors | default dict -}}
 {{- $fonts := $theme.fonts | default dict -}}
 {{- $density := $theme.density | default "comfortable" -}}
-{{- $preset := $theme.preset | default "minimal" -}}
 
-{{- /* Enum checks */ -}}
+{{- /* ============================================================
+   Color Preset Validation (SYM-VIS-001 Phase 1)
+   ============================================================ */ -}}
+
+{{- /* Load all presets from data/docs_presets.yaml (theme + project merged by Hugo) */ -}}
+{{- $allPresets := slice -}}
+{{- with hugo.Data.docs_presets -}}
+  {{- $allPresets = .presets | default slice -}}
+{{- end -}}
+
+{{- /* Build lookup map: preset ID → preset dict */ -}}
+{{- $presetMap := dict -}}
+{{- range $allPresets -}}
+  {{- if .id -}}
+    {{- $presetMap = merge $presetMap (dict .id .) -}}
+  {{- else -}}
+    {{- warnf "docs_presets.yaml: preset missing required 'id' field" -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Also load inline presets from hugo.toml [[params.docs.theme.presets]] */ -}}
+{{- $inlinePresets := $theme.presets | default slice -}}
+{{- range $inlinePresets -}}
+  {{- if .id -}}
+    {{- $presetMap = merge $presetMap (dict .id .) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Collect available preset IDs for error messages */ -}}
+{{- $presetIds := slice -}}
+{{- range $allPresets -}}
+  {{- if .id -}}
+    {{- $presetIds = $presetIds | append .id -}}
+  {{- end -}}
+{{- end -}}
+{{- range $inlinePresets -}}
+  {{- if .id -}}
+    {{- $presetIds = $presetIds | append .id -}}
+  {{- end -}}
+{{- end -}}
+{{- $presetIds = $presetIds | sort -}}
+
+{{- /* Default color preset */ -}}
+{{- $defaultPreset := $theme.preset | default "symblix-light" -}}
+{{- if not (isset $presetMap $defaultPreset) -}}
+  {{- warnf "params.docs.theme.preset: unknown preset %q; falling back to \"symblix-light\". Available: %q" $defaultPreset $presetIds -}}
+{{- end -}}
+
+{{- /* Available presets list */ -}}
+{{- $availablePresets := $theme.availablePresets | default slice -}}
+{{- if gt (len $availablePresets) 0 -}}
+  {{- range $availablePresets -}}
+    {{- if not (isset $presetMap .) -}}
+      {{- warnf "params.docs.theme.availablePresets: unknown preset %q; it will be skipped" . -}}
+    {{- end -}}
+  {{- end -}}
+  {{- /* Default must be in available list */ -}}
+  {{- $defaultInAvailable := false -}}
+  {{- range $availablePresets -}}
+    {{- if eq . $defaultPreset -}}
+      {{- $defaultInAvailable = true -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if not $defaultInAvailable -}}
+    {{- warnf "params.docs.theme.preset %q is not in availablePresets %q; default preset must be available" $defaultPreset $availablePresets -}}
+  {{- end -}}
+{{- else -}}
+  {{- /* No availablePresets set — validate default is still a real preset */ -}}
+  {{- if not (isset $presetMap $defaultPreset) -}}
+    {{- warnf "params.docs.theme.preset: unknown preset %q and no availablePresets configured" $defaultPreset -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Validate preset definitions: required fields */ -}}
+{{- $requiredColorKeys := slice "bg" "surface" "surface2" "text" "muted" "border" "accent" -}}
+{{- range $allPresets -}}
+  {{- $preset := . -}}
+  {{- $pid := $preset.id | default "(missing id)" -}}
+  {{- if not $preset.label -}}
+    {{- warnf "docs_presets.yaml: preset %q missing required 'label' field" $pid -}}
+  {{- end -}}
+  {{- if not $preset.mode -}}
+    {{- warnf "docs_presets.yaml: preset %q missing required 'mode' field (must be \"light\" or \"dark\")" $pid -}}
+  {{- else if and (ne $preset.mode "light") (ne $preset.mode "dark") -}}
+    {{- warnf "docs_presets.yaml: preset %q has invalid mode %q; must be \"light\" or \"dark\"" $pid $preset.mode -}}
+  {{- end -}}
+  {{- if not $preset.colors -}}
+    {{- warnf "docs_presets.yaml: preset %q missing required 'colors' map" $pid -}}
+  {{- else -}}
+    {{- range $requiredColorKeys -}}
+      {{- if not (isset $preset.colors .) -}}
+        {{- warnf "docs_presets.yaml: preset %q missing required color key %q" $pid . -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* ============================================================
+   Visual Preset Validation (renamed from "preset" to "visualPreset")
+   ============================================================ */ -}}
+{{- $visualPreset := $theme.visualPreset | default "minimal" -}}
+{{- $validVisualPresets := dict "minimal" true "rounded" true "high-contrast" true -}}
+{{- if not (isset $validVisualPresets $visualPreset) -}}
+  {{- warnf "params.docs.theme.visualPreset: invalid value %q; must be one of %q" $visualPreset (slice "minimal" "rounded" "high-contrast") -}}
+{{- end -}}
+
+{{- /* Legacy: warn if old "preset" key is used for visual preset (string enum value) */ -}}
+{{- if and $theme.preset (isset $validVisualPresets $theme.preset) -}}
+  {{- warnf "params.docs.theme.preset: %q is a visual preset value; use params.docs.theme.visualPreset instead. For color presets, use a preset ID from data/docs_presets.yaml" $theme.preset -}}
+{{- end -}}
+
+{{- /* ============================================================
+   Density Validation
+   ============================================================ */ -}}
 {{- $validDensities := dict "comfortable" true "compact" true "dense" true -}}
 {{- if not (isset $validDensities $density) -}}
   {{- warnf "params.docs.theme.density: invalid value %q; must be one of %q" $density (slice "comfortable" "compact" "dense") -}}
 {{- end -}}
-{{- $validPresets := dict "minimal" true "rounded" true "high-contrast" true -}}
-{{- if not (isset $validPresets $preset) -}}
-  {{- warnf "params.docs.theme.preset: invalid value %q; must be one of %q" $preset (slice "minimal" "rounded" "high-contrast") -}}
-{{- end -}}
 
-{{- /* Hex validation for colors */ -}}
+{{- /* ============================================================
+   Legacy Color Config Validation (colors.accent, colors.light, colors.dark)
+   ============================================================ */ -}}
 {{- $hexRe := "^#[0-9a-fA-F]{3,8}$" -}}
 
 {{- if $colors.accent -}}
@@ -77,10 +195,33 @@
   {{- end -}}
 {{- end -}}
 
-{{- /* Unknown keys in fonts */ -}}
+{{- /* ============================================================
+   Font Config Validation
+   ============================================================ */ -}}
 {{- $knownFonts := dict "body" true "mono" true -}}
 {{- range $key, $_ := $fonts -}}
   {{- if not (isset $knownFonts $key) -}}
     {{- warnf "params.docs.theme.fonts: unknown key %q; known keys: %q" $key (slice "body" "mono") -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* ============================================================
+   Unknown keys in theme config
+   Note: Hugo lowercases all param keys, so we compare lowercase.
+   ============================================================ */ -}}
+{{- $knownThemeKeys := dict
+  "preset" true
+  "availablepresets" true
+  "presets" true
+  "visualpreset" true
+  "density" true
+  "colors" true
+  "fonts" true
+-}}
+{{- $knownThemeKeyList := slice "preset" "availablePresets" "presets" "visualPreset" "density" "colors" "fonts" -}}
+{{- range $key, $_ := $theme -}}
+  {{- $lowerKey := $key | lower -}}
+  {{- if not (isset $knownThemeKeys $lowerKey) -}}
+    {{- warnf "params.docs.theme: unknown key %q; known keys: %q" $key $knownThemeKeyList -}}
   {{- end -}}
 {{- end -}}

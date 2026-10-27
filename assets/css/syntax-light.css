@@ -1,0 +1,24 @@
+/* ============================================================================
+   SYNTAX HIGHLIGHTING — LIGHT PALETTE (SYM-VIS-001)
+   ----------------------------------------------------------------------------
+   Neutral, standard syntax colors for light mode. Separate from presets —
+   syntax highlighting does not change with preset selection. Automatically
+   applied when the active preset has mode="light" (via data-syntax attribute).
+
+   Token colors are consumed by assets/css/components/code.css (Chroma classes).
+   ============================================================================ */
+
+html[data-syntax="light"],
+:root:not([data-syntax]) {
+  --docs-code-bg: color-mix(in srgb, var(--docs-surface) 90%, var(--docs-bg));
+  --docs-code-text: var(--docs-text);
+  --docs-code-comment: #64748b;
+  --docs-code-keyword: #7c3aed;
+  --docs-code-string: #047857;
+  --docs-code-number: #b45309;
+  --docs-code-function: #1d4ed8;
+  --docs-code-type: #0f766e;
+  --docs-code-constant: #9d174d;
+  --docs-code-operator: #475569;
+  --docs-code-error: #dc2626;
+}

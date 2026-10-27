@@ -1,0 +1,45 @@
+/* ============================================================================
+   BUNDLED FONTS (SYM-VIS-001)
+   ----------------------------------------------------------------------------
+   Self-hosted variable fonts under SIL Open Font License 1.1.
+   - Inter: body text (weights 100-900)
+   - JetBrains Mono: code/monospace (weights 100-800)
+
+   Font files are in static/fonts/ and served from the same origin.
+   font-display: swap ensures text renders immediately with fallback fonts.
+
+   System font fallbacks are provided via --docs-font-body and --docs-font-mono
+   tokens in theme.css.
+   ============================================================================ */
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter/Inter-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter/Inter-Variable-Italic.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/jetbrains-mono/JetBrainsMono[wght].woff2") format("woff2-variations");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/jetbrains-mono/JetBrainsMono-Italic[wght].woff2") format("woff2-variations");
+  font-weight: 100 800;
+  font-style: italic;
+  font-display: swap;
+}

@@ -1,0 +1,228 @@
+# Symblix default color presets
+#
+# Each preset defines a complete color system: base colors, callout colors,
+# and badge colors. Projects can override these by creating their own
+# data/docs_presets.yaml (Hugo merges data files by key).
+#
+# Schema (per preset):
+#   id:          unique identifier, lowercase-hyphenated (REQUIRED)
+#   label:       human-readable name (REQUIRED)
+#   description: short description (OPTIONAL)
+#   mode:        "light" or "dark" — determines syntax highlighting (REQUIRED)
+#   colors:      base color tokens (REQUIRED, all 7 keys)
+#     bg, surface, surface2, text, muted, border, accent
+#   callouts:    semantic callout colors (OPTIONAL, derived if absent)
+#     note, tip, info, warning, danger, success, deprecated, experimental
+#   badges:      badge colors (OPTIONAL, derived if absent)
+#     info, warning, success, danger
+
+presets:
+  # ─────────────────────────────────────────────────────────────────────────
+  # symblix-light — Clean, neutral light theme with blue accent
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: symblix-light
+    label: Symblix Light
+    description: Clean, neutral light theme with blue accent
+    mode: light
+    colors:
+      bg: "#f8fafc"
+      surface: "#ffffff"
+      surface2: "#f1f5f9"
+      text: "#0f172a"
+      muted: "#475569"
+      border: "#dbe2ea"
+      accent: "#2563eb"
+    callouts:
+      note: "#64748b"
+      tip: "#10b981"
+      info: "#3b82f6"
+      warning: "#f59e0b"
+      danger: "#ef4444"
+      success: "#22c55e"
+      deprecated: "#8b5cf6"
+      experimental: "#f97316"
+    badges:
+      info: "#3b82f6"
+      warning: "#f59e0b"
+      success: "#22c55e"
+      danger: "#ef4444"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # symblix-dark — Deep, focused dark theme with blue accent
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: symblix-dark
+    label: Symblix Dark
+    description: Deep, focused dark theme with blue accent
+    mode: dark
+    colors:
+      bg: "#02030a"
+      surface: "#070d18"
+      surface2: "#0d1424"
+      text: "#e5e7eb"
+      muted: "#94a3b8"
+      border: "rgb(148 163 184 / 0.16)"
+      accent: "#4aa3ff"
+    callouts:
+      note: "#94a3b8"
+      tip: "#34d399"
+      info: "#60a5fa"
+      warning: "#fbbf24"
+      danger: "#f87171"
+      success: "#4ade80"
+      deprecated: "#a78bfa"
+      experimental: "#fb923c"
+    badges:
+      info: "#60a5fa"
+      warning: "#fbbf24"
+      success: "#4ade80"
+      danger: "#f87171"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # ocean-dark — Deep blue-teal dark theme, easy on the eyes
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: ocean-dark
+    label: Ocean
+    description: Deep blue-teal dark theme, easy on the eyes
+    mode: dark
+    colors:
+      bg: "#0a1628"
+      surface: "#0f1f35"
+      surface2: "#16294a"
+      text: "#e2e8f0"
+      muted: "#94a3b8"
+      border: "#1e3a5f"
+      accent: "#38bdf8"
+    callouts:
+      note: "#64748b"
+      tip: "#2dd4bf"
+      info: "#38bdf8"
+      warning: "#fbbf24"
+      danger: "#f87171"
+      success: "#34d399"
+      deprecated: "#a78bfa"
+      experimental: "#fb923c"
+    badges:
+      info: "#38bdf8"
+      warning: "#fbbf24"
+      success: "#34d399"
+      danger: "#f87171"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # forest-light — Warm, green-tinted light theme
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: forest-light
+    label: Forest
+    description: Warm, green-tinted light theme
+    mode: light
+    colors:
+      bg: "#f7f9f5"
+      surface: "#ffffff"
+      surface2: "#eef2ea"
+      text: "#1a2e1a"
+      muted: "#4a5d4a"
+      border: "#d4ddd0"
+      accent: "#16a34a"
+    callouts:
+      note: "#64748b"
+      tip: "#16a34a"
+      info: "#0ea5e9"
+      warning: "#d97706"
+      danger: "#dc2626"
+      success: "#16a34a"
+      deprecated: "#7c3aed"
+      experimental: "#ea580c"
+    badges:
+      info: "#0ea5e9"
+      warning: "#d97706"
+      success: "#16a34a"
+      danger: "#dc2626"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # sunset-dark — Warm amber-purple dark theme
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: sunset-dark
+    label: Sunset
+    description: Warm amber-purple dark theme
+    mode: dark
+    colors:
+      bg: "#1a1025"
+      surface: "#251632"
+      surface2: "#2f1d3f"
+      text: "#f3e8ff"
+      muted: "#c4b5fd"
+      border: "#4c1d95"
+      accent: "#f59e0b"
+    callouts:
+      note: "#a78bfa"
+      tip: "#34d399"
+      info: "#60a5fa"
+      warning: "#fbbf24"
+      danger: "#f87171"
+      success: "#4ade80"
+      deprecated: "#c084fc"
+      experimental: "#fb923c"
+    badges:
+      info: "#60a5fa"
+      warning: "#fbbf24"
+      success: "#4ade80"
+      danger: "#f87171"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # solarized-light — Classic Solarized light palette, warm and muted
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: solarized-light
+    label: Solarized Light
+    description: Classic Solarized light palette, warm and muted
+    mode: light
+    colors:
+      bg: "#fdf6e3"
+      surface: "#eee8d5"
+      surface2: "#e5ddc8"
+      text: "#657b83"
+      muted: "#839496"
+      border: "#d5cdb6"
+      accent: "#268bd2"
+    callouts:
+      note: "#93a1a1"
+      tip: "#859900"
+      info: "#268bd2"
+      warning: "#b58900"
+      danger: "#dc322f"
+      success: "#859900"
+      deprecated: "#6c71c4"
+      experimental: "#d33682"
+    badges:
+      info: "#268bd2"
+      warning: "#b58900"
+      success: "#859900"
+      danger: "#dc322f"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # high-contrast — Maximum contrast for accessibility (WCAG AAA)
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: high-contrast
+    label: High Contrast
+    description: Maximum contrast for accessibility (WCAG AAA)
+    mode: light
+    colors:
+      bg: "#ffffff"
+      surface: "#ffffff"
+      surface2: "#f8fafc"
+      text: "#000000"
+      muted: "#1f2937"
+      border: "#000000"
+      accent: "#0000ff"
+    callouts:
+      note: "#000000"
+      tip: "#006400"
+      info: "#0000ff"
+      warning: "#8b0000"
+      danger: "#ff0000"
+      success: "#006400"
+      deprecated: "#4b0082"
+      experimental: "#ff4500"
+    badges:
+      info: "#0000ff"
+      warning: "#8b0000"
+      success: "#006400"
+      danger: "#ff0000"

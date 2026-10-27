@@ -17,24 +17,26 @@
     background: color-mix(in srgb, var(--docs-bg) 92%, var(--docs-border));
   }
 
+  /* Badge colors use preset tokens with fallbacks matching symblix-light defaults.
+     Fallbacks ensure badges render correctly if presets are not loaded. */
   .docs-badge--info,
   .docs-badge-info {
-    background: color-mix(in srgb, var(--docs-bg) 82%, #3b82f6);
+    background: color-mix(in srgb, var(--docs-bg) 82%, var(--docs-badge-info));
   }
 
   .docs-badge--warning,
   .docs-badge-warning {
-    background: color-mix(in srgb, var(--docs-bg) 82%, #f59e0b);
+    background: color-mix(in srgb, var(--docs-bg) 82%, var(--docs-badge-warning));
   }
 
   .docs-badge--success,
   .docs-badge-success {
-    background: color-mix(in srgb, var(--docs-bg) 82%, #22c55e);
+    background: color-mix(in srgb, var(--docs-bg) 82%, var(--docs-badge-success));
   }
 
   .docs-badge--danger,
   .docs-badge-danger {
-    background: color-mix(in srgb, var(--docs-bg) 82%, #ef4444);
+    background: color-mix(in srgb, var(--docs-bg) 82%, var(--docs-badge-danger));
   }
 
   .docs-lifecycle-badges {

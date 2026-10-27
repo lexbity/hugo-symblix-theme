@@ -1,0 +1,114 @@
+{{- /* Preset resolution helper (SYM-VIS-001 Phase 4).
+   Resolves color presets from data/docs_presets.yaml
+   and inline params, returning a structured dict for templates.
+   Replaces the old palette resolution logic.
+
+   Returns: dict {
+     default: string,           // default preset ID (from params.docs.theme.preset)
+     available: []dict,         // list of available presets for the switcher
+     all: map[string]dict,      // all presets by ID (for lookups)
+     current: string,           // resolved current preset (from page param or default)
+     currentMode: string,       // "light" or "dark" (from current preset)
+     currentColors: map,        // color tokens for current preset
+   }
+
+   Each available preset dict has:
+     id, label, description, mode, swatchBg, swatchAccent
+
+   Note: Hugo lowercases all param keys, so we access params with lowercase.
+*/ -}}
+
+{{- /* Load presets from data/docs_presets.yaml (theme + project merged by Hugo) */ -}}
+{{- $allPresets := slice -}}
+{{- with hugo.Data.docs_presets -}}
+  {{- $allPresets = .presets | default slice -}}
+{{- end -}}
+
+{{- /* Load inline presets from hugo.toml [[params.docs.theme.presets]] */ -}}
+{{- $theme := site.Params.docs.theme | default dict -}}
+{{- $inlinePresets := $theme.presets | default slice -}}
+
+{{- /* Build lookup map: preset ID → preset dict (inline overrides data) */ -}}
+{{- $presetMap := dict -}}
+{{- range $allPresets -}}
+  {{- if .id -}}
+    {{- $presetMap = merge $presetMap (dict .id .) -}}
+  {{- end -}}
+{{- end -}}
+{{- range $inlinePresets -}}
+  {{- if .id -}}
+    {{- $presetMap = merge $presetMap (dict .id .) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Default preset (params.docs.theme.preset, lowercased by Hugo) */ -}}
+{{- $defaultPreset := $theme.preset | default "symblix-light" -}}
+
+{{- /* Available presets list (params.docs.theme.availablepresets, lowercased) */ -}}
+{{- $availableIds := $theme.availablepresets | default slice -}}
+{{- if not $availableIds -}}
+  {{- /* If not configured, all defined presets are available */ -}}
+  {{- $availableIds = slice -}}
+  {{- range $allPresets -}}
+    {{- if .id -}}
+      {{- $availableIds = $availableIds | append .id -}}
+    {{- end -}}
+  {{- end -}}
+  {{- range $inlinePresets -}}
+    {{- if .id -}}
+      {{- $availableIds = $availableIds | append .id -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Build available list with swatch colors for UI */ -}}
+{{- $available := slice -}}
+{{- range $availableIds -}}
+  {{- $preset := index $presetMap . -}}
+  {{- if $preset -}}
+    {{- $swatchBg := $preset.colors.bg | default "#ffffff" -}}
+    {{- $swatchAccent := $preset.colors.accent | default "#2563eb" -}}
+    {{- $available = $available | append (dict
+      "id" $preset.id
+      "label" ($preset.label | default $preset.id)
+      "description" ($preset.description | default "")
+      "mode" ($preset.mode | default "light")
+      "swatchBg" $swatchBg
+      "swatchAccent" $swatchAccent
+    ) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Resolve current preset: page param > default */ -}}
+{{- $current := .Params.preset | default "" -}}
+{{- if not $current -}}
+  {{- $current = $defaultPreset -}}
+{{- end -}}
+{{- /* Validate current is in available list, fall back to default */ -}}
+{{- $currentValid := false -}}
+{{- range $available -}}
+  {{- if eq .id $current -}}
+    {{- $currentValid = true -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $currentValid -}}
+  {{- $current = $defaultPreset -}}
+{{- end -}}
+
+{{- /* Get current preset details */ -}}
+{{- $currentPreset := index $presetMap $current -}}
+{{- $currentMode := "light" -}}
+{{- $currentColors := dict -}}
+{{- if $currentPreset -}}
+  {{- $currentMode = $currentPreset.mode | default "light" -}}
+  {{- $currentColors = $currentPreset.colors | default dict -}}
+{{- end -}}
+
+{{- return dict
+  "default" $defaultPreset
+  "available" $available
+  "all" $presetMap
+  "current" $current
+  "currentMode" $currentMode
+  "currentColors" $currentColors
+-}}

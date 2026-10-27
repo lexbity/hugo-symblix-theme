@@ -1,0 +1,333 @@
+/* ============================================================================
+   SYMBLIX COLOR PRESETS (SYM-VIS-001)
+   ----------------------------------------------------------------------------
+   Each preset is a complete color system scoped to html[data-preset="<id>"].
+   Presets define: base colors, callout colors, badge colors, choice colors,
+   shadows, and focus rings.
+
+   Source of truth: data/docs_presets.yaml
+   This file is hand-written from the YAML; a sync test verifies consistency.
+
+   Syntax highlighting is separate — see syntax-light.css and syntax-dark.css.
+   ============================================================================ */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   symblix-light — Clean, neutral light theme with blue accent
+   ───────────────────────────────────────────────────────────────────────── */
+html[data-preset="symblix-light"] {
+  color-scheme: light;
+  --docs-bg: #f8fafc;
+  --docs-surface: #ffffff;
+  --docs-surface-2: #f1f5f9;
+  --docs-text: #0f172a;
+  --docs-muted: #475569;
+  --docs-border: #dbe2ea;
+  --docs-accent: #2563eb;
+  --docs-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+  --docs-focus-ring: 2px solid var(--docs-accent);
+  --docs-focus-offset: 2px;
+
+  /* Callout border colors */
+  --docs-callout-note: #64748b;
+  --docs-callout-tip: #10b981;
+  --docs-callout-info: #3b82f6;
+  --docs-callout-warning: #f59e0b;
+  --docs-callout-danger: #ef4444;
+  --docs-callout-success: #22c55e;
+  --docs-callout-deprecated: #8b5cf6;
+  --docs-callout-experimental: #f97316;
+
+  /* Choice group status colors */
+  --docs-choice-ok: #22c55e;
+  --docs-choice-warn: #f59e0b;
+
+  /* Warning amber */
+  --docs-warn: #f59e0b;
+
+  /* Badge colors */
+  --docs-badge-info: #3b82f6;
+  --docs-badge-warning: #f59e0b;
+  --docs-badge-success: #22c55e;
+  --docs-badge-danger: #ef4444;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   symblix-dark — Deep, focused dark theme with blue accent
+   ───────────────────────────────────────────────────────────────────────── */
+html[data-preset="symblix-dark"] {
+  color-scheme: dark;
+  --docs-bg: #02030a;
+  --docs-surface: #070d18;
+  --docs-surface-2: #0d1424;
+  --docs-text: #e5e7eb;
+  --docs-muted: #94a3b8;
+  --docs-border: rgb(148 163 184 / 0.16);
+  --docs-accent: #4aa3ff;
+  --docs-shadow: 0 1px 0 rgb(255 255 255 / 0.035), 0 18px 42px rgb(0 0 0 / 0.32);
+  --docs-focus-ring: 2px solid var(--docs-accent);
+  --docs-focus-offset: 2px;
+
+  /* Callout border colors */
+  --docs-callout-note: #94a3b8;
+  --docs-callout-tip: #34d399;
+  --docs-callout-info: #60a5fa;
+  --docs-callout-warning: #fbbf24;
+  --docs-callout-danger: #f87171;
+  --docs-callout-success: #4ade80;
+  --docs-callout-deprecated: #a78bfa;
+  --docs-callout-experimental: #fb923c;
+
+  /* Choice group status colors */
+  --docs-choice-ok: #4ade80;
+  --docs-choice-warn: #fbbf24;
+
+  /* Warning amber */
+  --docs-warn: #fbbf24;
+
+  /* Badge colors */
+  --docs-badge-info: #60a5fa;
+  --docs-badge-warning: #fbbf24;
+  --docs-badge-success: #4ade80;
+  --docs-badge-danger: #f87171;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   ocean-dark — Deep blue-teal dark theme, easy on the eyes
+   ───────────────────────────────────────────────────────────────────────── */
+html[data-preset="ocean-dark"] {
+  color-scheme: dark;
+  --docs-bg: #0a1628;
+  --docs-surface: #0f1f35;
+  --docs-surface-2: #16294a;
+  --docs-text: #e2e8f0;
+  --docs-muted: #94a3b8;
+  --docs-border: #1e3a5f;
+  --docs-accent: #38bdf8;
+  --docs-shadow: 0 1px 0 rgb(255 255 255 / 0.035), 0 18px 42px rgb(0 0 0 / 0.32);
+  --docs-focus-ring: 2px solid var(--docs-accent);
+  --docs-focus-offset: 2px;
+
+  /* Callout border colors */
+  --docs-callout-note: #64748b;
+  --docs-callout-tip: #2dd4bf;
+  --docs-callout-info: #38bdf8;
+  --docs-callout-warning: #fbbf24;
+  --docs-callout-danger: #f87171;
+  --docs-callout-success: #34d399;
+  --docs-callout-deprecated: #a78bfa;
+  --docs-callout-experimental: #fb923c;
+
+  /* Choice group status colors */
+  --docs-choice-ok: #34d399;
+  --docs-choice-warn: #fbbf24;
+
+  /* Warning amber */
+  --docs-warn: #fbbf24;
+
+  /* Badge colors */
+  --docs-badge-info: #38bdf8;
+  --docs-badge-warning: #fbbf24;
+  --docs-badge-success: #34d399;
+  --docs-badge-danger: #f87171;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   forest-light — Warm, green-tinted light theme
+   ───────────────────────────────────────────────────────────────────────── */
+html[data-preset="forest-light"] {
+  color-scheme: light;
+  --docs-bg: #f7f9f5;
+  --docs-surface: #ffffff;
+  --docs-surface-2: #eef2ea;
+  --docs-text: #1a2e1a;
+  --docs-muted: #4a5d4a;
+  --docs-border: #d4ddd0;
+  --docs-accent: #16a34a;
+  --docs-shadow: 0 1px 2px rgb(26 46 26 / 0.04);
+  --docs-focus-ring: 2px solid var(--docs-accent);
+  --docs-focus-offset: 2px;
+
+  /* Callout border colors */
+  --docs-callout-note: #64748b;
+  --docs-callout-tip: #16a34a;
+  --docs-callout-info: #0ea5e9;
+  --docs-callout-warning: #d97706;
+  --docs-callout-danger: #dc2626;
+  --docs-callout-success: #16a34a;
+  --docs-callout-deprecated: #7c3aed;
+  --docs-callout-experimental: #ea580c;
+
+  /* Choice group status colors */
+  --docs-choice-ok: #16a34a;
+  --docs-choice-warn: #d97706;
+
+  /* Warning amber */
+  --docs-warn: #d97706;
+
+  /* Badge colors */
+  --docs-badge-info: #0ea5e9;
+  --docs-badge-warning: #d97706;
+  --docs-badge-success: #16a34a;
+  --docs-badge-danger: #dc2626;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   sunset-dark — Warm amber-purple dark theme
+   ───────────────────────────────────────────────────────────────────────── */
+html[data-preset="sunset-dark"] {
+  color-scheme: dark;
+  --docs-bg: #1a1025;
+  --docs-surface: #251632;
+  --docs-surface-2: #2f1d3f;
+  --docs-text: #f3e8ff;
+  --docs-muted: #c4b5fd;
+  --docs-border: #4c1d95;
+  --docs-accent: #f59e0b;
+  --docs-shadow: 0 1px 0 rgb(255 255 255 / 0.035), 0 18px 42px rgb(0 0 0 / 0.32);
+  --docs-focus-ring: 2px solid var(--docs-accent);
+  --docs-focus-offset: 2px;
+
+  /* Callout border colors */
+  --docs-callout-note: #a78bfa;
+  --docs-callout-tip: #34d399;
+  --docs-callout-info: #60a5fa;
+  --docs-callout-warning: #fbbf24;
+  --docs-callout-danger: #f87171;
+  --docs-callout-success: #4ade80;
+  --docs-callout-deprecated: #c084fc;
+  --docs-callout-experimental: #fb923c;
+
+  /* Choice group status colors */
+  --docs-choice-ok: #4ade80;
+  --docs-choice-warn: #fbbf24;
+
+  /* Warning amber */
+  --docs-warn: #fbbf24;
+
+  /* Badge colors */
+  --docs-badge-info: #60a5fa;
+  --docs-badge-warning: #fbbf24;
+  --docs-badge-success: #4ade80;
+  --docs-badge-danger: #f87171;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   solarized-light — Classic Solarized light palette, warm and muted
+   ───────────────────────────────────────────────────────────────────────── */
+html[data-preset="solarized-light"] {
+  color-scheme: light;
+  --docs-bg: #fdf6e3;
+  --docs-surface: #eee8d5;
+  --docs-surface-2: #e5ddc8;
+  --docs-text: #657b83;
+  --docs-muted: #839496;
+  --docs-border: #d5cdb6;
+  --docs-accent: #268bd2;
+  --docs-shadow: 0 1px 2px rgb(101 123 131 / 0.08);
+  --docs-focus-ring: 2px solid var(--docs-accent);
+  --docs-focus-offset: 2px;
+
+  /* Callout border colors */
+  --docs-callout-note: #93a1a1;
+  --docs-callout-tip: #859900;
+  --docs-callout-info: #268bd2;
+  --docs-callout-warning: #b58900;
+  --docs-callout-danger: #dc322f;
+  --docs-callout-success: #859900;
+  --docs-callout-deprecated: #6c71c4;
+  --docs-callout-experimental: #d33682;
+
+  /* Choice group status colors */
+  --docs-choice-ok: #859900;
+  --docs-choice-warn: #b58900;
+
+  /* Warning amber */
+  --docs-warn: #b58900;
+
+  /* Badge colors */
+  --docs-badge-info: #268bd2;
+  --docs-badge-warning: #b58900;
+  --docs-badge-success: #859900;
+  --docs-badge-danger: #dc322f;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   high-contrast — Maximum contrast for accessibility (WCAG AAA)
+   ───────────────────────────────────────────────────────────────────────── */
+html[data-preset="high-contrast"] {
+  color-scheme: light;
+  --docs-bg: #ffffff;
+  --docs-surface: #ffffff;
+  --docs-surface-2: #f8fafc;
+  --docs-text: #000000;
+  --docs-muted: #1f2937;
+  --docs-border: #000000;
+  --docs-accent: #0000ff;
+  --docs-shadow: none;
+  --docs-focus-ring: 3px solid #000000;
+  --docs-focus-offset: 3px;
+
+  /* Callout border colors */
+  --docs-callout-note: #000000;
+  --docs-callout-tip: #006400;
+  --docs-callout-info: #0000ff;
+  --docs-callout-warning: #8b0000;
+  --docs-callout-danger: #ff0000;
+  --docs-callout-success: #006400;
+  --docs-callout-deprecated: #4b0082;
+  --docs-callout-experimental: #ff4500;
+
+  /* Choice group status colors */
+  --docs-choice-ok: #006400;
+  --docs-choice-warn: #8b0000;
+
+  /* Warning amber */
+  --docs-warn: #8b0000;
+
+  /* Badge colors */
+  --docs-badge-info: #0000ff;
+  --docs-badge-warning: #8b0000;
+  --docs-badge-success: #006400;
+  --docs-badge-danger: #ff0000;
+}
+
+/* ============================================================================
+   FALLBACK: Default to symblix-light when no data-preset is set
+   This ensures the site renders correctly before Phase 7 wires up presets.
+   ============================================================================ */
+:root:not([data-preset]) {
+  color-scheme: light;
+  --docs-bg: #f8fafc;
+  --docs-surface: #ffffff;
+  --docs-surface-2: #f1f5f9;
+  --docs-text: #0f172a;
+  --docs-muted: #475569;
+  --docs-border: #dbe2ea;
+  --docs-accent: #2563eb;
+  --docs-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+  --docs-focus-ring: 2px solid var(--docs-accent);
+  --docs-focus-offset: 2px;
+
+  /* Callout border colors */
+  --docs-callout-note: #64748b;
+  --docs-callout-tip: #10b981;
+  --docs-callout-info: #3b82f6;
+  --docs-callout-warning: #f59e0b;
+  --docs-callout-danger: #ef4444;
+  --docs-callout-success: #22c55e;
+  --docs-callout-deprecated: #8b5cf6;
+  --docs-callout-experimental: #f97316;
+
+  /* Choice group status colors */
+  --docs-choice-ok: #22c55e;
+  --docs-choice-warn: #f59e0b;
+
+  /* Warning amber */
+  --docs-warn: #f59e0b;
+
+  /* Badge colors */
+  --docs-badge-info: #3b82f6;
+  --docs-badge-warning: #f59e0b;
+  --docs-badge-success: #22c55e;
+  --docs-badge-danger: #ef4444;
+}

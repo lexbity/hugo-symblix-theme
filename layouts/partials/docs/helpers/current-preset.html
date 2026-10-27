@@ -1,0 +1,6 @@
+{{- /* Returns the current preset ID for the page.
+   Resolution order: page front matter `preset` > site default > "symblix-light".
+   Usage: {{ partial "docs/helpers/current-preset.html" . }}
+*/ -}}
+{{- $presets := partial "docs/helpers/presets.html" . -}}
+{{- $presets.current -}}

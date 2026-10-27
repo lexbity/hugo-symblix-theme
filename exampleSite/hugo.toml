@@ -55,6 +55,28 @@ showLifecycleBadges = true
 mode = "manual"
 data = "docs_nav"
 
+# Visual identity: color presets and typography
+# See: data/docs_presets.yaml for available presets
+[params.docs.theme]
+# Default color preset (must be a preset ID from data/docs_presets.yaml)
+preset = "symblix-light"
+# Presets available in the switcher (subset of all defined presets)
+availablePresets = [
+  "symblix-light",
+  "symblix-dark",
+  "ocean-dark",
+  "forest-light",
+  "sunset-dark",
+  "solarized-light",
+  "high-contrast",
+]
+# Visual preset: minimal (sharp corners), rounded, or high-contrast
+visualPreset = "minimal"
+# Density: comfortable, compact, or dense
+density = "comfortable"
+# Font stacks (system fallbacks used if bundled fonts not available)
+# fonts = { body = "Inter", mono = "JetBrains Mono" }
+
 [params.features]
 themeSwitcher = true
 

@@ -1,71 +1,246 @@
-const STORAGE_KEY = "docs-theme";
-const THEMES = new Set(["light", "dark", "system"]);
+/* Symblix Theme Runtime (SYM-VIS-001 Phase 5)
+ *
+ * Manages color preset switching via the data-preset attribute on <html>.
+ * Syncs data-syntax attribute for syntax highlighting based on preset mode.
+ * Persists selection to localStorage with migration from legacy docs-theme key.
+ *
+ * Backward compatible: window.SymblixTheme.set("dark") maps to preset IDs.
+ */
 
-function getStoredTheme() {
+const PRESET_STORAGE_KEY = "docs-preset";
+const LEGACY_THEME_STORAGE_KEY = "docs-theme";
+
+/* Map legacy theme values to preset IDs (D-03 backward compatibility) */
+const LEGACY_THEME_MAP = {
+  light: "symblix-light",
+  dark: "symblix-dark",
+  system: "symblix-light", /* No auto-detection; default to light */
+};
+
+/* Fallback mode detection from preset ID (used when DOM doesn't have mode info) */
+function guessModeFromId(presetId) {
+  return presetId.indexOf("dark") !== -1 ? "dark" : "light";
+}
+
+/* Get available presets from the DOM (rendered by preset-switcher partials).
+ * Returns a Map of presetId → { mode, label }.
+ * If no switchers are present (e.g., no-JS or Phase 5 before Phase 6),
+ * returns an empty Map and we fall back to HTML attributes. */
+function getAvailablePresets() {
+  const presets = new Map();
+  document.querySelectorAll("[data-preset-switcher]").forEach((switcher) => {
+    switcher.querySelectorAll("[data-preset-id]").forEach((el) => {
+      const id = el.getAttribute("data-preset-id");
+      if (id && !presets.has(id)) {
+        presets.set(id, {
+          mode: el.getAttribute("data-preset-mode") || guessModeFromId(id),
+          label: el.getAttribute("data-preset-label") || id,
+        });
+      }
+    });
+  });
+  return presets;
+}
+
+/* Get the mode for a preset ID, from DOM or fallback guess */
+function getPresetMode(presetId) {
+  const available = getAvailablePresets();
+  if (available.has(presetId)) {
+    return available.get(presetId).mode;
+  }
+  return guessModeFromId(presetId);
+}
+
+/* Get stored preset from localStorage, with legacy migration */
+function getStoredPreset() {
   try {
-    const value = window.localStorage.getItem(STORAGE_KEY);
-    return THEMES.has(value) ? value : "system";
+    /* Try new key first */
+    const preset = window.localStorage.getItem(PRESET_STORAGE_KEY);
+    if (preset) {
+      return preset;
+    }
+
+    /* Migrate from legacy key */
+    const legacyTheme = window.localStorage.getItem(LEGACY_THEME_STORAGE_KEY);
+    if (legacyTheme && LEGACY_THEME_MAP[legacyTheme]) {
+      const preset = LEGACY_THEME_MAP[legacyTheme];
+      try {
+        window.localStorage.setItem(PRESET_STORAGE_KEY, preset);
+      } catch (e) {
+        /* Ignore write errors */
+      }
+      return preset;
+    }
   } catch (error) {
-    return "system";
+    /* localStorage unavailable (private mode, quota, etc.) */
   }
+
+  /* Fall back to default from HTML attribute */
+  return document.documentElement.getAttribute("data-preset") || "symblix-light";
 }
 
-function setTheme(theme) {
-  document.documentElement.setAttribute("data-theme", theme);
+/* Fallback list of default preset IDs for validation when DOM has no switcher info.
+ * This matches the 7 default presets in data/docs_presets.yaml. */
+const DEFAULT_PRESET_IDS = new Set([
+  "symblix-light",
+  "symblix-dark",
+  "ocean-dark",
+  "forest-light",
+  "sunset-dark",
+  "solarized-light",
+  "high-contrast",
+]);
 
-  try {
-    window.localStorage.setItem(STORAGE_KEY, theme);
-  } catch (error) {}
-}
-
-function updateSwitcher(root, activeTheme) {
-  const select = root.querySelector("[data-theme-select]");
-  if (select && select.value !== activeTheme) {
-    select.value = activeTheme;
+/* Validate preset is available (if switchers exist) or is a known default */
+function isPresetAvailable(presetId) {
+  const available = getAvailablePresets();
+  /* If switchers exist in DOM, validate against them */
+  if (available.size > 0) {
+    return available.has(presetId);
   }
+  /* No switchers in DOM: validate against default preset list */
+  return DEFAULT_PRESET_IDS.has(presetId);
 }
 
-function applyTheme(theme) {
-  if (!THEMES.has(theme)) {
+/* Set the active preset: updates DOM attributes, localStorage, and switchers */
+function setPreset(presetId) {
+  if (!presetId || typeof presetId !== "string") {
     return false;
   }
 
-  setTheme(theme);
+  /* Validate against available presets (if switchers exist) */
+  if (!isPresetAvailable(presetId)) {
+    return false;
+  }
 
-  document.querySelectorAll("[data-theme-switcher]").forEach((switcherRoot) => {
-    updateSwitcher(switcherRoot, theme);
+  /* Set preset attribute */
+  document.documentElement.setAttribute("data-preset", presetId);
+
+  /* Sync syntax attribute based on preset mode */
+  const mode = getPresetMode(presetId);
+  document.documentElement.setAttribute("data-syntax", mode);
+
+  /* Persist to localStorage */
+  try {
+    window.localStorage.setItem(PRESET_STORAGE_KEY, presetId);
+  } catch (error) {
+    /* Ignore write errors */
+  }
+
+  /* Update all switcher instances */
+  document.querySelectorAll("[data-preset-switcher]").forEach((switcher) => {
+    updateSwitcher(switcher, presetId);
   });
 
   return true;
 }
 
-export function initTheme() {
-  const currentTheme = getStoredTheme();
-  setTheme(currentTheme);
+/* Update a single switcher instance to reflect the active preset */
+function updateSwitcher(switcher, activePreset) {
+  /* Update preset option elements (buttons, links, radio inputs) */
+  switcher.querySelectorAll("[data-preset-id]").forEach((el) => {
+    const isActive = el.getAttribute("data-preset-id") === activePreset;
 
-  document.querySelectorAll("[data-theme-switcher]").forEach((root) => {
-    updateSwitcher(root, currentTheme);
+    /* Handle different element types */
+    if (el.tagName === "INPUT") {
+      el.checked = isActive;
+    }
 
-    const select = root.querySelector("[data-theme-select]");
-    if (select) {
-      select.addEventListener("change", () => {
-        const choice = select.value;
-        if (!choice || !THEMES.has(choice)) {
-          return;
-        }
-        applyTheme(choice);
-      });
+    /* ARIA current state */
+    if (isActive) {
+      el.setAttribute("aria-current", "true");
+    } else {
+      el.removeAttribute("aria-current");
+    }
+
+    /* Update class for visual active state */
+    if (isActive) {
+      el.classList.add("is-active");
+    } else {
+      el.classList.remove("is-active");
     }
   });
 
-  window.SymblixTheme = {
-    set(theme) {
-      if (!THEMES.has(theme)) {
-        return false;
-      }
+  /* Update summary/current label if present */
+  const label = switcher.querySelector("[data-preset-label]");
+  if (label) {
+    const activeEl = switcher.querySelector(
+      '[data-preset-id="' + activePreset + '"]'
+    );
+    if (activeEl) {
+      const presetLabel =
+        activeEl.getAttribute("data-preset-label") || activePreset;
+      label.textContent = presetLabel;
+    }
+  }
+}
 
-      return applyTheme(theme);
+/* Initialize a single switcher with click/keyboard handlers */
+function initSwitcher(switcher) {
+  /* Handle click on preset options (buttons, links) */
+  switcher.querySelectorAll("[data-preset-id]").forEach((el) => {
+    el.addEventListener("click", (event) => {
+      event.preventDefault();
+      const presetId = el.getAttribute("data-preset-id");
+      if (presetId) {
+        setPreset(presetId);
+      }
+    });
+  });
+
+  /* Handle radio button changes (no-JS fallback form) */
+  const radios = switcher.querySelectorAll('input[type="radio"][name^="preset"]');
+  radios.forEach((radio) => {
+    radio.addEventListener("change", () => {
+      const presetId = radio.value;
+      if (presetId) {
+        setPreset(presetId);
+      }
+    });
+  });
+}
+
+/* Initialize the theme system */
+export function initTheme() {
+  /* Get and apply the stored/default preset */
+  let currentPreset = getStoredPreset();
+
+  /* If the stored preset is invalid, fall back to default */
+  if (!setPreset(currentPreset)) {
+    const htmlPreset = document.documentElement.getAttribute("data-preset");
+    if (htmlPreset && isPresetAvailable(htmlPreset)) {
+      currentPreset = htmlPreset;
+    } else {
+      currentPreset = "symblix-light";
+    }
+    setPreset(currentPreset);
+  }
+
+  /* Initialize all switchers */
+  document.querySelectorAll("[data-preset-switcher]").forEach(initSwitcher);
+
+  /* Expose backward-compatible API */
+  window.SymblixTheme = {
+    /* Legacy API: set("dark") maps to preset ID */
+    set(themeOrPreset) {
+      const preset = LEGACY_THEME_MAP[themeOrPreset] || themeOrPreset;
+      return setPreset(preset);
     },
-    get: getStoredTheme,
+    /* Legacy API: get() returns preset ID */
+    get() {
+      return document.documentElement.getAttribute("data-preset") || "symblix-light";
+    },
+    /* New API: explicit preset methods */
+    setPreset: setPreset,
+    getPreset() {
+      return document.documentElement.getAttribute("data-preset");
+    },
+    getSyntax() {
+      return document.documentElement.getAttribute("data-syntax");
+    },
+    /* List available presets */
+    getAvailable() {
+      return Array.from(getAvailablePresets().keys());
+    },
   };
 }

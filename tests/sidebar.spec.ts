@@ -19,10 +19,14 @@ test("mobile sidebar opens from a fixed menu button", async ({ page }) => {
 test("theme switcher updates the active theme", async ({ page }) => {
   await page.goto("/en/docs/latest/");
 
-  await page.locator('select[data-theme-select]').selectOption("dark");
+  // Use the SymblixTheme API (the preset switcher UI will use this internally)
+  await page.evaluate(() => {
+    window.SymblixTheme.setPreset("symblix-dark");
+  });
 
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect.poll(async () => page.evaluate(() => window.localStorage.getItem("docs-theme"))).toBe("dark");
+  await expect(page.locator("html")).toHaveAttribute("data-preset", "symblix-dark");
+  await expect(page.locator("html")).toHaveAttribute("data-syntax", "dark");
+  await expect.poll(async () => page.evaluate(() => window.localStorage.getItem("docs-preset"))).toBe("symblix-dark");
 });
 
 test("archived version pages use their own sidebar navigation", async ({ page }) => {
