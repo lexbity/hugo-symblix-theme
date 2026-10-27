@@ -76,6 +76,19 @@
     height: 1.15rem;
   }
 
+  /* Generic glyph icons (icon-svg.html): size relative to the surrounding
+     text so the same glyph works in titles, badges, and media bands. */
+  .docs-icon {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .docs-icon-glyph {
+    width: 1em;
+    height: 1em;
+    flex: none;
+  }
+
   /* Collapsed state: a dropdown panel under the toggle, built on a no-JS
      <details> element with the configured links plus a social icon bar. */
   .docs-header-menu {

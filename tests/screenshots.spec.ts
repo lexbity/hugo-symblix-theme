@@ -132,7 +132,7 @@ test.describe("Curated screenshots for README", () => {
       await page.setViewportSize({ width: 1440, height: 900 });
 
       // Open header switcher
-      await page.locator(".docs-header-preset summary").click();
+      await page.locator(".docs-site-rail .docs-header-preset summary").click();
 
       await page.waitForTimeout(100);
 

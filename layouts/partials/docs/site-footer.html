@@ -1,13 +1,65 @@
+{{- /* Site footer (SYM-VIS-002). Two tiers: an optional link tier with a
+       brand column (wordmark, description, social icons) and one column per
+       entry in params.docs.footer.columns ({title, menu}), then the meta
+       tier (copyright, license, powered-by). The link tier renders only when
+       columns or a description are configured; without them the footer keeps
+       its original slim shape. */ -}}
+{{- $footer := site.Params.docs.footer | default dict -}}
+{{- $columns := $footer.columns | default slice -}}
+{{- $social := site.Params.docs.social | default slice -}}
+{{- $owner := $footer.copyright | default site.Title -}}
 <footer class="site-footer">
-  {{ partial "docs/social-links.html" . }}
-  <p class="site-footer__copyright">
-    {{- $owner := site.Params.docs.footer.copyright | default site.Title -}}
-    © {{ now.Year }} {{ $owner -}}
-    {{- with site.Params.docs.footer.licenseURL }}
-      · <a href="{{ . }}" rel="license noopener">{{ site.Params.docs.footer.licenseLabel | default (i18n "license" | default "License") }}</a>
+  {{- if or $columns $footer.description }}
+  <div class="site-footer__grid">
+    <div class="site-footer__brand">
+      <a class="site-footer__wordmark" href="{{ site.Home.RelPermalink }}">
+        {{- with site.Params.docs.logo -}}
+          <img src="{{ . | relURL }}" alt="{{ site.Params.docs.logoAlt | default site.Title }}">
+        {{- else -}}
+          {{ site.Params.docs.logoAlt | default site.Title }}
+        {{- end -}}
+      </a>
+      {{ with $footer.description }}<p class="site-footer__description">{{ . | markdownify }}</p>{{ end }}
+      {{- with $social }}
+      <ul class="site-footer__social">
+        {{- range . -}}
+        <li>
+          <a class="docs-social-link" href="{{ .url }}" rel="me noopener" target="_blank" aria-label="{{ .name | default .url }}" title="{{ .name | default .url }}">
+            {{- partial "docs/helpers/social-icon.html" (dict "Name" (.icon | default .name)) -}}
+          </a>
+        </li>
+        {{- end -}}
+      </ul>
+      {{- end }}
+    </div>
+    {{- range $col := $columns }}
+    {{- $menuID := "" -}}
+    {{- with $col.menu -}}{{- $menuID = lower . -}}{{- end -}}
+    {{- $entries := index site.Menus $menuID -}}
+    {{- if and $menuID $entries }}
+    <nav class="site-footer__col" aria-label="{{ $col.title | default $menuID }}">
+      <p class="site-footer__col-title">{{ $col.title | default $menuID }}</p>
+      <ul class="site-footer__links">
+        {{- range $entries -}}
+        <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+        {{- end -}}
+      </ul>
+    </nav>
+    {{- else if $menuID -}}
+      {{- warnf "footer column %q references menu %q which has no entries" ($col.title | default $menuID) $menuID -}}
+    {{- end -}}
     {{- end }}
-  </p>
-  {{ if site.Params.docs.footer.poweredBy }}
+  </div>
+  {{- end }}
+  <div class="site-footer__meta">
+    <p class="site-footer__copyright">
+      © {{ now.Year }} {{ $owner -}}
+      {{- with $footer.licenseURL }}
+        · <a href="{{ . }}" rel="license noopener">{{ $footer.licenseLabel | default (i18n "license" | default "License") }}</a>
+      {{- end }}
+    </p>
+    {{ if $footer.poweredBy }}
     <p class="site-footer__powered">{{ i18n "powered_by" | default "Powered by Hugo" }}</p>
-  {{ end }}
+    {{ end }}
+  </div>
 </footer>

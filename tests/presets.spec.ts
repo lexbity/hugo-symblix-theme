@@ -376,14 +376,20 @@ test.describe("CSS architecture (Phase 2)", () => {
       "high-contrast",
     ];
     for (const preset of presets) {
-      expect(css).toContain(`html[data-preset="${preset}"]`);
+      // The minified build drops attribute-value quotes; accept both forms.
+      const quoted = css.includes(`html[data-preset="${preset}"]`);
+      const bare = css.includes(`html[data-preset=${preset}]`);
+      expect(quoted || bare, `preset ${preset} selector`).toBe(true);
     }
   });
 
   test("compiled CSS contains syntax palettes", () => {
     const css = readFileSync(compiledCssPath, "utf-8");
-    expect(css).toContain('html[data-syntax="light"]');
-    expect(css).toContain('html[data-syntax="dark"]');
+    // Quote-agnostic: the minified build may drop attribute-value quotes.
+    const hasLight = css.includes('html[data-syntax="light"]') || css.includes("html[data-syntax=light]");
+    const hasDark = css.includes('html[data-syntax="dark"]') || css.includes("html[data-syntax=dark]");
+    expect(hasLight).toBe(true);
+    expect(hasDark).toBe(true);
   });
 
   test("compiled CSS carries no @font-face declarations (templated resource)", () => {
@@ -906,7 +912,8 @@ test.describe("Switcher UI (Phase 6)", () => {
   test("header preset switcher appears on front page", async ({ page }) => {
     await page.goto("/en/");
 
-    const headerSwitcher = page.locator(".docs-header-preset");
+    // The front-page switcher lives in the rail chrome (SYM-VIS-002).
+    const headerSwitcher = page.locator(".docs-site-rail .docs-header-preset");
     await expect(headerSwitcher).toBeVisible();
 
     // Open it
@@ -942,8 +949,8 @@ test.describe("Switcher UI (Phase 6)", () => {
   test("clicking preset in header changes theme", async ({ page }) => {
     await page.goto("/en/");
 
-    // Open header switcher
-    await page.locator(".docs-header-preset summary").click();
+    // Open the rail switcher
+    await page.locator(".docs-site-rail .docs-header-preset summary").click();
 
     // Click a different preset
     await page.locator('[data-preset-id="forest-light"]').first().click();
@@ -964,8 +971,8 @@ test.describe("Switcher UI (Phase 6)", () => {
   test("both switchers stay in sync", async ({ page }) => {
     await page.goto("/en/");
 
-    // Change preset in header
-    await page.locator(".docs-header-preset summary").click();
+    // Change preset in the rail switcher
+    await page.locator(".docs-site-rail .docs-header-preset summary").click();
     await page.locator('[data-preset-id="ocean-dark"]').first().click();
 
     // Navigate to docs page

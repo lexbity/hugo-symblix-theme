@@ -5,6 +5,7 @@ import { initCopyCode } from "./copy-code.js";
 import { initDownloads } from "./downloads.js";
 import { initSearchPage } from "./search/index.js";
 import { initSiteHeader } from "./site-header.js";
+import { initVideo } from "./video.js";
 
 try {
   initTheme();
@@ -40,6 +41,12 @@ try {
   initSearchPage();
 } catch (error) {
   console.warn("Search bootstrap failed", error);
+}
+
+try {
+  initVideo();
+} catch (error) {
+  console.warn("Video bootstrap failed", error);
 }
 
 initSiteHeader();

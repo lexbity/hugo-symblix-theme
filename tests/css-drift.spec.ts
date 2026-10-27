@@ -12,7 +12,7 @@ test("compiled theme.css matches a fresh Tailwind build of the source layers", (
   const outDir = mkdtempSync(join(tmpdir(), "symblix-css-"));
   const outFile = join(outDir, "theme.css");
   execSync(
-    "npx --no-install @tailwindcss/cli -i assets/css/input.css -o " + outFile,
+    "npx --no-install @tailwindcss/cli -i assets/css/input.css --minify -o " + outFile,
     { stdio: "pipe" },
   );
   const fresh = readFileSync(outFile, "utf8");

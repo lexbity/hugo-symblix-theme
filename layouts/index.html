@@ -1,5 +1,10 @@
 {{- $currentVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace -}}
 {{- $versionRootPermalink := partialCached "docs/helpers/version-root.html" (dict "Page" . "VersionSlug" $currentVersion "Site" site) (site.Language.Lang) $currentVersion | strings.TrimSpace -}}
+{{- /* Front-page chrome: "topbar" (default) renders the header bar; "rail"
+       swaps it for a vertical icon rail from 48rem up, keeping the header —
+       with its no-JS dropdown — as the mobile chrome. Developer choice via
+       params.docs.frontPage.chrome; not user-switchable. */ -}}
+{{- $chrome := site.Params.docs.frontPage.chrome | default "topbar" -}}
 <!doctype html>
 <html
   lang="{{ partial "docs/helpers/language-code.html" . }}"
@@ -8,12 +13,38 @@
   data-preset="{{ partial "docs/helpers/current-preset.html" . }}"
   data-preset-source="default"
   data-syntax="{{ partial "docs/helpers/current-syntax.html" . }}"
+  data-frontpage-chrome="{{ $chrome }}"
 >
   <head>
     {{ partial "head.html" . }}
   </head>
   <body>
     <a class="skip-link" href="#main-content">{{ i18n "skip_to_content" | default "Skip to content" }}</a>
+    {{- if eq $chrome "rail" }}
+    <div class="docs-rail-shell">
+      {{ partial "docs/site-rail.html" . }}
+      <div class="docs-rail-page">
+        {{ partial "docs/site-header.html" . }}
+        <main id="main-content" class="docs-home-main" tabindex="-1">
+          <section class="docs-home">
+            {{ .Content }}
+            {{ if not .Content }}
+              {{ partial "docs/components/hero.html" (dict
+                "Title" .Site.Title
+                "Subtitle" (or .Site.Params.description .Site.Title)
+                "Eyebrow" (i18n "home_eyebrow" | default "Documentation")
+                "HeadingLevel" "1"
+                "PrimaryHref" $versionRootPermalink
+                "PrimaryLabel" (i18n "home_open_docs" | default "Open the latest docs")
+              ) }}
+            {{ end }}
+          </section>
+        </main>
+        {{ partial "scripts.html" . }}
+        {{ partial "docs/site-footer.html" . }}
+      </div>
+    </div>
+    {{- else }}
     {{ partial "docs/site-header.html" . }}
     <main id="main-content" class="docs-home-main" tabindex="-1">
       <section class="docs-home">
@@ -32,5 +63,6 @@
     </main>
     {{ partial "scripts.html" . }}
     {{ partial "docs/site-footer.html" . }}
+    {{- end }}
   </body>
 </html>

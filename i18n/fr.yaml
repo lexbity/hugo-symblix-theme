@@ -170,3 +170,7 @@
   translation: Navigation du site
 - id: diagram
   translation: Schéma
+- id: play_video
+  translation: "Lire la vidéo"
+- id: watch_on_youtube
+  translation: "Regarder sur YouTube"

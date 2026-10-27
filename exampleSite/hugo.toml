@@ -38,11 +38,33 @@ versions = { noindexArchived = true }
 name = "GitHub"
 url = "https://github.com/lexbity/hugo-symblix-theme"
 
+# Front-page chrome: "topbar" (header bar, default) or "rail"
+# (Material-style vertical icon rail from 48rem up; the header with its
+# no-JS dropdown stays as the mobile chrome). Developer choice, not
+# user-switchable.
+[params.docs.frontPage]
+chrome = "rail"
+
 [params.docs.footer]
 copyright = "Symblix authors"
 licenseURL = "https://opensource.org/licenses/MIT"
 licenseLabel = "MIT"
 poweredBy = true
+description = "Versioned, multilingual documentation without JavaScript."
+# Expanded footer columns: one column per entry, rendering the named Hugo
+# menu. Menus are defined per language below; omit `columns` to keep the
+# slim footer.
+[[params.docs.footer.columns]]
+title = "Product"
+menu = "footer"
+
+[[params.docs.footer.columns]]
+title = "Community"
+menu = "footerCommunity"
+
+[[params.docs.footer.columns]]
+title = "Project"
+menu = "footerProject"
 
 [params.docs.validation]
 showAuthorWarnings = false
@@ -94,12 +116,27 @@ direction = "ltr"
 weight = 1
 contentDir = "content/en"
 
+# Footer column titles per language (menus are identical; titles translate).
+# English titles come from the site-level columns block.
+
 [languages.fr]
 label = "Français"
 locale = "fr-FR"
 direction = "ltr"
 weight = 2
 contentDir = "content/fr"
+
+[[languages.fr.params.docs.footer.columns]]
+title = "Produit"
+menu = "footer"
+
+[[languages.fr.params.docs.footer.columns]]
+title = "Communauté"
+menu = "footerCommunity"
+
+[[languages.fr.params.docs.footer.columns]]
+title = "Projet"
+menu = "footerProject"
 
 [languages.ja]
 label = "日本語"
@@ -108,6 +145,18 @@ direction = "ltr"
 weight = 3
 contentDir = "content/ja"
 
+[[languages.ja.params.docs.footer.columns]]
+title = "製品"
+menu = "footer"
+
+[[languages.ja.params.docs.footer.columns]]
+title = "コミュニティ"
+menu = "footerCommunity"
+
+[[languages.ja.params.docs.footer.columns]]
+title = "プロジェクト"
+menu = "footerProject"
+
 [languages.ar]
 label = "العربية"
 locale = "ar"
@@ -115,17 +164,269 @@ direction = "rtl"
 weight = 4
 contentDir = "content/ar"
 
+[[languages.ar.params.docs.footer.columns]]
+title = "المنتج"
+menu = "footer"
+
+[[languages.ar.params.docs.footer.columns]]
+title = "المجتمع"
+menu = "footerCommunity"
+
+[[languages.ar.params.docs.footer.columns]]
+title = "المشروع"
+menu = "footerProject"
+
 # Front-page header links, rendered top right. Defined per language so
 # pageRef resolves inside each language's content tree; languages without a
 # header menu show the logo only. The GitHub/social links below render as
-# SVG icons; set `icon` on an entry to pick the glyph (github, x, bluesky,
-# youtube, rss; anything else falls back to a globe).
+# SVG icons; the rail additionally reads each entry's `params.icon` to
+# pick a glyph (see docs/helpers/icon-svg.html for shipped names).
+[[languages.en.menus.header]]
+name = "Home"
+pageRef = "/"
+weight = 5
+  [languages.en.menus.header.params]
+  icon = "home"
+
 [[languages.en.menus.header]]
 name = "Docs"
 pageRef = "/docs/latest/"
 weight = 10
+  [languages.en.menus.header.params]
+  icon = "book-open"
 
 [[languages.en.menus.header]]
 name = "Components"
 pageRef = "/docs/latest/components/"
 weight = 20
+
+# Header rail menus for the remaining languages (translated labels).
+  [languages.en.menus.header.params]
+  icon = "blocks"
+
+[[languages.fr.menus.header]]
+name = "Accueil"
+pageRef = "/"
+weight = 5
+  [languages.fr.menus.header.params]
+  icon = "home"
+
+[[languages.fr.menus.header]]
+name = "Doc"
+pageRef = "/docs/latest/"
+weight = 10
+  [languages.fr.menus.header.params]
+  icon = "book-open"
+
+[[languages.fr.menus.header]]
+name = "Composants"
+pageRef = "/docs/latest/components/"
+weight = 20
+  [languages.fr.menus.header.params]
+  icon = "blocks"
+
+[[languages.ja.menus.header]]
+name = "ホーム"
+pageRef = "/"
+weight = 5
+  [languages.ja.menus.header.params]
+  icon = "home"
+
+[[languages.ja.menus.header]]
+name = "ドキュメント"
+pageRef = "/docs/latest/"
+weight = 10
+  [languages.ja.menus.header.params]
+  icon = "book-open"
+
+[[languages.ja.menus.header]]
+name = "コンポーネント"
+pageRef = "/docs/latest/components/"
+weight = 20
+  [languages.ja.menus.header.params]
+  icon = "blocks"
+
+[[languages.ar.menus.header]]
+name = "الرئيسية"
+pageRef = "/"
+weight = 5
+  [languages.ar.menus.header.params]
+  icon = "home"
+
+[[languages.ar.menus.header]]
+name = "الدليل"
+pageRef = "/docs/latest/"
+weight = 10
+  [languages.ar.menus.header.params]
+  icon = "book-open"
+
+[[languages.ar.menus.header]]
+name = "المكونات"
+pageRef = "/docs/latest/components/"
+weight = 20
+
+# Footer menus (expanded footer columns), defined per language so pageRef
+# resolves inside each language's content tree. Column titles live in the
+# params.docs.footer.columns blocks above.
+  [languages.ar.menus.header.params]
+  icon = "blocks"
+
+[[languages.en.menus.footer]]
+name = "Home"
+pageRef = "/"
+weight = 10
+
+[[languages.en.menus.footer]]
+name = "Documentation"
+pageRef = "/docs/latest/"
+weight = 20
+
+[[languages.en.menus.footer]]
+name = "Components"
+pageRef = "/docs/latest/components/"
+weight = 30
+
+[[languages.en.menus.footer]]
+name = "All pages"
+pageRef = "/docs/latest/all-pages/"
+weight = 40
+
+[[languages.en.menus.footerCommunity]]
+name = "GitHub"
+url = "https://github.com/lexbity/hugo-symblix-theme"
+weight = 10
+
+[[languages.en.menus.footerProject]]
+name = "Releases"
+url = "https://github.com/lexbity/hugo-symblix-theme/releases"
+weight = 10
+
+[[languages.en.menus.footerProject]]
+name = "License (MIT)"
+url = "https://opensource.org/licenses/MIT"
+weight = 20
+
+[[languages.en.menus.footerProject]]
+name = "RSS"
+url = "/en/index.xml"
+weight = 30
+
+[[languages.fr.menus.footer]]
+name = "Accueil"
+pageRef = "/"
+weight = 10
+
+[[languages.fr.menus.footer]]
+name = "Documentation"
+pageRef = "/docs/latest/"
+weight = 20
+
+[[languages.fr.menus.footer]]
+name = "Composants"
+pageRef = "/docs/latest/components/"
+weight = 30
+
+[[languages.fr.menus.footer]]
+name = "Toutes les pages"
+pageRef = "/docs/latest/all-pages/"
+weight = 40
+
+[[languages.fr.menus.footerCommunity]]
+name = "GitHub"
+url = "https://github.com/lexbity/hugo-symblix-theme"
+weight = 10
+
+[[languages.fr.menus.footerProject]]
+name = "Versions"
+url = "https://github.com/lexbity/hugo-symblix-theme/releases"
+weight = 10
+
+[[languages.fr.menus.footerProject]]
+name = "Licence (MIT)"
+url = "https://opensource.org/licenses/MIT"
+weight = 20
+
+[[languages.fr.menus.footerProject]]
+name = "RSS"
+url = "/fr/index.xml"
+weight = 30
+
+[[languages.ja.menus.footer]]
+name = "ホーム"
+pageRef = "/"
+weight = 10
+
+[[languages.ja.menus.footer]]
+name = "ドキュメント"
+pageRef = "/docs/latest/"
+weight = 20
+
+[[languages.ja.menus.footer]]
+name = "コンポーネント"
+pageRef = "/docs/latest/components/"
+weight = 30
+
+[[languages.ja.menus.footer]]
+name = "全ページ"
+pageRef = "/docs/latest/all-pages/"
+weight = 40
+
+[[languages.ja.menus.footerCommunity]]
+name = "GitHub"
+url = "https://github.com/lexbity/hugo-symblix-theme"
+weight = 10
+
+[[languages.ja.menus.footerProject]]
+name = "リリース"
+url = "https://github.com/lexbity/hugo-symblix-theme/releases"
+weight = 10
+
+[[languages.ja.menus.footerProject]]
+name = "ライセンス (MIT)"
+url = "https://opensource.org/licenses/MIT"
+weight = 20
+
+[[languages.ja.menus.footerProject]]
+name = "RSS"
+url = "/ja/index.xml"
+weight = 30
+
+[[languages.ar.menus.footer]]
+name = "الرئيسية"
+pageRef = "/"
+weight = 10
+
+[[languages.ar.menus.footer]]
+name = "الدليل"
+pageRef = "/docs/latest/"
+weight = 20
+
+[[languages.ar.menus.footer]]
+name = "المكونات"
+pageRef = "/docs/latest/components/"
+weight = 30
+
+[[languages.ar.menus.footer]]
+name = "كل الصفحات"
+pageRef = "/docs/latest/all-pages/"
+weight = 40
+
+[[languages.ar.menus.footerCommunity]]
+name = "GitHub"
+url = "https://github.com/lexbity/hugo-symblix-theme"
+weight = 10
+
+[[languages.ar.menus.footerProject]]
+name = "الإصدارات"
+url = "https://github.com/lexbity/hugo-symblix-theme/releases"
+weight = 10
+
+[[languages.ar.menus.footerProject]]
+name = "الرخصة (MIT)"
+url = "https://opensource.org/licenses/MIT"
+weight = 20
+
+[[languages.ar.menus.footerProject]]
+name = "RSS"
+url = "/ar/index.xml"
+weight = 30

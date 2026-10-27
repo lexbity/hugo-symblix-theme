@@ -239,6 +239,14 @@
     .docs-header-preset {
       display: none;
     }
+
+    /* …except inside the header <details> menu, where it stays reachable. */
+    .docs-header-menu__panel .docs-header-preset {
+      display: block;
+      margin-top: 0.5rem;
+      border-top: 1px solid var(--docs-border);
+      padding-top: 0.5rem;
+    }
   }
 
   /* Sidebar switcher: ensure it fits in narrow sidebar */

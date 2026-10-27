@@ -1,0 +1,54 @@
+{{- /* Front-page icon rail (SYM-VIS-002). Material-style vertical rail:
+       logo mark, icon+label menu buttons from the `header` menu (per-entry
+       `icon` param picks the glyph; unknown names fall back to a styled
+       initial), then social icons and the preset switcher at the bottom.
+
+       Rendered only when params.docs.frontPage.chrome = "rail" (index.html).
+       Hidden below 48rem, where the standard header — with its no-JS
+       <details> menu — remains the front-page chrome. */ -}}
+{{- $page := . -}}
+{{- $links := site.Menus.header | default slice -}}
+{{- $social := site.Params.docs.social | default slice -}}
+{{- $wordmark := site.Params.docs.logoAlt | default site.Title -}}
+<div class="docs-site-rail">
+  <a class="docs-rail__logo" href="{{ site.Home.RelPermalink }}" aria-label="{{ $wordmark }}">
+    {{- with site.Params.docs.logo -}}
+      <img src="{{ . | relURL }}" alt="">
+    {{- else -}}
+      <span class="docs-rail__logo-mark" aria-hidden="true">{{ strings.SliceString $wordmark 0 1 | upper }}</span>
+    {{- end -}}
+  </a>
+  {{- with $links }}
+  <nav class="docs-rail__nav" aria-label="{{ i18n "header_navigation" | default "Site navigation" }}">
+    {{- range . -}}
+    {{- $icon := "" -}}
+    {{- with .Params -}}{{- $icon = .icon | default "" -}}{{- end -}}
+    {{- $active := $page.IsMenuCurrent "header" . -}}
+    {{- if not $active -}}{{- $active = $page.HasMenuCurrent "header" . -}}{{- end -}}
+    <a class="docs-rail__item" href="{{ .URL }}"{{ if $active }} aria-current="page"{{ end }}>
+      <span class="docs-rail__bubble" aria-hidden="true">
+        {{- if $icon -}}
+          {{ partial "docs/helpers/icon.html" (dict "Name" $icon) }}
+        {{- else -}}
+          <span class="docs-rail__letter">{{ strings.SliceString .Name 0 1 | upper }}</span>
+        {{- end -}}
+      </span>
+      <span class="docs-rail__label">{{ .Name }}</span>
+    </a>
+    {{- end }}
+  </nav>
+  {{- end }}
+  <div class="docs-rail__spacer"></div>
+  {{- with $social }}
+  <ul class="docs-rail__utility">
+    {{- range . -}}
+    <li>
+      <a class="docs-rail__iconlink" href="{{ .url }}" rel="me noopener" target="_blank" aria-label="{{ .name | default .url }}" title="{{ .name | default .url }}">
+        {{- partial "docs/helpers/social-icon.html" (dict "Name" (.icon | default .name)) -}}
+      </a>
+    </li>
+    {{- end -}}
+  </ul>
+  {{- end }}
+  {{ partial "docs/header-preset-switcher.html" $page }}
+</div>

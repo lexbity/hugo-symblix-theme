@@ -50,6 +50,11 @@
                 {{- end -}}
               </ul>
             {{- end -}}
+            {{- /* The theme switcher stays reachable on narrow screens here,
+                   even when the front page uses the rail chrome. */ -}}
+            <div class="docs-header-menu__preset">
+              {{ partial "docs/header-preset-switcher.html" . }}
+            </div>
           </div>
         </details>
       </nav>

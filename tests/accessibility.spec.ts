@@ -79,8 +79,9 @@ test.describe("preset accessibility", () => {
   test("preset switcher is keyboard navigable (header)", async ({ page }) => {
     await page.goto("/en/");
 
-    // Focus the header switcher
-    const toggle = page.locator(".docs-header-preset__toggle");
+    // Focus the rail switcher (the front-page "header" switcher lives in
+    // the rail chrome; the header bar is the mobile chrome).
+    const toggle = page.locator(".docs-site-rail .docs-header-preset__toggle");
     await toggle.focus();
 
     // Open with Enter
@@ -118,8 +119,8 @@ test.describe("preset accessibility", () => {
   test("preset switcher has aria-label", async ({ page }) => {
     await page.goto("/en/");
 
-    // Header switcher should have aria-label
-    const headerSwitcher = page.locator(".docs-header-preset__toggle");
+    // Rail switcher should have aria-label
+    const headerSwitcher = page.locator(".docs-site-rail .docs-header-preset__toggle");
     const ariaLabel = await headerSwitcher.getAttribute("aria-label");
     expect(ariaLabel).toContain("theme");
   });

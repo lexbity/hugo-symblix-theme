@@ -170,3 +170,7 @@
   translation: サイトナビゲーション
 - id: diagram
   translation: 図
+- id: play_video
+  translation: "動画を再生"
+- id: watch_on_youtube
+  translation: "YouTubeで見る"

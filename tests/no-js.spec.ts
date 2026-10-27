@@ -63,4 +63,17 @@ test.describe("no-JS", () => {
     await expect(page.locator("[data-search-filters]")).toBeHidden();
     await expect(page.locator("[data-search-fallback]")).toBeVisible();
   });
+
+  test("front-page rail renders as plain links and the video facade stays a link", async ({ page }) => {
+    await page.goto("/en/");
+    const rail = page.locator(".docs-site-rail");
+    await expect(rail).toBeVisible();
+    await expect(rail.getByRole("link", { name: "Docs" })).toBeVisible();
+
+    await page.goto("/en/docs/latest/components/video/");
+    const fallback = page.locator(".docs-video__fallback").first();
+    await expect(fallback).toBeVisible();
+    const href = await fallback.getAttribute("href");
+    expect(href).toContain("youtube-nocookie.com/watch?v=");
+  });
 });

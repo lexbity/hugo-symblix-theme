@@ -1,13 +1,31 @@
+{{- /* Bento feature grid (SYM-VIS-002).
+       Params: layout ("text" | "media" | "lead"), columns, variant, class.
+
+       layout=text  (default) equal text tiles — the classic feature row.
+       layout=media equal tiles with a media band (image or themed glyph).
+       layout=lead  asymmetric band: first tile is a large media lead spanning
+                    two columns, the next two tiles stack beside it. `columns`
+                    is ignored in this layout.
+
+       Column count rides in as a custom property so the CSS media query can
+       collapse the grid on small screens; an inline grid-template-columns
+       would override the responsive fallback at every width. */ -}}
 {{- $columns := .Get "columns" | default "auto" -}}
 {{- $variant := .Get "variant" | default "default" -}}
+{{- $layout := .Get "layout" | default "text" -}}
+{{- $modifiers := slice "docs-feature-grid--cols" -}}
+{{- if ne $layout "text" -}}
+  {{- $modifiers = $modifiers | append (printf "docs-feature-grid--%s" $layout) -}}
+{{- end -}}
+{{- $style := "" -}}
+{{- if and (ne $columns "auto") ($columns) (ne $layout "lead") -}}
+  {{- $style = printf "--docs-feature-cols: %s;" $columns -}}
+{{- end -}}
 {{- $classes := partial "docs/helpers/classname.html" (dict
   "Base" (slice "docs-feature-grid" (printf "docs-feature-grid--%s" $variant))
-  "Extra" (.Get "class" | default "")
-) -}}
-{{- $style := "" -}}
-{{- if and (ne $columns "auto") ($columns) -}}
-  {{- $style = printf "grid-template-columns: repeat(%s, minmax(0, 1fr));" $columns -}}
-{{- end -}}
-<div class="{{ $classes }}"{{ with $style }} style="{{ . }}"{{ end }}>
+  "Modifiers" $modifiers
+  "Extra" (.Get "class" | default ""))
+-}}
+<div class="{{ $classes }}"{{ with $style }} style="{{ . | safeCSS }}"{{ end }}>
   {{ .Inner }}
 </div>

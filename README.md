@@ -13,8 +13,9 @@ A Hugo documentation theme for structured, navigable, versioned, multilingual te
 - **Versioning:** current + archived docs trees, a version switcher with page-equivalent resolution, `noindex` and sitemap exclusion for archived releases.
 - **Multilingual:** per-language content trees, translation status warnings, and a language switcher that falls back gracefully when a page is untranslated.
 - **Pre-built CSS:** ships compiled CSS so sites need only Hugo. Tailwind CSS v4 is an optional development dependency for styling from source.
-- **Project front page:** `release`, `install`, and `downloads` shortcodes compose a software landing page — release badge, copyable install commands, and binary downloads — complete without JavaScript. Platform detection annotates the right download row as a JavaScript enhancement only. A front-page header puts site links and social icons in the top right; on narrow screens they collapse into a dropdown menu built on a no-JS `<details>` element.
-- **Project chrome:** default SVG favicon (drop in your own to override), site footer with `rel="me"` social links, license line, and copyright — configured entirely from `hugo.toml`.
+- **Project front page:** `release`, `install`, and `downloads` shortcodes compose a software landing page — release badge, copyable install commands, and binary downloads — complete without JavaScript. Platform detection annotates the right download row as a JavaScript enhancement only. Two developer-selected chrome layouts: the header bar, or a Material-style icon rail — on narrow screens both collapse into a dropdown menu built on a no-JS `<details>` element.
+- **Bento blocks:** `feature-grid` renders equal text tiles, media tiles (image or themed glyph bands), or an asymmetric 1+2 lead band; `video` embeds self-hosted clips natively and YouTube through a click-to-load facade — no third-party request until the visitor presses play.
+- **Project chrome:** default SVG favicon (drop in your own to override), an expanded multi-column footer driven by Hugo menus (brand column, social icons, translated column titles), license line, and copyright — configured entirely from `hugo.toml`.
 
 ## Requirements
 
@@ -66,6 +67,7 @@ Start with these pages:
 - [Search](/en/docs/latest/search/)
 - [Components](/en/docs/latest/components/)
 - [Diagrams](/en/docs/latest/components/diagrams/)
+- [Video](/en/docs/latest/components/video/)
 - [Customization](/en/docs/latest/customization/)
 - [Presets System](/en/docs/latest/components/presets/)
 
@@ -122,15 +124,22 @@ Fenced `mermaid` blocks render as static SVG at build time — the published pag
 
 `npm run build`, `npm run check`, and `npm test` run the pipeline automatically. Site repositories adopt the same pattern: run `node <theme>/scripts/render-diagrams.mjs --content content --out assets/diagrams` before `hugo`.
 
-## Front-page header
+## Front-page chrome
 
-The project front page renders a header with the site logo on the left and navigation in the top right: a Hugo menu of plain links (defined per language so `pageRef` resolves inside each language tree) next to a bar of social SVG icons. Icons are inline — no icon font, no external requests.
+The front page supports two developer-selected layouts (set `params.docs.frontPage.chrome`; not user-switchable):
+
+- `"topbar"` (default) — the header bar: logo left; navigation from the `header` Hugo menu and social SVG icons top right.
+- `"rail"` — a vertical icon rail (Material-style): logo mark, one icon+label button per `header` menu entry, social icons, and the preset switcher at the bottom. Icons come from each entry's `params.icon` (shipped glyph names in `docs/helpers/icon-svg.html`; unknown names fall back to a styled initial).
 
 ```toml
+[params.docs.frontPage]
+chrome = "rail"   # "topbar" (default) or "rail"
+
 [[languages.en.menus.header]]
 name = "Docs"
 pageRef = "/docs/latest/"
 weight = 10
+icon = "book-open"   # rail glyph; see icon-svg.html for shipped names
 
 [[params.docs.social]]
 name = "GitHub"
@@ -138,9 +147,43 @@ url = "https://github.com/you/project"
 icon = "github"   # optional; falls back to the lowercased name
 ```
 
-Shipped icons: `github`, `x`, `bluesky`, `youtube`, `rss`; any other name renders a globe glyph. Override `layouts/partials/docs/helpers/social-icon.html` to add more brands.
+Shipped social icons: `github`, `x`, `bluesky`, `youtube`, `rss`; any other name renders a globe glyph. Override `layouts/partials/docs/helpers/social-icon.html` to add more brands and `icon-svg.html` for generic glyphs.
 
-On screens under 48rem the links and icons collapse into a dropdown menu on a `<details>` element — it opens and closes without JavaScript; the script bundle only adds close-on-outside-click and Escape.
+On screens under 48rem both layouts collapse into a dropdown menu on a `<details>` element — links, social icons, and the theme switcher, all functional without JavaScript; the script bundle only adds close-on-outside-click and Escape.
+
+## Video
+
+The `video` shortcode embeds videos that play inside the page:
+
+```go
+{{</* video src="/videos/demo.webm" poster="/videos/demo.jpg"
+           title="Product tour" caption="Optional *markdown* caption."
+           duration="2:41" */>}}
+
+{{</* video youtube="VIDEO_ID" title="Launch talk" duration="10:34" */>}}
+```
+
+Self-hosted sources render a native `<video controls preload="metadata">` — embedded playback with no JavaScript and no external requests. YouTube sources render a static facade (your `poster`, or a themed placeholder) and load the privacy-enhanced nocookie player only after the visitor presses play; without JavaScript the facade is a plain outbound link. `title` is required and becomes the accessible name.
+
+## Footer
+
+The footer has two tiers. The meta tier (copyright, license, powered-by) always renders; the link tier appears when configured and contains a brand column (wordmark, description, social icons) plus one column per entry in `params.docs.footer.columns`, each rendering a Hugo menu — defined per language so links and titles translate:
+
+```toml
+[params.docs.footer]
+description = "Versioned, multilingual documentation without JavaScript."
+
+[[params.docs.footer.columns]]
+title = "Product"
+menu = "footer"
+
+[[languages.fr.menus.footer]]
+name = "Accueil"
+pageRef = "/"
+weight = 10
+```
+
+Omit `description` and `columns` to keep the original slim footer.
 
 ## Non-Goals
 
@@ -163,6 +206,8 @@ The theme intentionally omits the following. They are not bugs; they are design 
 ## Privacy
 
 The theme makes **zero external runtime requests**. No fonts, scripts, analytics, or tracking are loaded from third parties. All assets (CSS, JS, favicon, search index) are served from the same origin. The optional `custom-head.html` hook is the single sanctioned extension point for site owners who wish to add third-party resources.
+
+The one opt-in exception is the `video` shortcode's YouTube facade: page load stays third-party-free, and the nocookie player is fetched only after the visitor clicks play (self-hosted `src` videos never touch a third party).
 
 ## Content Security Policy
 

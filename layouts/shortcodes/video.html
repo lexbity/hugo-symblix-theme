@@ -1,0 +1,71 @@
+{{- /* Embedded video (SYM-VIS-002).
+       Self-hosted sources render a native <video> element — embedded
+       playback with no JavaScript and no external requests.
+
+       YouTube sources render a static click-to-load facade: no iframe and no
+       third-party byte exists on page load. main.js swaps the facade for the
+       privacy-enhanced nocookie player after the visitor opts in; without
+       JavaScript a <noscript> outbound link keeps the video reachable.
+
+       Params: src | youtube (one required), poster, title (required),
+       caption, duration, class. */ -}}
+{{- $src := .Get "src" | default "" -}}
+{{- $youtube := .Get "youtube" | default "" -}}
+{{- $poster := .Get "poster" | default "" -}}
+{{- $title := .Get "title" | default "" -}}
+{{- $caption := .Get "caption" | default "" -}}
+{{- $duration := .Get "duration" | default "" -}}
+{{- $class := .Get "class" | default "" -}}
+{{- $mimeType := .Get "type" | default "" -}}
+{{- $pagePath := .Page.Path | default .Page.Title -}}
+
+{{- if and (not $src) (not $youtube) -}}
+  {{- warnf "video shortcode on %s: pass src or youtube" $pagePath -}}
+{{- end -}}
+{{- if and $src $youtube -}}
+  {{- warnf "video shortcode on %s: pass src or youtube, not both; using src" $pagePath -}}
+{{- end -}}
+{{- if not $title -}}
+  {{- warnf "video shortcode on %s: title is required for the accessible name" $pagePath -}}
+  {{- $title = "Video" -}}
+{{- end -}}
+
+{{- $modifiers := slice -}}
+{{- $facade := false -}}
+{{- if and $youtube (not $src) -}}
+  {{- $facade = true -}}
+  {{- $modifiers = $modifiers | append "docs-video--facade" -}}
+{{- end -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict
+  "Base" (slice "docs-video")
+  "Modifiers" $modifiers
+  "Extra" $class)
+-}}
+<figure class="{{ $classes }}">
+  <div class="docs-video__frame">
+    {{- if not $facade }}
+    <video controls preload="metadata" playsinline src="{{ $src | relURL }}"{{ with $poster }} poster="{{ . | relURL }}"{{ end }}></video>
+    {{- else }}
+    <button type="button" class="docs-video__facade" data-video-facade data-video-id="{{ $youtube }}" data-video-title="{{ $title }}" aria-label="{{ i18n "play_video" | default "Play video" }}: {{ $title }}">
+      {{- with $poster }}
+      <img class="docs-video__poster" src="{{ . | relURL }}" alt="" loading="lazy" decoding="async">
+      {{- else }}
+      <span class="docs-video__placeholder" aria-hidden="true"></span>
+      {{- end }}
+      <span class="docs-video__play" aria-hidden="true">{{ partial "docs/helpers/icon.html" (dict "Name" "play") }}</span>
+      {{- with $duration }}<span class="docs-video__duration">{{ . }}</span>{{ end }}
+    </button>
+    <noscript>
+      <a class="docs-video__fallback" href="https://www.youtube-nocookie.com/watch?v={{ $youtube }}" target="_blank" rel="noopener">
+        {{- with $poster }}
+        <img class="docs-video__poster" src="{{ . | relURL }}" alt="" loading="lazy" decoding="async">
+        {{- end }}
+        <span class="docs-video__fallback-label">{{ i18n "watch_on_youtube" | default "Watch on YouTube" }}</span>
+      </a>
+    </noscript>
+    {{- end }}
+  </div>
+  {{- with $caption }}
+  <figcaption class="docs-video__caption">{{ . | markdownify }}</figcaption>
+  {{- end }}
+</figure>

@@ -59,4 +59,8 @@ Render tutorials and workflows as ordered content.
 {{< card title="Landing" href="/en/docs/latest/components/landing/" badge="Layout" >}}
 Compose hero, feature, and CTA blocks for section hubs.
 {{< /card >}}
+
+{{< card title="Video" href="/en/docs/latest/components/video/" badge="Media" >}}
+Embed self-hosted clips and click-to-load YouTube videos.
+{{< /card >}}
 {{< /cards >}}

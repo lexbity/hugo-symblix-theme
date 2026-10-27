@@ -1,0 +1,196 @@
+/* Front-page icon rail (SYM-VIS-002). Rendered when
+   params.docs.frontPage.chrome = "rail"; from 48rem up it replaces the
+   header as the front-page chrome, below that the header (with its no-JS
+   <details> menu) stays in charge. Logical properties keep RTL mirrored. */
+@layer components {
+  .docs-rail-shell {
+    display: flex;
+    align-items: stretch;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .docs-rail-page {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .docs-rail-page > .docs-home-main {
+    flex: 1 1 auto;
+  }
+
+  .docs-site-rail {
+    display: none;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    height: 100dvh;
+    width: 5.5rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.9rem 0.4rem 1rem;
+    border-inline-end: 1px solid var(--docs-border);
+    background: color-mix(in srgb, var(--docs-surface) 96%, var(--docs-bg));
+  }
+
+  @media (min-width: 48rem) {
+    html[data-frontpage-chrome="rail"] .docs-site-rail {
+      display: flex;
+    }
+
+    html[data-frontpage-chrome="rail"] .docs-rail-page > .docs-site-header {
+      display: none;
+    }
+  }
+
+  .docs-rail__logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-bottom: 0.9rem;
+    border-radius: calc(var(--docs-component-radius) + 0.25rem);
+    background: var(--docs-accent);
+    color: var(--docs-bg);
+    text-decoration: none;
+    overflow: hidden;
+  }
+
+  .docs-rail__logo:focus-visible {
+    outline: var(--docs-focus-ring);
+    outline-offset: var(--docs-focus-offset);
+  }
+
+  .docs-rail__logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .docs-rail__logo-mark {
+    font-weight: 800;
+    font-size: 1.15rem;
+  }
+
+  .docs-rail__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
+  }
+
+  .docs-rail__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0;
+    border-radius: var(--docs-component-radius);
+    color: var(--docs-muted);
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .docs-rail__item:hover {
+    color: var(--docs-text);
+  }
+
+  .docs-rail__item:focus-visible {
+    outline: var(--docs-focus-ring);
+    outline-offset: var(--docs-focus-offset);
+  }
+
+  .docs-rail__bubble {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: calc(var(--docs-component-radius) + 0.5rem);
+    transition: background-color 120ms ease;
+  }
+
+  .docs-rail__item:hover .docs-rail__bubble {
+    background: color-mix(in srgb, var(--docs-text) 8%, transparent);
+  }
+
+  .docs-rail__item[aria-current="page"] {
+    color: var(--docs-accent);
+  }
+
+  .docs-rail__item[aria-current="page"] .docs-rail__bubble {
+    background: color-mix(in srgb, var(--docs-accent) 16%, transparent);
+  }
+
+  .docs-rail__bubble .docs-icon-glyph {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .docs-rail__letter {
+    font-weight: 800;
+    font-size: 0.95rem;
+  }
+
+  .docs-rail__spacer {
+    flex: 1 1 auto;
+    min-height: 1rem;
+  }
+
+  .docs-rail__utility {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .docs-rail__iconlink {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--docs-component-radius);
+    color: var(--docs-muted);
+  }
+
+  .docs-rail__iconlink:hover {
+    color: var(--docs-accent);
+  }
+
+  .docs-rail__iconlink:focus-visible {
+    outline: var(--docs-focus-ring);
+    outline-offset: var(--docs-focus-offset);
+  }
+
+  /* Preset switcher inside the rail: square toggle, panel opens toward the
+     page so it is not clipped by the narrow rail. */
+  .docs-site-rail .docs-header-preset {
+    position: relative;
+    display: block;
+  }
+
+  .docs-site-rail .docs-header-preset__toggle {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--docs-component-radius);
+  }
+
+  .docs-site-rail .docs-header-preset__panel {
+    bottom: calc(100% + 0.6rem);
+    top: auto;
+    inset-inline-start: calc(100% + 0.6rem);
+    inset-inline-end: auto;
+    min-width: 13rem;
+  }
+}

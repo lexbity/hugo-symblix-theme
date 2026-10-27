@@ -353,9 +353,9 @@ test.describe("performance benchmarks", () => {
       const cssFiles = files.filter((f) => f.endsWith(".css"));
 
       // We should have a reasonable number of CSS files
-      // components/ + top-level files. Ratcheted at 32 when
-      // preset-switcher.css joined the set.
-      expect(cssFiles.length).toBeLessThan(32);
+      // components/ + top-level files. Ratcheted at 40 when the video,
+      // rail, and footer components joined the set (SYM-VIS-002).
+      expect(cssFiles.length).toBeLessThan(40);
 
       console.log(`CSS files: ${cssFiles.length}`);
     });
@@ -378,8 +378,12 @@ test.describe("performance benchmarks", () => {
       ];
 
       for (const preset of presets) {
-        const selector = `html[data-preset="${preset}"]`;
-        const matches = css.split(selector).length - 1;
+        // Quote-agnostic: the minified build drops attribute-value quotes.
+        const matches =
+          css.split(`html[data-preset="${preset}"]`).length -
+          1 +
+          css.split(`html[data-preset=${preset}]`).length -
+          1;
         // The preset block plus the OS-preference fallback for symblix-light
         expect(matches, `Preset ${preset} selector count`).toBeGreaterThanOrEqual(1);
       }

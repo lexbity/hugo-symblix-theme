@@ -14,29 +14,31 @@
 
   .docs-badge--neutral,
   .docs-badge-default {
-    background: color-mix(in srgb, var(--docs-bg) 92%, var(--docs-border));
+    background: color-mix(in srgb, var(--docs-surface2) 88%, var(--docs-border));
   }
 
   /* Badge colors use preset tokens with fallbacks matching symblix-light defaults.
-     Fallbacks ensure badges render correctly if presets are not loaded. */
+     Fallbacks ensure badges render correctly if presets are not loaded.
+     Chips mix against surface-2 rather than the page background so they keep a
+     visible fill on cards in the dark presets (near-black bg would vanish). */
   .docs-badge--info,
   .docs-badge-info {
-    background: color-mix(in srgb, var(--docs-bg) 82%, var(--docs-badge-info));
+    background: color-mix(in srgb, var(--docs-surface2) 78%, var(--docs-badge-info));
   }
 
   .docs-badge--warning,
   .docs-badge-warning {
-    background: color-mix(in srgb, var(--docs-bg) 82%, var(--docs-badge-warning));
+    background: color-mix(in srgb, var(--docs-surface2) 78%, var(--docs-badge-warning));
   }
 
   .docs-badge--success,
   .docs-badge-success {
-    background: color-mix(in srgb, var(--docs-bg) 82%, var(--docs-badge-success));
+    background: color-mix(in srgb, var(--docs-surface2) 78%, var(--docs-badge-success));
   }
 
   .docs-badge--danger,
   .docs-badge-danger {
-    background: color-mix(in srgb, var(--docs-bg) 82%, var(--docs-badge-danger));
+    background: color-mix(in srgb, var(--docs-surface2) 78%, var(--docs-badge-danger));
   }
 
   .docs-lifecycle-badges {

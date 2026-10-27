@@ -62,6 +62,12 @@
 
   .docs-card__link {
     color: var(--docs-text);
+    text-decoration: none;
+  }
+
+  .docs-card__link:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
   }
 
   .docs-card__icon {

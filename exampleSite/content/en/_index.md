@@ -22,26 +22,26 @@ description = "Versioned, multilingual Hugo documentation without JavaScript."
 {{< download label="Windows x86_64" platform="windows" href="https://github.com/lexbity/hugo-symblix-theme/releases/latest/download/symblix-windows-x86_64.zip" size="4.6 MB" >}}
 {{< /downloads >}}
 
-{{< feature-grid >}}
-{{< feature title="Versioned docs" icon="versions" >}}
+{{< feature-grid layout="media" columns="3" >}}
+{{< feature title="Versioned docs" icon="git-branch" eyebrow="Versioning" >}}
 Keep current and archived documentation in one site.
 {{< /feature >}}
 
-{{< feature title="Multilingual" icon="languages" >}}
+{{< feature title="Multilingual" icon="languages" eyebrow="Languages" >}}
 Support translated docs with clear review metadata.
 {{< /feature >}}
 
-{{< feature title="No JavaScript" icon="static" >}}
+{{< feature title="No JavaScript" icon="zap" eyebrow="Static first" >}}
 Readable HTML, durable navigation, and print-friendly output.
 {{< /feature >}}
 {{< /feature-grid >}}
 
 {{< cards columns="3" >}}
-{{< card title="Getting Started" href="/en/docs/latest/getting-started/" icon="start" badge="Docs" >}}
+{{< card title="Getting Started" href="/en/docs/latest/getting-started/" icon="home" badge="Docs" >}}
 Start with the installation and content tree overview.
 {{< /card >}}
 
-{{< card title="Theme Guide" href="/en/docs/latest/" icon="browse" badge="Docs" >}}
+{{< card title="Theme Guide" href="/en/docs/latest/" icon="book-open" badge="Docs" >}}
 Read the theme documentation from the latest release root.
 {{< /card >}}
 

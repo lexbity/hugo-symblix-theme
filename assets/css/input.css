@@ -22,14 +22,17 @@
 @import "./components/callouts.css";
 @import "./components/details.css";
 @import "./components/figures.css";
+@import "./components/video.css";
 @import "./components/steps.css";
 @import "./components/cards.css";
 @import "./components/landing.css";
 @import "./components/site-header.css";
+@import "./components/site-rail.css";
 @import "./components/project.css";
 @import "./components/reference.css";
 @import "./components/navigation-components.css";
 @import "./components/choice-groups.css";
 @import "./components/print-components.css";
 @import "./components/print.css";
+@import "./components/site-footer.css";
 @import "./components/preset-switcher.css";

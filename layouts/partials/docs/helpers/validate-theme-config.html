@@ -9,6 +9,25 @@
    - Font stack keys
 */ -}}
 {{- $theme := site.Params.docs.theme | default dict -}}
+{{- /* Front-page chrome + footer column validation (SYM-VIS-002). Runs
+       regardless of theme config presence. */ -}}
+{{- $docsParams := site.Params.docs | default dict -}}
+{{- $frontPage := $docsParams.frontpage | default dict -}}
+{{- with $frontPage.chrome -}}
+  {{- $validChrome := dict "topbar" true "rail" true -}}
+  {{- if not (isset $validChrome (lower .)) -}}
+    {{- warnf "params.docs.frontPage.chrome: invalid value %q; must be one of %q" . (slice "topbar" "rail") -}}
+  {{- end -}}
+{{- end -}}
+{{- range $col := ($docsParams.footer.columns | default slice) -}}
+  {{- $menuID := "" -}}
+  {{- with $col.menu -}}{{- $menuID = lower . -}}{{- end -}}
+  {{- if not $menuID -}}
+    {{- warnf "params.docs.footer.columns: entry %q has no menu key" ($col.title | default "") -}}
+  {{- else if not (index site.Menus $menuID) -}}
+    {{- warnf "params.docs.footer.columns: column %q references menu %q which has no entries" ($col.title | default $menuID) $menuID -}}
+  {{- end -}}
+{{- end -}}
 {{- /* Only validate if theme config is explicitly set (not just defaults) */ -}}
 {{- $hasThemeConfig := not (eq (len $theme) 0) -}}
 {{- if not $hasThemeConfig -}}

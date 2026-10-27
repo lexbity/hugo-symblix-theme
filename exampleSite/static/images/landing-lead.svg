@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Abstract band of preset swatches">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef4fb"/>
+      <stop offset="1" stop-color="#dfe9f5"/>
+    </linearGradient>
+    <linearGradient id="a" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#60a5fa"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)"/>
+  <g stroke="#c3d4ea" stroke-width="1">
+    <path d="M0 90h640M0 180h640M0 270h640M160 0v360M320 0v360M480 0v360"/>
+  </g>
+  <g>
+    <rect x="48" y="120" width="160" height="120" rx="4" fill="#ffffff" stroke="#c3d4ea"/>
+    <rect x="48" y="120" width="160" height="34" fill="url(#a)"/>
+    <rect x="64" y="170" width="96" height="10" rx="2" fill="#dbe2ea"/>
+    <rect x="64" y="190" width="128" height="10" rx="2" fill="#e8eef6"/>
+    <rect x="64" y="210" width="80" height="10" rx="2" fill="#e8eef6"/>
+    <rect x="240" y="120" width="160" height="120" rx="4" fill="#070d18" stroke="#1e293b"/>
+    <rect x="240" y="120" width="160" height="34" fill="#4aa3ff"/>
+    <rect x="256" y="170" width="96" height="10" rx="2" fill="#1e293b"/>
+    <rect x="256" y="190" width="128" height="10" rx="2" fill="#16233b"/>
+    <rect x="256" y="210" width="80" height="10" rx="2" fill="#16233b"/>
+    <rect x="432" y="120" width="160" height="120" rx="4" fill="#fdf6e3" stroke="#d5cdb6"/>
+    <rect x="432" y="120" width="160" height="34" fill="#16678f"/>
+    <rect x="448" y="170" width="96" height="10" rx="2" fill="#e5ddc8"/>
+    <rect x="448" y="190" width="128" height="10" rx="2" fill="#eee8d5"/>
+    <rect x="448" y="210" width="80" height="10" rx="2" fill="#eee8d5"/>
+  </g>
+  <rect x="48" y="288" width="200" height="12" rx="3" fill="url(#a)" opacity="0.35"/>
+  <rect x="48" y="310" width="140" height="12" rx="3" fill="url(#a)" opacity="0.2"/>
+</svg>

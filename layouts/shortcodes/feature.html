@@ -1,13 +1,70 @@
+{{- /* Bento feature tile (SYM-VIS-002).
+       Anatomy: optional media band → optional eyebrow → title (with optional
+       icon and link) → markdown body.
+
+       Params: title, href, icon (glyph name from icon-svg.html), image,
+       imageAlt, eyebrow, class.
+
+       The parent feature-grid's `layout` controls when the media band renders
+       automatically: in `media` grids a tile with only an icon gets a themed
+       glyph band; in `text` grids tiles never render a band; an explicit
+       `image` always renders one. */ -}}
 {{- $title := .Get "title" | default "Feature" -}}
 {{- $href := .Get "href" | default "" -}}
 {{- $icon := .Get "icon" | default "" -}}
-{{- $classes := partial "docs/helpers/classname.html" (dict "Base" (slice "docs-feature") "Extra" (.Get "class" | default "")) -}}
+{{- $image := .Get "image" | default "" -}}
+{{- $imageAlt := .Get "imageAlt" | default "" -}}
+{{- $eyebrow := .Get "eyebrow" | default "" -}}
+{{- $layout := "text" -}}
+{{- with .Parent -}}
+  {{- $layout = .Get "layout" | default "text" -}}
+{{- end -}}
+
+{{- $showMedia := false -}}
+{{- $glyphBand := false -}}
+{{- if $image -}}
+  {{- $showMedia = true -}}
+{{- else if and $icon (eq $layout "media") -}}
+  {{- $showMedia = true -}}
+  {{- $glyphBand = true -}}
+{{- end -}}
+
+{{- if and $showMedia $image (not $imageAlt) site.Params.docs.validation.showAuthorWarnings -}}
+  {{- warnf "feature shortcode: image %q on %q has no imageAlt; add one for accessibility" $image $title -}}
+{{- end -}}
+
+{{- $modifiers := slice -}}
+{{- if $showMedia -}}
+  {{- $modifiers = $modifiers | append "docs-feature--media" -}}
+{{- end -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict
+  "Base" (slice "docs-feature")
+  "Modifiers" $modifiers
+  "Extra" (.Get "class" | default ""))
+-}}
 <article class="{{ $classes }}">
-  <h3 class="docs-feature__title">
-    {{ if $href }}<a class="docs-feature__link" href="{{ $href | relURL }}">{{ end }}
-    {{ with $icon }}{{ partial "docs/helpers/icon.html" (dict "Name" . "Class" "docs-feature__icon") }}{{ end -}}
-    {{- $title -}}
-    {{ if $href }}</a>{{ end }}
-  </h3>
-  <div class="docs-feature__body">{{ .InnerDeindent | markdownify }}</div>
+  {{- if $showMedia }}
+  <div class="docs-feature__media{{ if $glyphBand }} docs-feature__media--glyph{{ end }}">
+    {{- if $glyphBand -}}
+      {{ partial "docs/helpers/icon.html" (dict "Name" $icon) }}
+    {{- else }}
+      <img src="{{ $image | relURL }}" alt="{{ $imageAlt }}" loading="lazy" decoding="async">
+    {{- end }}
+  </div>
+  {{- end }}
+  <div class="docs-feature__content">
+    {{- with $eyebrow }}
+    <p class="docs-feature__eyebrow">
+      {{- with $icon }}{{ partial "docs/helpers/icon.html" (dict "Name" .) }}{{ end -}}
+      {{- . -}}
+    </p>
+    {{- end }}
+    <h3 class="docs-feature__title">
+      {{ if $href }}<a class="docs-feature__link" href="{{ $href | relURL }}">{{ end }}
+      {{- if and $icon (not $eyebrow) }}{{ partial "docs/helpers/icon.html" (dict "Name" $icon "Class" "docs-feature__icon") }}{{ end -}}
+      {{- $title -}}
+      {{ if $href }}</a>{{ end }}
+    </h3>
+    <div class="docs-feature__body">{{ .InnerDeindent | markdownify }}</div>
+  </div>
 </article>

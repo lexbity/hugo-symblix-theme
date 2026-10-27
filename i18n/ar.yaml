@@ -170,3 +170,7 @@
   translation: تنقل الموقع
 - id: diagram
   translation: مخطط
+- id: play_video
+  translation: "تشغيل الفيديو"
+- id: watch_on_youtube
+  translation: "المشاهدة على يوتيوب"

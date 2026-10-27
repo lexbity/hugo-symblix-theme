@@ -8,7 +8,7 @@
     "diagrams": "node scripts/render-diagrams.mjs --content exampleSite/content --out exampleSite/assets/diagrams",
     "build": "npm run diagrams && hugo --source exampleSite --theme hugo-theme-symblix --cleanDestinationDir",
     "check": "npm run diagrams && hugo --source exampleSite --theme hugo-theme-symblix --panicOnWarning --cleanDestinationDir",
-    "build:css": "tailwindcss -i assets/css/input.css -o assets/css/compiled/theme.css",
+    "build:css": "tailwindcss -i assets/css/input.css -o assets/css/compiled/theme.css --minify",
     "test": "playwright test",
     "test:install": "playwright install --with-deps chromium",
     "screenshots": "playwright test tests/screenshots.spec.ts"
