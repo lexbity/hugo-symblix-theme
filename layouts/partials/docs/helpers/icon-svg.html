@@ -50,5 +50,9 @@
 -}}
 {{- $body := index $glyphs $name -}}
 {{- if $body -}}
+{{- /* pathLength="100" normalizes dash math so the CSS stroke-draw
+       animation (landing.css) shares one keyframe across every glyph;
+       it has no visual effect outside that animation. */ -}}
+{{- $body = replaceRE `<(path|rect|circle|line|polyline|polygon)\b` `<$1 pathLength="100"` $body -}}
 <svg class="docs-icon-glyph{{ with $class }} {{ . }}{{ end }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">{{ $body | safeHTML }}</svg>
 {{- end -}}

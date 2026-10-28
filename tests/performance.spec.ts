@@ -337,7 +337,9 @@ test.describe("performance benchmarks", () => {
         return sum + statSync(join(publicDir, f)).size;
       }, 0);
 
-      // Target: ~12 KB minified, allow up to 20 KB
+      // Target: core bundle < 20 KB minified (README Non-Goals). Optional
+      // future subsystems (e.g. a motion runtime) carry separate budgets
+      // and would ship as their own chunks, not part of this total.
       expect(totalSize).toBeLessThan(20 * 1024);
 
       console.log(`JS bundle size: ${(totalSize / 1024).toFixed(1)} KB`);

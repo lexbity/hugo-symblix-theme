@@ -12,17 +12,36 @@ async function analyzePage(page: Page) {
   });
 }
 
+// Jump every animation to its final state before analysis. WCAG contrast
+// applies to the settled page; sampling mid-entrance (semi-transparent
+// buttons over the hero background) produces false violations.
+async function settleAnimations(page: Page) {
+  await page.evaluate(() => {
+    document.getAnimations().forEach((a) => {
+      try {
+        a.finish();
+      } catch {
+        /* infinite animations cannot finish; leave them running */
+      }
+    });
+  });
+}
+
 test("accessibility smoke passes on representative pages", async ({ page }) => {
   await page.goto("/en/");
+  await settleAnimations(page);
   expect(await analyzePage(page)).toEqual([]);
 
   await page.goto("/en/docs/latest/");
+  await settleAnimations(page);
   expect(await analyzePage(page)).toEqual([]);
 
   await page.goto("/en/docs/latest/components/project/");
+  await settleAnimations(page);
   expect(await analyzePage(page)).toEqual([]);
 
   await page.goto("/ar/docs/latest/");
+  await settleAnimations(page);
   expect(await analyzePage(page)).toEqual([]);
 });
 

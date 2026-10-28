@@ -8,9 +8,25 @@ if (!existsSync(SCREENSHOT_DIR)) {
 }
 
 test.describe("Curated screenshots for README", () => {
+  // Front-page choreography (entrance, scroll reveals) must not leak
+  // mid-flight frames into captures: jump every animation to its final
+  // state first. Infinite animations cannot finish and are left running.
+  async function settleAnimations(page: import("@playwright/test").Page) {
+    await page.evaluate(() => {
+      document.getAnimations().forEach((a) => {
+        try {
+          a.finish();
+        } catch {
+          /* infinite */
+        }
+      });
+    });
+  }
+
   test("home page desktop", async ({ page }) => {
     await page.goto("/en/");
     await page.waitForLoadState("networkidle");
+    await settleAnimations(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.screenshot({
       path: join(SCREENSHOT_DIR, "home-desktop.png"),

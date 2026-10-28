@@ -1,0 +1,47 @@
+/* Motion system: shared keyframes, the opt-in tilt utility, and the global
+   reduced-motion guard. All choreography on any page must be transform or
+   opacity only — nothing here may affect layout, so the CLS = 0 guarantee
+   of the performance suite holds by construction. */
+
+@layer components {
+  /* Shared entrance keyframe: rise + fade. Consumed by landing.css
+     choreography (hero entrance, scroll-driven reveals). */
+  @keyframes docs-rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  /* Opt-in 3D hover tilt for landing tiles and cards — subtle fixed-angle
+     perspective without pointer tracking. Apply via the shortcode `class`
+     parameter (e.g. class="docs-motion-tilt"). */
+  .docs-motion-tilt {
+    transition: transform 180ms ease;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .docs-motion-tilt:hover {
+      transform: perspective(40rem) rotateX(1.5deg) rotateY(-1.5deg) translateY(-2px);
+    }
+  }
+}
+
+/* Global reduced-motion guard. Wins over every authored transition and
+   animation in the theme (and most site additions): near-zero durations,
+   no delays, no repeats. Viewport-initiated smooth scrolling is disabled
+   as well. Choreography that must not merely be fast but absent entirely
+   (scroll-driven reveals start hidden) is additionally gated on
+   prefers-reduced-motion: no-preference at its definition site. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}

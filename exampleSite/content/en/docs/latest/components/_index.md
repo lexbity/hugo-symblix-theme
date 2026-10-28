@@ -63,4 +63,8 @@ Compose hero, feature, and CTA blocks for section hubs.
 {{< card title="Video" href="/en/docs/latest/components/video/" badge="Media" >}}
 Embed self-hosted clips and click-to-load YouTube videos.
 {{< /card >}}
+
+{{< card title="Motion" href="/en/docs/latest/components/motion/" badge="Polish" >}}
+CSS-only hero glow, glyph draws, and scroll reveals with reduced-motion support.
+{{< /card >}}
 {{< /cards >}}

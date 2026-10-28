@@ -1,4 +1,13 @@
 @media print {
+  /* Freeze all motion: no entrance/reveal animations mid-state on paper,
+     no transition artifacts. Content must print in its final state. */
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
   .skip-link,
   .docs-site-header,
   .docs-sidebar,

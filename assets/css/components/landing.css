@@ -9,6 +9,8 @@
   }
 
   .docs-hero {
+    position: relative;
+    overflow: hidden;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: calc(var(--docs-density-component-gap) * 1.1);
@@ -19,6 +21,91 @@
       radial-gradient(circle at top right, color-mix(in srgb, var(--docs-accent) 16%, transparent), transparent 45%),
       linear-gradient(180deg, color-mix(in srgb, var(--docs-surface) 98%, var(--docs-bg)), var(--docs-surface));
     box-shadow: var(--docs-shadow);
+  }
+
+  /* Pixel-dither glow (hero variant="pixel"): a retro quantized accent glow
+     built from pure CSS masks — a checkerboard pixel grid intersected with a
+     stepped radial falloff, so the dither density drops toward the edge.
+     Two phase-shifted layers alternate in hard steps for a two-frame dither
+     shimmer. Decorative only: aria-irrelevant pseudo-elements, transform-
+     and opacity-only animation, physically top-right like the default glow.
+     Browsers without mask-composite keep the default smooth gradient. */
+  @supports (mask-composite: intersect) {
+    .docs-hero--pixel {
+      /* isolation makes the hero a stacking context, so the glow
+         pseudo-elements' z-index: -1 paints above the hero's own
+         background but below its content — never behind the card. */
+      isolation: isolate;
+      background:
+        radial-gradient(circle at top right, color-mix(in srgb, var(--docs-accent) 7%, transparent), transparent 45%),
+        linear-gradient(180deg, color-mix(in srgb, var(--docs-surface) 98%, var(--docs-bg)), var(--docs-surface));
+    }
+
+    .docs-hero--pixel::before,
+    .docs-hero--pixel::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      top: 0;
+      right: 0;
+      width: min(44rem, 85%);
+      height: 74%;
+      pointer-events: none;
+      background: color-mix(in srgb, var(--docs-accent) 30%, transparent);
+      -webkit-mask-image: repeating-conic-gradient(#000 0% 25%, transparent 0% 50%),
+        radial-gradient(
+          115% 115% at top right,
+          #000 0 18%,
+          rgba(0, 0, 0, 0.66) 18% 38%,
+          rgba(0, 0, 0, 0.42) 38% 58%,
+          rgba(0, 0, 0, 0.2) 58% 78%,
+          transparent 78%
+        );
+      mask-image: repeating-conic-gradient(#000 0% 25%, transparent 0% 50%),
+        radial-gradient(
+          115% 115% at top right,
+          #000 0 18%,
+          rgba(0, 0, 0, 0.66) 18% 38%,
+          rgba(0, 0, 0, 0.42) 38% 58%,
+          rgba(0, 0, 0, 0.2) 58% 78%,
+          transparent 78%
+        );
+      -webkit-mask-size: 6px 6px, 100% 100%;
+      mask-size: 6px 6px, 100% 100%;
+      -webkit-mask-repeat: repeat, no-repeat;
+      mask-repeat: repeat, no-repeat;
+      mask-composite: intersect;
+    }
+
+    /* Phase B: the grid shifted by half a cell is the checkerboard's
+       complement, so alternating visibility flips the dither pattern. */
+    .docs-hero--pixel::after {
+      -webkit-mask-position: 3px 3px, 0 0;
+      mask-position: 3px 3px, 0 0;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .docs-hero--pixel::before,
+      .docs-hero--pixel::after {
+        animation: docs-glow-phase 1.6s linear infinite;
+      }
+
+      .docs-hero--pixel::after {
+        animation-delay: -0.8s;
+      }
+    }
+  }
+
+  @keyframes docs-glow-phase {
+    0%,
+    49.99% {
+      opacity: 1;
+    }
+
+    50%,
+    100% {
+      opacity: 0;
+    }
   }
 
   .docs-hero--center {
@@ -274,5 +361,60 @@
     display: flex;
     flex-wrap: wrap;
     gap: calc(var(--docs-density-component-gap) * 0.75);
+  }
+
+  /* ---- Front-page choreography (CSS-only, no JavaScript) ----
+     Three layers, each degrading to fully static content:
+     1. Glyph stroke-draw: media-band icons draw themselves once when they
+        scroll into view. Requires scroll-driven animations (animation-
+        timeline: view()) — static glyphs everywhere else. pathLength="100"
+        on every glyph shape (icon-svg.html) makes one keyframe fit all.
+     2. Hero entrance: above-fold hero children rise in with a short
+        stagger on load (time-based, so it plays without scrolling).
+     3. Scroll reveals: below-fold tiles and cards rise in as they enter
+        the viewport, scrubbed by scroll position. Chromium/Safari only;
+        other browsers show static content. */
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .docs-feature__media--glyph .docs-icon-glyph :is(path, rect, circle, line, polyline, polygon) {
+        stroke-dasharray: 100;
+        stroke-dashoffset: 100;
+        animation: docs-icon-draw 900ms ease-out forwards;
+        animation-timeline: view();
+        animation-range: entry 10% entry 60%;
+      }
+    }
+
+    .docs-home .docs-hero > * {
+      animation: docs-rise 460ms ease-out backwards;
+    }
+
+    .docs-home .docs-hero > :nth-child(2) {
+      animation-delay: 70ms;
+    }
+
+    .docs-home .docs-hero > :nth-child(3) {
+      animation-delay: 140ms;
+    }
+
+    .docs-home .docs-hero > :nth-child(4) {
+      animation-delay: 210ms;
+    }
+
+    @supports (animation-timeline: view()) {
+      .docs-home .docs-feature,
+      .docs-home .docs-card {
+        animation: docs-rise linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 65%;
+      }
+    }
+
+    @keyframes docs-icon-draw {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
   }
 }

@@ -16,6 +16,7 @@ A Hugo documentation theme for structured, navigable, versioned, multilingual te
 - **Project front page:** `release`, `install`, and `downloads` shortcodes compose a software landing page — release badge, copyable install commands, and binary downloads — complete without JavaScript. Platform detection annotates the right download row as a JavaScript enhancement only. Two developer-selected chrome layouts: the header bar, or a Material-style icon rail — on narrow screens both collapse into a dropdown menu built on a no-JS `<details>` element.
 - **Bento blocks:** `feature-grid` renders equal text tiles, media tiles (image or themed glyph bands), or an asymmetric 1+2 lead band; `video` embeds self-hosted clips natively and YouTube through a click-to-load facade — no third-party request until the visitor presses play.
 - **Project chrome:** default SVG favicon (drop in your own to override), an expanded multi-column footer driven by Hugo menus (brand column, social icons, translated column titles), license line, and copyright — configured entirely from `hugo.toml`.
+- **CSS-only front-page motion:** a retro pixel-dither hero glow (`variant="pixel"`), glyph stroke-draw, staggered hero entrance, scroll-driven reveals, and an opt-in 3D hover tilt — all pure CSS, all collapsing to their final static state under `prefers-reduced-motion` and in print. See the [Motion](#front-page-motion) section.
 
 ## Requirements
 
@@ -151,6 +152,17 @@ Shipped social icons: `github`, `x`, `bluesky`, `youtube`, `rss`; any other name
 
 On screens under 48rem both layouts collapse into a dropdown menu on a `<details>` element — links, social icons, and the theme switcher, all functional without JavaScript; the script bundle only adds close-on-outside-click and Escape.
 
+## Front-page motion
+
+Front-page life is CSS-only: no JavaScript, no network requests beyond the stylesheet, and every effect derives from the active preset's tokens so it re-themes with all seven presets automatically.
+
+- **Pixel-dither hero glow** — `variant="pixel"` on the `hero` shortcode swaps the smooth corner gradient for a retro quantized glow (a checkerboard mask intersected with a stepped radial falloff, two phase-shifted layers alternating in hard steps). Degrades to the smooth glow without `mask-composite` support.
+- **Glyph stroke-draw** — media-band feature glyphs draw themselves in on first scroll into view (`animation-timeline: view()`); every shipped glyph carries `pathLength="100"` so one keyframe fits all.
+- **Entrance + scroll reveals** — front-page hero children rise in with a short stagger on load; feature tiles and cards below the fold rise in as they enter the viewport, scrubbed by scroll. Scoped to the `.docs-home` layout; reading pages stay static.
+- **Opt-in 3D tilt** — `class="docs-motion-tilt"` on any tile or card adds a fixed-angle perspective tilt on hover.
+
+Hard guarantees, enforced in CSS and by the test suite: `prefers-reduced-motion: reduce` collapses every animation and transition to its final state instantly (scroll-driven choreography is not applied at all, so no content hides); the print stylesheet suppresses motion entirely; and all choreography animates `transform`/`opacity` only, preserving the zero-layout-shift behavior. See the Motion page in the example site for live demos.
+
 ## Video
 
 The `video` shortcode embeds videos that play inside the page:
@@ -189,7 +201,7 @@ Omit `description` and `columns` to keep the original slim footer.
 
 The theme intentionally omits the following. They are not bugs; they are design boundaries.
 
-1. **No client-side dependency additions.** No search library, no font loader, no framework. Bundle budget stays ~12 KB minified JS.
+1. **No client-side dependency additions.** No search library, no font loader, no framework. The core bundle budget stays under ~20 KB minified JS; any future optional subsystem (for example an opt-in motion/3D runtime) carries its own separate budget and must load lazily, never render-blocking.
 2. **No fuzzy/typo-tolerant search.** The hand-rolled exact-token matcher stays. Revisit only with evidence.
 3. **No "edit on GitHub", analytics bundling, or feedback widgets.** The `custom-head.html` hook is the sanctioned extension point; the theme ships none of them.
 4. **Self-hosted fonts only.** The theme bundles Inter and JetBrains Mono fonts locally. Font configuration accepts stack declarations with bundled fonts as the first choice, followed by system fallbacks.
