@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Static frame of the orbit demo scene">
+  <rect width="800" height="450" fill="#eef2f7"/>
+  <g fill="none" stroke="#94a3b8" stroke-width="2">
+    <ellipse cx="400" cy="225" rx="270" ry="98"/>
+    <ellipse cx="400" cy="225" rx="185" ry="66"/>
+    <ellipse cx="400" cy="225" rx="100" ry="34"/>
+    <line x1="130" y1="225" x2="670" y2="225" stroke-dasharray="4 8"/>
+  </g>
+  <circle cx="400" cy="225" r="15" fill="#2563eb"/>
+  <circle cx="642" cy="193" r="7" fill="#334155"/>
+  <circle cx="206" cy="264" r="7" fill="#334155"/>
+  <circle cx="472" cy="160" r="6" fill="#64748b"/>
+  <circle cx="318" cy="296" r="5" fill="#94a3b8"/>
+</svg>

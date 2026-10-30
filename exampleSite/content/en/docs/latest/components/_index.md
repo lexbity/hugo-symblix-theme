@@ -67,4 +67,8 @@ Embed self-hosted clips and click-to-load YouTube videos.
 {{< card title="Motion" href="/en/docs/latest/components/motion/" badge="Polish" >}}
 CSS-only hero glow, glyph draws, and scroll reveals with reduced-motion support.
 {{< /card >}}
+
+{{< card title="Scenes" href="/en/docs/latest/components/scenes/" badge="3D" >}}
+Mount poster-first 3D scenes on a vendored three.js runtime.
+{{< /card >}}
 {{< /cards >}}

@@ -4,6 +4,10 @@
 @import "tailwindcss" source(none);
 @source "../layouts";
 @source "../js";
+/* Vendored third-party bundles (SYM-MOT-001) are not class sources: their
+   minified identifiers collide with utility names, and every runtime upgrade
+   would silently churn the compiled stylesheet. */
+@source not "../js/vendor";
 
 @import "./theme.css";
 @import "./presets.css";

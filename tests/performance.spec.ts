@@ -8,13 +8,14 @@
 
 import { expect, test } from "@playwright/test";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { gzipSync } from "node:zlib";
 import { join } from "node:path";
 
 const REPO_ROOT = join(__dirname, "..");
 
 test.describe("performance benchmarks", () => {
   test.describe("CSS payload size (NFR-1.3)", () => {
-    test("compiled CSS size is under 88 KB minified", () => {
+    test("compiled CSS size is under 112 KB minified", () => {
       const compiledCssPath = join(REPO_ROOT, "assets", "css", "compiled", "theme.css");
       expect(existsSync(compiledCssPath)).toBe(true);
 
@@ -24,20 +25,25 @@ test.describe("performance benchmarks", () => {
 
       console.log(`CSS size: ${sizeKB.toFixed(1)} KB (${sizeBytes} bytes)`);
 
-      // Target: < 88 KB minified. Re-based from the original 58 KB when the
-      // seven-preset visual identity system landed (~+25 KB of preset token
-      // blocks and switcher styles); font-face declarations moved out of the
-      // bundle into a Hugo-templated stylesheet (head.html).
-      expect(sizeBytes).toBeLessThan(88 * 1024);
+      // Target: < 112 KB minified. History of this ratchet (it exists to
+      // force a recorded decision, not to freeze history):
+      //   88 KB — original ceiling after the preset identity system.
+      //   101 KB actual — f608bad expanded the hero-glow variant family
+      //     (aurora/scanline/pulse/beam/ripple/synth), deliberately.
+      //   102 KB actual — SYM-MOT-001 P1 scene-mount layer (~+1.1 KB).
+      //   Re-based to 112/120 with ~10 KB headroom for reveal-text and
+      //   adapter CSS. If this ceiling is hit again, trim or split before
+      //   raising.
+      expect(sizeBytes).toBeLessThan(112 * 1024);
     });
 
-    test("CSS size regression check (< 92 KB minified)", () => {
+    test("CSS size regression check (< 120 KB minified)", () => {
       const compiledCssPath = join(REPO_ROOT, "assets", "css", "compiled", "theme.css");
       const css = readFileSync(compiledCssPath, "utf-8");
       const sizeBytes = Buffer.byteLength(css, "utf-8");
 
-      // Hard-fail margin above the 88 KB target
-      expect(sizeBytes).toBeLessThan(92 * 1024);
+      // Hard-fail margin above the 112 KB target (SYM-MOT-001 D2 re-base).
+      expect(sizeBytes).toBeLessThan(120 * 1024);
     });
 
     test("input.css imports all required CSS files", () => {
@@ -330,7 +336,10 @@ test.describe("performance benchmarks", () => {
         return;
       }
 
-      const files = readdirSync(publicDir).filter((f) => f.endsWith(".js"));
+      // Scoped to the core bundle (SYM-MOT-001 D1): motion.min.*.js is a
+      // separately-budgeted, lazily-emitted chunk and must not pollute the
+      // core total.
+      const files = readdirSync(publicDir).filter((f) => f.startsWith("main.min.") && f.endsWith(".js"));
       expect(files.length).toBeGreaterThan(0);
 
       const totalSize = files.reduce((sum, f) => {
@@ -338,11 +347,54 @@ test.describe("performance benchmarks", () => {
       }, 0);
 
       // Target: core bundle < 20 KB minified (README Non-Goals). Optional
-      // future subsystems (e.g. a motion runtime) carry separate budgets
-      // and would ship as their own chunks, not part of this total.
+      // subsystems (the motion runtime) carry separate budgets below.
       expect(totalSize).toBeLessThan(20 * 1024);
 
       console.log(`JS bundle size: ${(totalSize / 1024).toFixed(1)} KB`);
+    });
+
+    test("motion runtime chunk stays within its separate budget", () => {
+      // Reference-based (SYM-MOT-001 NFR-2): measure the exact chunk a built
+      // scene page loads, not every motion.min.* on disk — stale builds can
+      // leave superseded fingerprinted files in public/ (cleanDestinationDir
+      // does not remove renamed hashes).
+      const scenesPage = join(
+        REPO_ROOT,
+        "exampleSite",
+        "public",
+        "en",
+        "docs",
+        "latest",
+        "components",
+        "scenes",
+        "index.html",
+      );
+      if (!existsSync(scenesPage)) {
+        console.log("Skipping motion budget test - scenes page not built");
+        return;
+      }
+
+      const match = readFileSync(scenesPage, "utf-8").match(
+        /src="([^"]*motion\.min\.[^"]+\.js)"/,
+      );
+      if (!match) {
+        console.log("Skipping motion budget test - no motion chunk referenced");
+        return;
+      }
+
+      const chunkPath = join(REPO_ROOT, "exampleSite", "public", new URL(match[1], "http://x/").pathname.replace(/^\//, ""));
+      expect(existsSync(chunkPath), `referenced chunk exists: ${match[1]}`).toBe(true);
+
+      // SYM-MOT-001 NFR-2: runtime + vendored three, raw ≤ 780 KB,
+      // gzip ≤ 220 KB. Enforced on the emitted (post-js.Build) artifact.
+      const raw = statSync(chunkPath).size;
+      const gzipped = gzipSync(readFileSync(chunkPath)).length;
+
+      console.log(
+        `Motion chunk: ${(raw / 1024).toFixed(1)} KB raw, ${(gzipped / 1024).toFixed(1)} KB gzip`,
+      );
+      expect(raw).toBeLessThan(780 * 1024);
+      expect(gzipped).toBeLessThan(220 * 1024);
     });
   });
 
@@ -355,9 +407,10 @@ test.describe("performance benchmarks", () => {
       const cssFiles = files.filter((f) => f.endsWith(".css"));
 
       // We should have a reasonable number of CSS files
-      // components/ + top-level files. Ratcheted at 40 when the video,
-      // rail, and footer components joined the set (SYM-VIS-002).
-      expect(cssFiles.length).toBeLessThan(40);
+      // components/ + top-level files. Ratcheted at 44 when the scene-mount
+      // subsystem (SYM-MOT-001) reserved headroom for adapter CSS; the
+      // scene layer itself co-locates in motion.css.
+      expect(cssFiles.length).toBeLessThan(44);
 
       console.log(`CSS files: ${cssFiles.length}`);
     });

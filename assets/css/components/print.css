@@ -77,4 +77,10 @@
   .docs-manual-section {
     margin-bottom: 1.5rem;
   }
+
+  /* Scene mounts (SYM-MOT-001): the poster is the printed face; the live
+     canvas never prints. */
+  [data-scene] canvas {
+    display: none !important;
+  }
 }

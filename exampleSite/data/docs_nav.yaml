@@ -63,6 +63,10 @@ items:
         page: /en/docs/latest/components/video/
       - title: Presets
         page: /en/docs/latest/components/presets/
+      - title: Motion
+        page: /en/docs/latest/components/motion/
+      - title: Scenes
+        page: /en/docs/latest/components/scenes/
 
   - title: Hidden Example
     hidden: true

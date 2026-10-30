@@ -170,3 +170,9 @@ This tier adds identity and life without JavaScript, bytes on the wire, or
 new dependencies — the theme ships zero scene content and zero runtimes.
 Interactive 3D and heavier motion (the scaffolding-plus-runtime subsystem)
 is a separate, opt-in design track with its own bundle budget.
+
+## Next step: interactive scenes
+
+Everything above is ambient CSS motion. For interactive 3D — WebGL scenes
+on the vendored three.js runtime, with live palette re-theming and scroll
+signals — see [Scenes](/en/docs/latest/components/scenes/).

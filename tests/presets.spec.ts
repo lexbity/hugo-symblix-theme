@@ -816,21 +816,25 @@ test.describe("JavaScript runtime (Phase 5)", () => {
   });
 
   test("JS bundle size is reasonable (< 20 KB minified)", () => {
-    // Find the built JS bundle
+    // Scoped to the core bundle (SYM-MOT-001 D1): the motion runtime is a
+    // separately-budgeted chunk (see performance.spec.ts) and must not
+    // pollute the core total.
     const publicDir = join(REPO_ROOT, "exampleSite", "public", "js");
     if (!existsSync(publicDir)) {
       // Skip if not built
       return;
     }
     const { readdirSync, statSync } = require("node:fs");
-    const files = readdirSync(publicDir).filter((f: string) => f.endsWith(".js"));
+    const files = readdirSync(publicDir).filter(
+      (f: string) => f.startsWith("main.min.") && f.endsWith(".js"),
+    );
     expect(files.length).toBeGreaterThan(0);
 
     const totalSize = files.reduce((sum: number, f: string) => {
       return sum + statSync(join(publicDir, f)).size;
     }, 0);
 
-    // Target: ~12 KB minified, allow up to 20 KB
+    // Target: core bundle < 20 KB minified (README Non-Goals)
     expect(totalSize).toBeLessThan(20 * 1024);
   });
 });

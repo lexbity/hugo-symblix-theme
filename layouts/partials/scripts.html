@@ -11,3 +11,15 @@
 </script>
 {{ $js := resources.Get "js/main.js" | js.Build | minify | fingerprint }}
 <script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
+{{/* Motion runtime (SYM-MOT-001): emitted exactly once per page, only when
+     a {{< scene >}} shortcode ran (the shortcode sets the page-scoped store
+     flag). This relies on a structural invariant of the theme: every
+     template calls scripts.html AFTER .Content has rendered, so the flag
+     is always set by the time we get here (verified across index.html,
+     docs/baseof.html, and the 404 template — tests/scene.spec.ts holds the
+     emission contract). type="module" defers execution; the chunk is never
+     render-blocking. */}}
+{{ if .Page.Store.Get "symblixMotion" }}
+  {{ $motion := resources.Get "js/motion.js" | js.Build (dict "target" "es2020" "format" "esm") | minify | fingerprint }}
+  <script type="module" src="{{ $motion.RelPermalink }}" integrity="{{ $motion.Data.Integrity }}"></script>
+{{ end }}

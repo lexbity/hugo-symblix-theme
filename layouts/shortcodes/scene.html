@@ -1,0 +1,149 @@
+{{- /* Scene mount (SYM-MOT-001) — poster-first 3D/motion stage.
+
+       Renders COMPLETE plain markup: a sized, labeled figure holding the
+       poster image and optional overlay content. Nothing here depends on
+       JavaScript; the motion runtime (loaded separately, only on pages that
+       use this shortcode) upgrades the mount in place via data-scene-state.
+
+       Params:
+         src      (required) site/theme asset path of the scene ES module.
+                  Site-relative only — any URL scheme or protocol-relative
+                  path fails the build (zero-external-request contract).
+         poster   (required) site-relative asset path of the still frame.
+         title    (required) accessible name (aria-label + poster alt).
+         runtime  (default "three") adapter id; v1 ships only "three".
+         load     (default "visible") init strategy. "click" (poster +
+                  activate button) arrives with the runtime in P6.
+         pointer  (default "off") "on" arms pointer signal delivery.
+         ratio    (default "16/9") aspect ratio; mutually exclusive with height.
+         height   fixed CSS length; mutually exclusive with ratio.
+         class    extra classes.
+
+       Hugo's errorf fails the build but does not halt template execution,
+       so every check records $failed and the transform/markup section is
+       gated on it — a validation failure can never reach js.Build with a
+       nil resource and mask the real message with a secondary crash.
+
+       The runtime script is emitted once per page by scripts.html, keyed on
+       the Page.Store flag set below. That emission relies on a structural
+       invariant of this theme: every template calls scripts.html AFTER
+       .Content has rendered, so the flag is always set by then (verified
+       across layouts/index.html and layouts/docs/baseof.html). */ -}}
+{{- $src := .Get "src" -}}
+{{- $poster := .Get "poster" -}}
+{{- $title := .Get "title" -}}
+{{- $runtime := .Get "runtime" | default "three" -}}
+{{- $load := .Get "load" | default "visible" -}}
+{{- $pointer := .Get "pointer" | default "off" -}}
+{{- $ratioRaw := .Get "ratio" -}}
+{{- $height := .Get "height" -}}
+{{- $class := .Get "class" -}}
+{{- $where := .Page.Title -}}
+{{- with .Page.File -}}{{ $where = printf "%s (%s)" $where .Filename }}{{ end -}}
+{{- $failed := false -}}
+
+{{- /* ---- validation (build-time, fail the build loudly) ---- */ -}}
+{{- if not $src -}}{{ errorf "scene shortcode (%s): src is required" $where }}{{ $failed = true }}{{ end -}}
+{{- if not $poster -}}{{ errorf "scene shortcode (%s): poster is required" $where }}{{ $failed = true }}{{ end -}}
+{{- if not $title -}}{{ errorf "scene shortcode (%s): title is required (it becomes the accessible name)" $where }}{{ $failed = true }}{{ end -}}
+
+{{- /* Asset paths must be site-relative: any scheme (https:, data:, …) or
+       protocol-relative // would fetch from off-origin at runtime. */ -}}
+{{- if and $src (findRE `^[a-zA-Z][a-zA-Z0-9+.-]*:` $src) -}}
+  {{- errorf "scene shortcode (%s): src %q must be a site-relative asset path, not a URL (zero-external-request contract)" $where $src -}}
+  {{- $failed = true -}}
+{{- end -}}
+{{- if and $src (findRE `^//` $src) -}}
+  {{- errorf "scene shortcode (%s): src %q must not be protocol-relative" $where $src -}}
+  {{- $failed = true -}}
+{{- end -}}
+{{- if and $poster (findRE `^[a-zA-Z][a-zA-Z0-9+.-]*:` $poster) -}}
+  {{- errorf "scene shortcode (%s): poster %q must be a site-relative asset path, not a URL (zero-external-request contract)" $where $poster -}}
+  {{- $failed = true -}}
+{{- end -}}
+{{- if and $poster (findRE `^//` $poster) -}}
+  {{- errorf "scene shortcode (%s): poster %q must not be protocol-relative" $where $poster -}}
+  {{- $failed = true -}}
+{{- end -}}
+
+{{- if ne $runtime "three" -}}
+  {{- errorf "scene shortcode (%s): unknown runtime %q (v1 ships \"three\")" $where $runtime -}}
+  {{- $failed = true -}}
+{{- end -}}
+{{- if ne $load "visible" -}}
+  {{- errorf "scene shortcode (%s): unknown load %q (\"visible\" only until the runtime lands \"click\")" $where $load -}}
+  {{- $failed = true -}}
+{{- end -}}
+{{- if and (ne $pointer "off") (ne $pointer "on") -}}
+  {{- errorf "scene shortcode (%s): pointer must be \"off\" or \"on\", got %q" $where $pointer -}}
+  {{- $failed = true -}}
+{{- end -}}
+
+{{- if and $ratioRaw $height -}}
+  {{- errorf "scene shortcode (%s): ratio and height are mutually exclusive" $where -}}
+  {{- $failed = true -}}
+{{- end -}}
+{{- $ratio := "16 / 9" -}}
+{{- $fixedHeight := "" -}}
+{{- if and (not $failed) $height -}}
+  {{- if not (findRE `^[0-9]+(\.[0-9]+)?(rem|em|px|vh|vw|svh|lvh|%)$` $height) -}}
+    {{- errorf "scene shortcode (%s): height %q is not a plain CSS length" $where $height -}}
+    {{- $failed = true -}}
+  {{- else -}}
+    {{- $fixedHeight = $height -}}
+  {{- end -}}
+{{- else if and (not $failed) $ratioRaw -}}
+  {{- $normalized := replace $ratioRaw " " "" -}}
+  {{- if not (findRE `^[0-9]+(\.[0-9]+)?/[0-9]+(\.[0-9]+)?$` $normalized) -}}
+    {{- errorf "scene shortcode (%s): ratio %q must look like 16/9" $where $ratioRaw -}}
+    {{- $failed = true -}}
+  {{- else -}}
+    {{- $ratio = delimit (split $normalized "/") " / " -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if $failed -}}{{ return }}{{ end -}}
+
+{{- /* ---- asset resolution (site assets shadow theme assets) ---- */ -}}
+{{- $srcPath := strings.TrimPrefix "/" $src -}}
+{{- $sceneRes := resources.Get $srcPath -}}
+{{- if not $sceneRes -}}
+  {{- errorf "scene shortcode (%s): src %q not found in assets" $where $src -}}
+  {{- return -}}
+{{- end -}}
+{{- $sceneJs := $sceneRes | js.Build (dict "target" "es2020" "format" "esm") | minify | fingerprint -}}
+
+{{- $posterPath := strings.TrimPrefix "/" $poster -}}
+{{- $posterRes := resources.Get $posterPath -}}
+{{- if not $posterRes -}}
+  {{- errorf "scene shortcode (%s): poster %q not found in assets" $where $poster -}}
+  {{- return -}}
+{{- end -}}
+
+{{- /* ---- page-scoped flag: scripts.html emits the runtime once ---- */ -}}
+{{- .Page.Store.Set "symblixMotion" true -}}
+
+{{- $modifiers := slice -}}
+{{- if $fixedHeight -}}{{ $modifiers = $modifiers | append "docs-scene--fixed-height" }}{{ end -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict
+  "Base" (slice "docs-scene")
+  "Modifiers" $modifiers
+  "Extra" $class)
+-}}
+<figure class="{{ $classes }}"
+        data-scene
+        data-scene-runtime="{{ $runtime }}"
+        data-scene-state="idle"
+        data-scene-load="{{ $load }}"
+        data-scene-pointer="{{ $pointer }}"
+        data-scene-src="{{ $sceneJs.RelPermalink }}"
+        data-scene-id="scene-{{ .Ordinal }}"
+        aria-label="{{ $title }}"
+        {{- if $fixedHeight }} style="height: {{ $fixedHeight | safeCSS }};"
+        {{- else }} style="--docs-scene-aspect: {{ $ratio | safeCSS }};"{{ end -}}
+>
+  <img class="docs-scene__poster" src="{{ $posterRes.RelPermalink }}" alt="{{ $title }}" loading="lazy" decoding="async">
+  {{- with .InnerDeindent }}
+  <div class="docs-scene__overlay">{{ . | markdownify }}</div>
+  {{- end }}
+</figure>
