@@ -8,7 +8,7 @@
 import { expect, test } from "@playwright/test";
 
 const SCENES_PAGE = "/en/docs/latest/components/scenes/";
-const FIXTURE_PAGE = "/en/docs/latest/components/scene-fixture/";
+const FIXTURE_PAGE = "/en/docs/latest/components/scene-failures/";
 
 test.describe("lifecycle", () => {
   test("demo scene reaches live with a sized canvas and the poster cross-fades", async ({
@@ -202,5 +202,109 @@ test.describe("registration idempotency", () => {
     const after = await page.evaluate(() => window.SymblixMotion.hosts.size);
     expect(after).toBe(before);
     expect(after).toBe(1);
+  });
+});
+
+test.describe("palette bridge", () => {
+  // Preset tokens from data/docs_presets.yaml — the bridge must deliver
+  // exactly these values as frozen snapshots.
+  const PRESET_ACCENTS = {
+    "symblix-light": { css: "#2563eb", mode: "light" },
+    "symblix-dark": { css: "#4aa3ff", mode: "dark" },
+    "ocean-dark": { css: "#38bdf8", mode: "dark" },
+    "forest-light": { css: "#166534", mode: "light" },
+    "sunset-dark": { css: "#f59e0b", mode: "dark" },
+    "solarized-light": { css: "#16678f", mode: "light" },
+    "high-contrast": { css: "#0000ff", mode: "light" },
+  };
+
+  // Chromium normalizes custom-property colors to minimal hex (#0000ff →
+  // #00f); the bridge delivers the browser's computed string, so compare
+  // both sides in expanded form.
+  function expandHex(h) {
+    const m = /^#([0-9a-f]{3})$/i.exec(h.trim());
+    if (!m) return h.trim().toLowerCase();
+    const [r, g, b] = m[1].split("");
+    return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
+  }
+
+  async function sceneLive(page) {
+    await page.goto(SCENES_PAGE);
+    await page.locator("[data-scene]").evaluate((el) => el.scrollIntoView({ block: "center" }));
+    await expect
+      .poll(() => page.locator("[data-scene]").getAttribute("data-scene-state"), {
+        timeout: 3000,
+      })
+      .toBe("live");
+  }
+
+  test("preset switch re-themes the live scene and flips the mirror", async ({ page }) => {
+    await sceneLive(page);
+
+    const initial = await page.evaluate(() => {
+      const host = [...window.SymblixMotion.hosts.values()][0];
+      return {
+        mirror: document.querySelector("[data-scene]").dataset.scenePreset,
+        accent: host.palette && host.palette.accent && host.palette.accent.css,
+      };
+    });
+    expect(initial.mirror).toBe("symblix-light");
+    expect(initial.accent).toBe("#2563eb");
+
+    await page.evaluate(() => window.SymblixTheme.setPreset("ocean-dark"));
+    await expect
+      .poll(() => page.locator("[data-scene]").getAttribute("data-scene-preset"))
+      .toBe("ocean-dark");
+
+    const after = await page.evaluate(() => {
+      const host = [...window.SymblixMotion.hosts.values()][0];
+      return {
+        accent: host.palette.accent.css,
+        mode: host.palette.mode,
+        frozen: Object.isFrozen(host.palette),
+      };
+    });
+    expect(after.accent).toBe("#38bdf8");
+    expect(after.mode).toBe("dark");
+    // The snapshot the scene received is immutable (Q6).
+    expect(after.frozen).toBe(true);
+  });
+
+  test("all seven presets deliver their accent token and mode", async ({ page }) => {
+    await sceneLive(page);
+
+    for (const [preset, expected] of Object.entries(PRESET_ACCENTS)) {
+      await page.evaluate((p) => window.SymblixTheme.setPreset(p), preset);
+      await expect
+        .poll(() => page.locator("[data-scene]").getAttribute("data-scene-preset"), {
+          timeout: 2000,
+        })
+        .toBe(preset);
+      const got = await page.evaluate(() => {
+        const host = [...window.SymblixMotion.hosts.values()][0];
+        return { css: host.palette.accent.css, mode: host.palette.mode };
+      });
+      expect(expandHex(got.css), `${preset} accent`).toBe(expandHex(expected.css));
+      expect(got.mode, `${preset} mode`).toBe(expected.mode);
+    }
+  });
+
+  test("reduced motion: mirror still tracks presets though the scene never starts", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(SCENES_PAGE);
+    await page.waitForLoadState("load");
+
+    // The mirror is a page-wide observability signal, independent of scene
+    // lifecycle (P3 decision): the host registers, never starts, but the
+    // mount still reports the live preset truthfully.
+    await page.evaluate(() => window.SymblixTheme.setPreset("sunset-dark"));
+    await expect
+      .poll(() => page.locator("[data-scene]").getAttribute("data-scene-preset"))
+      .toBe("sunset-dark");
+
+    expect(await page.locator("[data-scene]").getAttribute("data-scene-state")).toBe("idle");
+    expect(await page.locator("[data-scene] .docs-scene__canvas").count()).toBe(0);
   });
 });

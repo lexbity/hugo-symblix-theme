@@ -132,7 +132,9 @@ Contract rules:
 when scrolled away or the tab hides, and `error` when anything fails (a
 throwing scene, missing WebGL2, a lost GPU context that cannot recover).
 Errors are logged with the `[symblix-motion]` tag. A lost GPU context gets
-exactly one automatic re-init; a second loss is permanent.
+exactly one automatic re-init; a second loss is permanent. The
+[Scene Failure Fixtures](/en/docs/latest/components/scene-failures/) page
+demonstrates the isolation live with deliberately broken scenes.
 
 ## Degradation matrix
 

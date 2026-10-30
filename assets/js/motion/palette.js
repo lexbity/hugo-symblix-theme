@@ -65,3 +65,20 @@ export function freezePalette(snapshot) {
   }
   return Object.freeze(snapshot);
 }
+
+// Singleton observer (Q6): the preset system expresses theme changes as
+// html[data-preset] / html[data-syntax] attribute writes, so one observer
+// serves every host on the page. Attribute mutations arrive batched per
+// microtask — one recompute per callback, never per host, never per frame.
+let observer = null;
+
+/** Start watching preset/mode flips; onChange fires at most once per
+    mutation batch. Idempotent; inert where MutationObserver is missing. */
+export function observePalette(onChange) {
+  if (observer || typeof MutationObserver !== "function") return;
+  observer = new MutationObserver(() => onChange());
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-preset", "data-syntax"],
+  });
+}

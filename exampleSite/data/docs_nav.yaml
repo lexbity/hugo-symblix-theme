@@ -67,6 +67,8 @@ items:
         page: /en/docs/latest/components/motion/
       - title: Scenes
         page: /en/docs/latest/components/scenes/
+      - title: Scene Failure Fixtures
+        page: /en/docs/latest/components/scene-failures/
 
   - title: Hidden Example
     hidden: true

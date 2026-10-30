@@ -15,7 +15,7 @@ import {
   logWarn,
   logInfo,
 } from "./util.js";
-import { readPalette } from "./palette.js";
+import { observePalette, readPalette } from "./palette.js";
 
 /** mount element → Host, exposed via window.SymblixMotion for tests and
     support debugging. Not a public mutation API. */
@@ -35,11 +35,24 @@ export function registerAll(three) {
     hosts.set(mount, host);
     host.register();
   });
+  observePalette(broadcastPalette);
+}
+
+/** Palette bridge (Q6, P3): one recompute per mutation batch, then every
+    host with a live instance re-tints and every registered mount mirrors
+    the preset for observability — including hosts that never started
+    (reduced motion), which keeps the mirror a truthful page-wide signal. */
+function broadcastPalette() {
+  const snapshot = readPalette();
+  hosts.forEach((host) => host.onPalette(snapshot));
 }
 
 function scheduleIdle(fn) {
   if (typeof window.requestIdleCallback === "function") {
-    window.requestIdleCallback(fn);
+    // timeout guarantees the callback fires even in throttled/hidden
+    // contexts (embedded webviews starve idle callbacks otherwise, leaving
+    // scenes stuck between idle and error).
+    window.requestIdleCallback(fn, { timeout: 2000 });
   } else {
     setTimeout(fn, 1);
   }
@@ -100,6 +113,11 @@ export class Host {
       { threshold: 0.15 },
     );
     this.io.observe(this.mount);
+
+    // Observability mirror (Q6): every registered mount reports the live
+    // preset, updated by broadcastPalette on theme changes.
+    this.mount.dataset.scenePreset =
+      document.documentElement.getAttribute("data-preset") || "";
 
     // Pointer signal: opt-in attribute AND fine pointer (Q7). The decision
     // is cached at init; a pointer attached mid-session does not re-arm.
@@ -258,6 +276,22 @@ export class Host {
     if (this.instance && typeof this.instance.onResize === "function") {
       try {
         this.instance.onResize(this.width, this.height, this.dpr);
+      } catch (error) {
+        this.fail(error);
+      }
+    }
+  }
+
+  /** Palette broadcast receiver (Q6): refresh the mirror, then hand the new
+      frozen snapshot to the scene. A throwing onPaletteChange follows the
+      same one-strike rule as frame (Q5) — it is author code in the hot path
+      of the page, and a broken re-tint must not retry forever. */
+  onPalette(snapshot) {
+    this.palette = snapshot;
+    this.mount.dataset.scenePreset = snapshot.preset;
+    if (this.instance && typeof this.instance.onPaletteChange === "function") {
+      try {
+        this.instance.onPaletteChange(snapshot);
       } catch (error) {
         this.fail(error);
       }

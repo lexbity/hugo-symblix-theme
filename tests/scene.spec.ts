@@ -10,7 +10,7 @@ import { join } from "node:path";
 
 const REPO_ROOT = join(__dirname, "..");
 const SCENES_PAGE = "/en/docs/latest/components/scenes/";
-const FIXTURE_PAGE = "/en/docs/latest/components/scene-fixture/";
+const FIXTURE_PAGE = "/en/docs/latest/components/scene-failures/";
 const DEMO_TITLE = "Orbit — the reference demo scene";
 
 test.describe("scene mount contract", () => {
