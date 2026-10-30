@@ -3,7 +3,9 @@
 //   its final state; scroll-driven choreography is not applied at all.
 // - Front-page choreography (hero entrance, scroll reveals) is CSS-only —
 //   it runs with JavaScript disabled.
-// - The pixel-dither hero glow is two masked pseudo-elements, opacity-only.
+// - The hero glow variants (pixel, aurora, scanline, pulse, beam, ripple,
+//   ripplebounce, synth) are decorative pseudo-elements animated with
+//   transform/opacity only.
 // - Print output freezes motion entirely.
 // - Glyph stroke-draw rides on pathLength="100" normalization.
 import { expect, test } from "@playwright/test";
@@ -120,6 +122,110 @@ test.describe("motion: pixel-dither glow", () => {
     // Stacking context + clipping keep the decorative layer inside the card.
     expect(styles.position).toBe("relative");
     expect(styles.overflow).toBe("hidden");
+  });
+});
+
+test.describe("motion: aurora glow", () => {
+  test("variant renders one rotated lobed layer behind content", async ({ page }) => {
+    await page.goto(MOTION_PAGE);
+
+    const glow = page.locator(".docs-hero--aurora").first();
+    await expect(glow).toBeVisible();
+
+    const styles = await glow.evaluate((el) => {
+      const s = getComputedStyle(el, "::before");
+      const hero = getComputedStyle(el);
+      return {
+        content: s.content,
+        z: s.zIndex,
+        origin: s.transformOrigin,
+        background: s.backgroundImage,
+        isolation: hero.isolation,
+        overflow: hero.overflow,
+      };
+    });
+    expect(styles.content).toBe('""');
+    expect(styles.z).toBe("-1");
+    // The layer pivots at the hero's top-right corner (Chromium resolves
+    // "top right" to absolute pixels: "<full width>px 0px").
+    expect(styles.origin).toMatch(/^[\d.]+px 0px$/);
+    expect(styles.background).toContain("radial-gradient");
+    // Stacking context + clipping keep the decorative layer inside the card.
+    expect(styles.isolation).toBe("isolate");
+    expect(styles.overflow).toBe("hidden");
+  });
+
+  test("aurora sway runs when motion is allowed", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto(MOTION_PAGE);
+
+    const glow = page.locator(".docs-hero--aurora").first();
+    const styles = await glow.evaluate((el) => {
+      const s = getComputedStyle(el, "::before");
+      return { name: s.animationName, duration: s.animationDuration, fill: s.animationFillMode };
+    });
+    expect(styles.name).toBe("docs-glow-aurora");
+    expect(parseFloat(styles.duration)).toBeGreaterThan(0);
+  });
+
+  test("aurora sway does not run under reduced motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(MOTION_PAGE);
+
+    const glow = page.locator(".docs-hero--aurora").first();
+    await expect(glow).toBeVisible();
+    const before = await glow.evaluate((el) => {
+      const s = getComputedStyle(el, "::before");
+      return { animationName: s.animationName, backgroundImage: s.backgroundImage };
+    });
+    expect(before.animationName).toBe("none");
+    // The static lobed layer itself still renders — only the sway stops.
+    expect(before.backgroundImage).toContain("radial-gradient");
+  });
+});
+
+test.describe("motion: glow variants", () => {
+  // The moving layer is ::before everywhere except ripple (calm dot grid
+  // is the static ::before, the wave ring is ::after) and synth (trace A
+  // is ::before, trace B is ::after). The bounce variant animates both
+  // layers with the same keyframes, so ::before stands in for the check.
+  const variants: Array<[string, "::before" | "::after", string]> = [
+    ["scanline", "::before", "docs-glow-scanline"],
+    ["pulse", "::before", "docs-glow-pulse"],
+    ["beam", "::before", "docs-glow-beam"],
+    ["ripple", "::after", "docs-glow-ripple"],
+    ["ripplebounce", "::before", "docs-glow-ripplebounce"],
+    ["synth", "::before", "docs-glow-synth-a"],
+  ];
+
+  test("each variant renders a decorative layer behind content", async ({ page }) => {
+    await page.goto(MOTION_PAGE);
+    for (const [v] of variants) {
+      const glow = page.locator(`.docs-hero--${v}`).first();
+      await expect(glow, v).toBeVisible();
+      const z = await glow.evaluate((el, pseudo) => getComputedStyle(el, pseudo).zIndex, "::before");
+      expect(z, v).toBe("-1");
+    }
+  });
+
+  test("each variant animates when motion is allowed", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto(MOTION_PAGE);
+    for (const [v, pseudo, keyframes] of variants) {
+      const glow = page.locator(`.docs-hero--${v}`).first();
+      const name = await glow.evaluate((el, p) => getComputedStyle(el, p).animationName, pseudo);
+      expect(name, v).toBe(keyframes);
+    }
+  });
+
+  test("each variant freezes under reduced motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(MOTION_PAGE);
+    for (const [v, pseudo] of variants) {
+      const glow = page.locator(`.docs-hero--${v}`).first();
+      const name = await glow.evaluate((el, p) => getComputedStyle(el, p).animationName, pseudo);
+      expect(name, v).toBe("none");
+    }
   });
 });
 
