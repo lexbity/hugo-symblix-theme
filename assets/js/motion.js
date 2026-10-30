@@ -9,7 +9,7 @@
 
 import * as THREE from "./vendor/three/three.module.min.js";
 import { SCENE_API } from "./motion/util.js";
-import { hosts, registerAll } from "./motion/runtime.js";
+import { destroyHost, hosts, registerAll } from "./motion/runtime.js";
 
 try {
   registerAll(THREE);
@@ -22,4 +22,5 @@ try {
 window.SymblixMotion = Object.freeze({
   SCENE_API,
   hosts,
+  destroyHost,
 });

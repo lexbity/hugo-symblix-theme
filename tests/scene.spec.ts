@@ -64,10 +64,10 @@ test.describe("scene mount contract", () => {
   test("mounts on one page get unique stable ids", async ({ page }) => {
     await page.goto(FIXTURE_PAGE);
     const mounts = page.locator("[data-scene]");
-    await expect(mounts).toHaveCount(3);
+    await expect(mounts).toHaveCount(7);
     const ids = await mounts.evaluateAll((els) => els.map((el) => el.getAttribute("data-scene-id")));
-    expect(new Set(ids).size).toBe(3);
-    expect(ids).toEqual(["scene-0", "scene-1", "scene-2"]);
+    expect(new Set(ids).size).toBe(7);
+    expect(ids).toEqual(["scene-0", "scene-1", "scene-2", "scene-3", "scene-4", "scene-5", "scene-6"]);
   });
 
   // FR-6 emission contract (P2): the runtime chunk is emitted exactly once
@@ -128,6 +128,76 @@ test.describe("scene degradation", () => {
     expect(cls).toBeLessThan(0.01);
   });
 });
+
+test.describe("reveal-text (P5)", () => {
+  const MOTION_PAGE = "/en/docs/latest/components/motion/";
+
+  test("splits words at build time with full a11y wiring", async ({ page }) => {
+    await page.goto(MOTION_PAGE);
+
+    // Container variants render (p default + explicit h2).
+    expect(await page.locator("p.docs-reveal").count()).toBeGreaterThanOrEqual(1);
+    expect(await page.locator("h2.docs-reveal").count()).toBe(1);
+
+    const reveal = page.locator("p.docs-reveal").first();
+    const srText = (await reveal.locator(".docs-reveal__sr").textContent()).trim();
+    expect(srText).toContain("Hugo during the build");
+
+    // One aria-hidden wrapper; word spans inside; --i sequence 0..n-1.
+    const wrapper = reveal.locator(".docs-reveal__text");
+    await expect(wrapper).toHaveAttribute("aria-hidden", "true");
+    const words = reveal.locator(".docs-reveal__word");
+    const count = await words.count();
+    expect(count).toBeGreaterThan(5);
+    const indices = await words.evaluateAll((els) =>
+      els.map((el) => parseInt(el.style.getPropertyValue("--i"), 10)),
+    );
+    expect(indices).toEqual(indices.map((_, i) => i));
+
+    // Words carry the visible sentence; the wrapper hides it from AT only.
+    const firstWord = (await words.first().textContent()).trim();
+    expect(srText.startsWith(firstWord)).toBe(true);
+
+    // Stagger steps land as container custom properties: the h2 demo
+    // passes 3%, the default p keeps the 4% default.
+    const h2Style = await page.locator("h2.docs-reveal").getAttribute("style");
+    expect(h2Style).toContain("--docs-reveal-step: 3%");
+    const pStyle = await reveal.getAttribute("style");
+    expect(pStyle).toContain("--docs-reveal-step: 4%");
+  });
+
+  test("reduced motion leaves words fully visible (never hidden text)", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(MOTION_PAGE);
+    const styles = await page
+      .locator(".docs-reveal__word")
+      .first()
+      .evaluate((el) => {
+        const s = getComputedStyle(el);
+        return { opacity: s.opacity, display: s.display };
+      });
+    expect(parseFloat(styles.opacity)).toBe(1);
+    expect(styles.display).toBe("inline-block");
+  });
+
+  test("scrubbed words settle fully visible once scrolled into view", async ({ page }) => {
+    // With view() support the words are scrubbed by scroll: below the fold
+    // they are legitimately at the pre-entry state (opacity 0); scrolled
+    // past their entry range they MUST settle at the end state — text that
+    // stays invisible after being read would be a contract violation.
+    const gated = await page.evaluate(() => CSS.supports("animation-timeline: view()"));
+    if (!gated) test.skip(true, "runner lacks view(); static path is the contract");
+    await page.goto(MOTION_PAGE);
+    const reveal = page.locator("h2.docs-reveal");
+    await reveal.evaluate((el) => el.scrollIntoView({ block: "center" }));
+    await page.waitForTimeout(400);
+    const opacities = await reveal.locator(".docs-reveal__word").evaluateAll((els) =>
+      els.map((el) => parseFloat(getComputedStyle(el).opacity)),
+    );
+    expect(opacities.length).toBeGreaterThan(2);
+    expect(Math.min(...opacities)).toBe(1);
+  });
+})
 
 test.describe("build-time validation", () => {
   // Hugo errorf fails the build without halting template execution, so these
@@ -199,6 +269,17 @@ test.describe("build-time validation", () => {
     expect(result.html).toMatch(/data-scene-src="\/js\/scenes\/orbit\.min\.[a-f0-9]+\.js"/);
   });
 
+  test("a valid reveal-text builds the full span contract", () => {
+    const result = buildMiniSite('{{< reveal-text tag="h2" >}}Ship scenes, not spinners.{{< /reveal-text >}}');
+    expect(result.code).toBe(0);
+    expect(result.html).toContain('<h2 class="docs-reveal"');
+    expect(result.html).toContain('<span class="docs-reveal__sr">Ship scenes, not spinners.</span>');
+    expect(result.html).toContain('<span class="docs-reveal__text" aria-hidden="true">');
+    expect(result.html).toContain('style="--i: 0;"');
+    expect(result.html).toContain("Ship");
+    expect(result.html).toContain("spinners.");
+  });
+
   const invalid: Array<[string, string, RegExp]> = [
     ["missing title", '{{< scene src="js/scenes/orbit.js" poster="images/scene-orbit-poster.svg" >}}{{< /scene >}}', /title is required/],
     ["absolute URL src", '{{< scene src="https://cdn.example.com/evil.js" poster="images/scene-orbit-poster.svg" title="T" >}}{{< /scene >}}', /must be a site-relative asset path/],
@@ -206,13 +287,16 @@ test.describe("build-time validation", () => {
     ["ratio and height together", '{{< scene src="js/scenes/orbit.js" poster="images/scene-orbit-poster.svg" title="T" ratio="16/9" height="20rem" >}}{{< /scene >}}', /mutually exclusive/],
     ["unknown load strategy", '{{< scene src="js/scenes/orbit.js" poster="images/scene-orbit-poster.svg" title="T" load="eager" >}}{{< /scene >}}', /unknown load/],
     ["unresolvable src", '{{< scene src="js/scenes/missing.js" poster="images/scene-orbit-poster.svg" title="T" >}}{{< /scene >}}', /not found in assets/],
+    ["disallowed reveal tag", '{{< reveal-text tag="script" >}}X{{< /reveal-text >}}', /not allowed/],
+    ["bad reveal stagger", '{{< reveal-text stagger="fast" >}}X{{< /reveal-text >}}', /percentage step/],
+    ["empty reveal text", '{{< reveal-text >}}   {{< /reveal-text >}}', /inner text is required/],
   ];
 
   for (const [name, body, message] of invalid) {
     test(`build fails on ${name} with the clean scene error`, () => {
       const result = buildMiniSite(body);
       expect(result.code, `expected build failure for ${name}`).not.toBe(0);
-      expect(result.stderr).toMatch(/ERROR scene shortcode/);
+      expect(result.stderr).toMatch(/ERROR (scene|reveal-text) shortcode/);
       expect(result.stderr).toMatch(message);
       // The validation gate must prevent the nil-resource secondary crash.
       expect(result.stderr).not.toMatch(/no Resource provided/);

@@ -174,3 +174,5 @@
   translation: "تشغيل الفيديو"
 - id: watch_on_youtube
   translation: "المشاهدة على يوتيوب"
+- id: motion_load_scene
+  translation: حمّل المشهد التفاعلي

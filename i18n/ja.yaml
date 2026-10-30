@@ -174,3 +174,5 @@
   translation: "動画を再生"
 - id: watch_on_youtube
   translation: "YouTubeで見る"
+- id: motion_load_scene
+  translation: インタラクティブシーンを読み込む

@@ -1,0 +1,65 @@
+{{- /* Build-time text reveal (SYM-MOT-001 P5, Q11).
+
+       Splits the inner text into word spans at BUILD time; CSS scrubs each
+       word in as it scrolls into view (view()-gated, motion.css). Zero
+       JavaScript, zero bytes beyond the stylesheet.
+
+       Accessibility contract: a visually-hidden span (docs-reveal__sr —
+       hand-written in motion.css; NOT Tailwind's sr-only, which the
+       candidate scanner does not reliably emit for layouts files) carries
+       the real sentence;
+       the word spans live inside one aria-hidden wrapper. aria-label is
+       NOT used — it is prohibited ARIA on generic roles (p/span/div), and
+       the axe suite rejects it (aria-prohibited-attr). Word-level
+       splitting only — char-level destroys screen-reader prosody and
+       bloats HTML.
+
+       Inner content is PLAIN TEXT by construction: it is markdownified
+       then plainified, so inline markup is flattened rather than carried
+       into spans (no links/bold inside a reveal — compose outward).
+
+       Params:
+         tag      (default "p") container element; allowlist
+                  p | h1 | h2 | h3 | h4 | span | div. Shortcode-rendered
+                  headings do not enter Hugo's TOC fragments.
+         stagger  (default "4%") per-word step of the entry range. A
+                  percentage of the scroll-scrubbed entry window, NOT a
+                  wall-clock time (A14): time is meaningless when the
+                  animation timeline is view().
+         class    extra classes.
+
+       Hugo's errorf does not halt template execution, so every check
+       returns immediately after failing the build (house gate, scene.html
+       pattern). */ -}}
+{{- $tag := .Get "tag" | default "p" -}}
+{{- $stagger := .Get "stagger" | default "4%" -}}
+{{- $class := .Get "class" -}}
+{{- $where := .Page.Title -}}
+{{- with .Page.File -}}{{ $where = printf "%s (%s)" $where .Filename }}{{ end -}}
+
+{{- $allowed := slice "p" "h1" "h2" "h3" "h4" "span" "div" -}}
+{{- if not (in $allowed $tag) -}}
+  {{- errorf "reveal-text shortcode (%s): tag %q is not allowed (one of p, h1, h2, h3, h4, span, div)" $where $tag -}}
+  {{- return -}}
+{{- end -}}
+{{- if not (findRE `^[0-9]+(\.[0-9]+)?%$` $stagger) -}}
+  {{- errorf "reveal-text shortcode (%s): stagger %q must be a percentage step, e.g. 4%%" $where $stagger -}}
+  {{- return -}}
+{{- end -}}
+{{- $text := replaceRE `\s+` " " (trim (plainify (markdownify .Inner)) "\n\r\t ") -}}
+{{- if eq $text "" -}}
+  {{- errorf "reveal-text shortcode (%s): inner text is required" $where -}}
+  {{- return -}}
+{{- end -}}
+{{- $words := split $text " " -}}
+{{- $classes := partial "docs/helpers/classname.html" (dict
+  "Base" (slice "docs-reveal")
+  "Modifiers" (slice)
+  "Extra" $class)
+-}}
+{{ printf "<%s" $tag | safeHTML }} class="{{ $classes }}" style="--docs-reveal-step: {{ $stagger | safeCSS }};">
+  <span class="docs-reveal__sr">{{ $text }}</span>
+  <span class="docs-reveal__text" aria-hidden="true">{{- range $index, $word := $words }}
+    <span class="docs-reveal__word" style="--i: {{ $index }};">{{ $word }}</span>{{- end }}
+  </span>
+{{ printf "</%s>" $tag | safeHTML }}

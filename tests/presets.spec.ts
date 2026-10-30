@@ -1,6 +1,7 @@
 // Phase 1 tests: Validate preset data structure and configuration.
 // These tests verify the data foundation before CSS/JS implementation.
 import { expect, test } from "@playwright/test";
+import { CSS_BUDGET_MINIFIED_BYTES } from "./helpers/budgets";
 import { readFileSync, existsSync, mkdtempSync, rmSync, writeFileSync, mkdirSync, cpSync } from "node:fs";
 import { join } from "node:path";
 import { execSync } from "node:child_process";
@@ -411,11 +412,12 @@ test.describe("CSS architecture (Phase 2)", () => {
     expect(css).toContain("--docs-badge-danger:");
   });
 
-  test("compiled CSS size is reasonable (< 100 KB unminified)", () => {
+  test("compiled CSS size is reasonable (shared budget policy)", () => {
     const css = readFileSync(compiledCssPath, "utf-8");
     const sizeBytes = Buffer.byteLength(css, "utf-8");
-    // Target: < 58 KB minified, ~80 KB unminified is acceptable
-    expect(sizeBytes).toBeLessThan(100 * 1024);
+    // Mirrors performance.spec.ts via tests/helpers/budgets.ts — one policy,
+    // no divergent copies (SYM-MOT-001 D2 lineage).
+    expect(sizeBytes).toBeLessThan(CSS_BUDGET_MINIFIED_BYTES);
   });
 
   test("site renders correctly with fallback (no data-preset attribute)", async ({ page }) => {

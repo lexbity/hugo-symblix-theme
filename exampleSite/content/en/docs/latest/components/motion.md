@@ -164,6 +164,29 @@ Without the class, tiles keep the standard hover treatment.
 {{< /feature >}}
 {{< /feature-grid >}}
 
+## Build-time text reveals
+
+The `reveal-text` shortcode splits a headline into word spans **at build
+time** — zero JavaScript, zero bytes beyond the stylesheet — and CSS
+scrubs each word in as it scrolls into view. The full sentence lives in
+`aria-label`; the spans are hidden from assistive technology; splitting is
+word-level only, so screen-reader prosody survives.
+
+{{< reveal-text tag="h2" stagger="3%" >}}Ship scenes, not spinners.{{< /reveal-text >}}
+
+{{< reveal-text >}}Every word of this paragraph was split by Hugo during the build, and each one rides the same scroll-driven rise you saw on the front page tiles.{{< /reveal-text >}}
+
+| Param | Default | Description |
+|---|---|---|
+| `tag` | `p` | Container element: `p`, `h1`–`h4`, `span`, or `div`. |
+| `stagger` | `4%` | Per-word step of the scroll-scrubbed entry range. A percentage, not a wall-clock time. |
+| `class` | — | Extra classes on the container. |
+
+The inner content is plain text by construction — inline markdown is
+flattened rather than carried into spans. Without scroll-driven-animation
+support, or under reduced motion, the words are simply visible: text is
+never hidden behind an unsupported effect.
+
 ## What this is not
 
 This tier adds identity and life without JavaScript, bytes on the wire, or

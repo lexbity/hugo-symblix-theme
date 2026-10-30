@@ -43,6 +43,12 @@ test("accessibility smoke passes on representative pages", async ({ page }) => {
   await page.goto("/ar/docs/latest/");
   await settleAnimations(page);
   expect(await analyzePage(page)).toEqual([]);
+
+  // SYM-MOT-001: the motion page carries every Tier-1 effect plus live
+  // scene/reveal demos — scrubbed words, glow variants, tilt.
+  await page.goto("/en/docs/latest/components/motion/");
+  await settleAnimations(page);
+  expect(await analyzePage(page)).toEqual([]);
 });
 
 // Phase 6-7: Preset-specific accessibility tests

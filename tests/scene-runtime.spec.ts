@@ -79,31 +79,47 @@ test.describe("fetch gating", () => {
 });
 
 test.describe("error isolation", () => {
-  test("broken scenes land in error with the poster intact; live scene unaffected", async ({
-    page,
-  }) => {
+  // Every row of the degradation matrix, live (see the fixtures page):
+  // per-mount outcomes must match exactly, siblings unaffected.
+  const EXPECTED = {
+    "Fixture — createScene throws": "error",
+    "Healthy control": "live",
+    "Fixture — module throws at import": "error",
+    "Fixture — bad export shape": "error",
+    "Fixture — scene API mismatch": "error",
+    "Fixture — click-gated createScene throw": "idle",
+    "Click-to-load control": "idle",
+  };
+
+  async function statesByTitle(page) {
+    // paused normalizes to live: pause means "was live, currently offscreen"
+    // (FR-14) — after the scroll sequence ends, earlier mounts are paused
+    // and that IS their designed outcome.
+    return page.locator("[data-scene]").evaluateAll((els) =>
+      Object.fromEntries(
+        els.map((el) => {
+          const state = el.dataset.sceneState === "paused" ? "live" : el.dataset.sceneState;
+          return [el.getAttribute("aria-label"), state];
+        }),
+      ),
+    );
+  }
+
+  test("every degradation-matrix row lands in its designed state", async ({ page }) => {
     await page.goto(FIXTURE_PAGE);
     const mounts = page.locator("[data-scene]");
-    await expect(mounts).toHaveCount(3);
+    await expect(mounts).toHaveCount(7);
 
     // Scroll each mount through the viewport sequentially (instant jumps
-    // can skip IntersectionObserver detection): broken scenes fail at
-    // createScene (tryStart), the orbit scene starts.
-    for (let i = 0; i < 3; i++) {
+    // can skip IntersectionObserver detection).
+    for (let i = 0; i < 7; i++) {
       await mounts.nth(i).evaluate((el) => el.scrollIntoView({ block: "center" }));
-      await page.waitForTimeout(250);
+      await page.waitForTimeout(200);
     }
 
     await expect
-      .poll(async () => {
-        const errors = await page.locator('[data-scene-state="error"]').count();
-        const live = await page.locator('[data-scene-state="live"]').count();
-        return errors + live;
-      }, { timeout: 3000 })
-      .toBe(3);
-
-    expect(await page.locator('[data-scene-state="error"]').count()).toBe(2);
-    expect(await page.locator('[data-scene-state="live"]').count()).toBe(1);
+      .poll(() => statesByTitle(page), { timeout: 3000 })
+      .toEqual(EXPECTED);
 
     // Failed scenes keep the poster standing.
     const postersVisible = await page
@@ -113,7 +129,212 @@ test.describe("error isolation", () => {
 
     // One Host per mount, all registered.
     const hostCount = await page.evaluate(() => window.SymblixMotion.hosts.size);
-    expect(hostCount).toBe(3);
+    expect(hostCount).toBe(7);
+  });
+
+  test("click-gated fixtures resolve on activation: one to error, one to live", async ({
+    page,
+  }) => {
+    await page.goto(FIXTURE_PAGE);
+    const mounts = page.locator("[data-scene]");
+    await expect(mounts).toHaveCount(7);
+    for (let i = 0; i < 7; i++) {
+      await mounts.nth(i).evaluate((el) => el.scrollIntoView({ block: "center" }));
+      await page.waitForTimeout(150);
+    }
+
+    // Buttons are real, keyboard-focusable, and localized (en).
+    const buttons = page.locator("[data-scene-activate]");
+    await expect(buttons).toHaveCount(2);
+    await expect(buttons.first()).toHaveText("Load interactive scene");
+
+    // Keyboard activation of the working control (last mount).
+    const control = mounts.nth(6);
+    await control.scrollIntoViewIfNeeded();
+    const controlButton = control.locator("[data-scene-activate]");
+    await controlButton.focus();
+    await page.keyboard.press("Enter");
+    await expect
+      .poll(() => control.getAttribute("data-scene-state"), { timeout: 3000 })
+      .toBe("live");
+
+    // Keyboard activation of the broken click-gated fixture: one strike,
+    // then the button is gone (no retry) and the poster stands.
+    const gated = mounts.nth(5);
+    await gated.scrollIntoViewIfNeeded();
+    await gated.locator("[data-scene-activate]").focus();
+    await page.keyboard.press("Enter");
+    await expect
+      .poll(() => gated.getAttribute("data-scene-state"), { timeout: 3000 })
+      .toBe("error");
+    // display:none — the node remains in the DOM, hidden (no retry).
+    await expect(gated.locator("[data-scene-activate]")).toBeHidden();
+
+    const states = await statesByTitle(page);
+    expect(states["Click-to-load control"]).toBe("live");
+    expect(states["Fixture — click-gated createScene throw"]).toBe("error");
+  });
+});
+
+test.describe("click degradation (P6)", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("activate button is absent without JavaScript (noscript rule)", async ({ page }) => {
+    await page.goto(FIXTURE_PAGE);
+    // The markup exists (the server cannot know JS is off); the noscript
+    // stylesheet hides the dead controls — assert hidden, not absent.
+    await expect(page.locator("[data-scene-activate]")).toHaveCount(2);
+    for (let i = 0; i < 2; i++) {
+      await expect(page.locator("[data-scene-activate]").nth(i)).toBeHidden();
+    }
+    // Posters remain the whole content.
+    await expect(page.locator("[data-scene] .docs-scene__poster").first()).toBeVisible();
+  });
+});
+
+test.describe("chaos (P6)", () => {
+  test("context loss recovers exactly once; the second loss is terminal", async ({ page }) => {
+    test.skip(!(await hasWebGL2(page)), "context-loss choreography needs WebGL2");
+    await page.goto(FIXTURE_PAGE);
+    const control = page.locator('[data-scene][aria-label="Healthy control"]');
+    await control.evaluate((el) => el.scrollIntoView({ block: "center" }));
+    await expect
+      .poll(() => control.getAttribute("data-scene-state"), { timeout: 3000 })
+      .toBe("live");
+
+    // Retain the extension on window at live state: after loss, Chromium
+    // returns null for a fresh getExtension lookup on the lost context,
+    // but the retained object stays callable (that is its purpose).
+    // Functions do not survive evaluate serialization — lose/restore run
+    // page-side.
+    async function loseAndRestore() {
+      await control.locator(".docs-scene__canvas").evaluate((el) => {
+        const ext = el.getContext("webgl2").getExtension("WEBGL_lose_context");
+        if (!ext) throw new Error("WEBGL_lose_context unavailable");
+        window.__loseExt = ext;
+        ext.loseContext();
+      });
+      await expect
+        .poll(() => control.getAttribute("data-scene-state"), { timeout: 3000 })
+        .toBe("error");
+      await control.locator(".docs-scene__canvas").evaluate((el) => {
+        window.__loseExt.restoreContext();
+      });
+    }
+
+    // First loss: exactly one automatic re-init back to live.
+    await loseAndRestore();
+    await expect
+      .poll(() => control.getAttribute("data-scene-state"), { timeout: 4000 })
+      .toBe("live");
+
+    // Second loss: terminal — restore fires but the host stays error.
+    await loseAndRestore();
+    await control.locator(".docs-scene__canvas").evaluate((el) => {
+      el.getContext("webgl2").getExtension("WEBGL_lose_context").restoreContext();
+    });
+    await page.waitForTimeout(800);
+    expect(await control.getAttribute("data-scene-state")).toBe("error");
+    // Poster stands after the terminal loss.
+    await expect(control.locator(".docs-scene__poster")).toBeVisible();
+  });
+
+  test("failure cycles do not leak canvases or listeners; destroy() releases a host", async ({
+    page,
+  }) => {
+    test.skip(!(await hasWebGL2(page)), "listener accounting needs a live host");
+    // Count addEventListener calls per element from the very first script.
+    await page.addInitScript(() => {
+      window.__listenerAdds = new Map();
+      const orig = EventTarget.prototype.addEventListener;
+      EventTarget.prototype.addEventListener = function (type, fn, opts) {
+        const map = window.__listenerAdds;
+        map.set(this, (map.get(this) || 0) + 1);
+        return orig.call(this, type, fn, opts);
+      };
+    });
+
+    await page.goto(FIXTURE_PAGE);
+    const control = page.locator('[data-scene][aria-label="Healthy control"]');
+    await control.evaluate((el) => el.scrollIntoView({ block: "center" }));
+    await expect
+      .poll(() => control.getAttribute("data-scene-state"), { timeout: 3000 })
+      .toBe("live");
+
+    const canvasesBefore = await page.locator("[data-scene] canvas").count();
+
+    // Cycle 1: loss → the single designed re-init (Q5) → live on a fresh
+    // canvas — no accumulation, bounded listeners. The extension is
+    // retained at live state (post-loss getExtension lookups return null).
+    await control.locator(".docs-scene__canvas").evaluate((el) => {
+      const e = el.getContext("webgl2").getExtension("WEBGL_lose_context");
+      if (!e) throw new Error("WEBGL_lose_context unavailable");
+      window.__loseExt = e;
+      e.loseContext();
+    });
+    await expect
+      .poll(() => control.getAttribute("data-scene-state"), { timeout: 3000 })
+      .toBe("error");
+    await control.locator(".docs-scene__canvas").evaluate((el) => {
+      window.__loseExt.restoreContext();
+    });
+    await expect
+      .poll(() => control.getAttribute("data-scene-state"), { timeout: 4000 })
+      .toBe("live");
+
+    // Cycle 2: terminal by design — restore fires, the host stays error.
+    await control.locator(".docs-scene__canvas").evaluate((el) => {
+      const e = el.getContext("webgl2").getExtension("WEBGL_lose_context");
+      if (!e) throw new Error("WEBGL_lose_context unavailable");
+      window.__loseExt = e;
+      e.loseContext();
+    });
+    await expect
+      .poll(() => control.getAttribute("data-scene-state"), { timeout: 3000 })
+      .toBe("error");
+    await control.locator(".docs-scene__canvas").evaluate((el) => {
+      window.__loseExt.restoreContext();
+    });
+    await page.waitForTimeout(800);
+    expect(await control.getAttribute("data-scene-state")).toBe("error");
+
+    // Canvas replaced wholesale on re-init, never accumulated.
+    expect(await page.locator("[data-scene] canvas").count()).toBe(canvasesBefore);
+
+    // The canvas carries exactly its bounded listener set: 2 runtime
+    // (contextlost/restored) + 3 three.js WebGLRenderer context handlers —
+    // the same count a fresh canvas gets, so re-init added nothing.
+    const canvasListeners = await control.locator(".docs-scene__canvas").evaluate((el) => {
+      const map = window.__listenerAdds;
+      let total = 0;
+      map.forEach((v, k) => {
+        if (k === el) total = v;
+      });
+      return total;
+    });
+    expect(canvasListeners).toBe(5);
+
+    // destroy() releases the host completely: map entry gone, listeners
+    // removed (a later pointermove adds nothing), poster stays standing.
+    const hostsBefore = await page.evaluate(() => window.SymblixMotion.hosts.size);
+    await page.evaluate(() => {
+      const mount = document.querySelector('[aria-label="Fixture — createScene throws"]');
+      window.SymblixMotion.destroyHost(mount);
+    });
+    expect(await page.evaluate(() => window.SymblixMotion.hosts.size)).toBe(hostsBefore - 1);
+    // Count adds scoped to the destroyed mount element (a page-wide sum
+    // would race with injected tooling like livereload).
+    const addsOnDestroyed = () =>
+      page.evaluate(() => {
+        const map = window.__listenerAdds;
+        return map.get(document.querySelector('[aria-label="Fixture — createScene throws"]')) || 0;
+      });
+    const addsBefore = await addsOnDestroyed();
+    await page
+      .locator('[aria-label="Fixture — createScene throws"]')
+      .evaluate((el) => el.dispatchEvent(new PointerEvent("pointermove", { bubbles: true })));
+    const addsAfter = await addsOnDestroyed();
+    expect(addsAfter).toBe(addsBefore);
   });
 });
 
@@ -214,7 +435,7 @@ test.describe("signals (P4)", () => {
     // host registers, pointer listeners are never attached (Q7).
     await page.goto(FIXTURE_PAGE);
     const mounts = page.locator("[data-scene]");
-    await expect(mounts).toHaveCount(3);
+    await expect(mounts).toHaveCount(7);
     const control = mounts.nth(1); // orbit, pointer="off"
     await control.evaluate((el) => el.scrollIntoView({ block: "center" }));
     await expect

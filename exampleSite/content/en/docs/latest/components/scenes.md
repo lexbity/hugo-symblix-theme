@@ -49,7 +49,7 @@ toward it (the demo mounts `pointer="on"`).
 | `poster` | — required | Site asset path of the static frame shown without JS, under reduced motion, in print, and on scene failure. |
 | `title` | — required | Accessible name — becomes the figure's `aria-label` and the poster's `alt`. |
 | `runtime` | `three` | Adapter id. v1 ships `three`. |
-| `load` | `visible` | Init strategy: start when the mount scrolls into view. |
+| `load` | `visible` | Init strategy. `visible`: start when the mount scrolls into view. `click`: defer both fetch and start until the visitor presses the activate button (removed entirely without JavaScript). |
 | `pointer` | `off` | `on` delivers normalized pointer position to the scene (fine-pointer devices only). |
 | `ratio` | `16/9` | Aspect ratio of the mount. Mutually exclusive with `height`. |
 | `height` | — | Fixed CSS length instead of a ratio. |

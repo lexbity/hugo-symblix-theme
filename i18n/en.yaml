@@ -174,3 +174,5 @@
   translation: "Play video"
 - id: watch_on_youtube
   translation: "Watch on YouTube"
+- id: motion_load_scene
+  translation: Load interactive scene

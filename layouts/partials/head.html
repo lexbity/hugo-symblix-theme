@@ -107,7 +107,10 @@
       } catch (error) {}
     })();
   </script>
-  <noscript><style>[data-preset-switcher]{display:none !important}</style></noscript>
+  {{/* Without JS: hide the preset switcher (no persistence) and the scene
+     activate button (a click-strategy button is a dead control) — the
+     poster is the whole content either way. */}}
+  <noscript><style>[data-preset-switcher]{display:none !important}[data-scene-load="click"] .docs-scene__activate{display:none !important}</style></noscript>
 {{ end }}
 {{ $derived := partialCached "docs/helpers/versions.html" . .Site.Language.Lang }}
 {{ $currentVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}

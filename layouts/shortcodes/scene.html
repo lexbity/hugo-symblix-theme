@@ -12,8 +12,9 @@
          poster   (required) site-relative asset path of the still frame.
          title    (required) accessible name (aria-label + poster alt).
          runtime  (default "three") adapter id; v1 ships only "three".
-         load     (default "visible") init strategy. "click" (poster +
-                  activate button) arrives with the runtime in P6.
+         load     (default "visible") init strategy: "visible" starts when
+                  the mount scrolls into view; "click" defers fetch and
+                  init until the visitor presses the activate button.
          pointer  (default "off") "on" arms pointer signal delivery.
          ratio    (default "16/9") aspect ratio; mutually exclusive with height.
          height   fixed CSS length; mutually exclusive with ratio.
@@ -70,8 +71,8 @@
   {{- errorf "scene shortcode (%s): unknown runtime %q (v1 ships \"three\")" $where $runtime -}}
   {{- $failed = true -}}
 {{- end -}}
-{{- if ne $load "visible" -}}
-  {{- errorf "scene shortcode (%s): unknown load %q (\"visible\" only until the runtime lands \"click\")" $where $load -}}
+{{- if and (ne $load "visible") (ne $load "click") -}}
+  {{- errorf "scene shortcode (%s): unknown load %q (\"visible\" or \"click\")" $where $load -}}
   {{- $failed = true -}}
 {{- end -}}
 {{- if and (ne $pointer "off") (ne $pointer "on") -}}
@@ -145,5 +146,8 @@
   <img class="docs-scene__poster" src="{{ $posterRes.RelPermalink }}" alt="{{ $title }}" loading="lazy" decoding="async">
   {{- with .InnerDeindent }}
   <div class="docs-scene__overlay">{{ . | markdownify }}</div>
+  {{- end }}
+  {{- if eq $load "click" }}
+  <button type="button" class="docs-scene__activate docs-button docs-button--primary" data-scene-activate>{{ i18n "motion_load_scene" | default "Load interactive scene" }}</button>
   {{- end }}
 </figure>

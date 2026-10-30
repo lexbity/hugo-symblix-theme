@@ -47,6 +47,13 @@ function broadcastPalette() {
   hosts.forEach((host) => host.onPalette(snapshot));
 }
 
+/** Remove a host entirely (listeners, observers, map entry). See
+    Host.destroy — exposed for embedders and the chaos battery. */
+export function destroyHost(mount) {
+  const host = hosts.get(mount);
+  if (host) host.destroy();
+}
+
 function scheduleIdle(fn) {
   if (typeof window.requestIdleCallback === "function") {
     // timeout guarantees the callback fires even in throttled/hidden
@@ -119,37 +126,82 @@ export class Host {
     this.mount.dataset.scenePreset =
       document.documentElement.getAttribute("data-preset") || "";
 
-    // Pointer signal: opt-in attribute AND fine pointer (Q7). The decision
-    // is cached at init; a pointer attached mid-session does not re-arm.
-    this.pointerArmed =
-      this.mount.dataset.scenePointer === "on" &&
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(pointer: fine)").matches;
-    if (this.pointerArmed) {
-      this.mount.dataset.scenePointerActive = "false";
-      this.addListen(
-        this.mount,
-        "pointermove",
-        (event) => {
-          const rect = this.mount.getBoundingClientRect();
-          this.signals.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-          this.signals.pointer.y = ((event.clientY - rect.top) / rect.height) * 2 - 1;
-          this.signals.pointer.active = true;
-          this.mount.dataset.scenePointerActive = "true";
-        },
-        { passive: true },
-      );
-      this.addListen(this.mount, "pointerleave", () => {
-        this.signals.pointer.active = false;
-        this.mount.dataset.scenePointerActive = "false";
-      });
-    }
+    this.armPointer();
+    this.armActivate();
 
+    if (this.load === "click") {
+      // Q3: click defers BOTH fetch and init until the visitor opts in.
+      return;
+    }
     if (motionAllowed()) {
       this.ensureModule();
     } else {
       logInfo(this.id, "prefers-reduced-motion: staying on the poster");
     }
+  }
+
+  /** Pointer signal (P4/Q7): opt-in attribute AND fine pointer. The
+      decision is cached at init; a pointer attached mid-session does not
+      re-arm. */
+  armPointer() {
+    this.pointerArmed =
+      this.mount.dataset.scenePointer === "on" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(pointer: fine)").matches;
+    if (!this.pointerArmed) return;
+    this.mount.dataset.scenePointerActive = "false";
+    this.addListen(
+      this.mount,
+      "pointermove",
+      (event) => {
+        const rect = this.mount.getBoundingClientRect();
+        this.signals.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        this.signals.pointer.y = ((event.clientY - rect.top) / rect.height) * 2 - 1;
+        this.signals.pointer.active = true;
+        this.mount.dataset.scenePointerActive = "true";
+      },
+      { passive: true },
+    );
+    this.addListen(this.mount, "pointerleave", () => {
+      this.signals.pointer.active = false;
+      this.mount.dataset.scenePointerActive = "false";
+    });
+  }
+
+  /** Click strategy (P6/Q3): arm the activate button. Fetching starts only
+      on press; tryStart's visible-strategy intersection gate does not
+      apply (the visitor is looking at the mount by definition). */
+  armActivate() {
+    if (this.load !== "click") return;
+    const button = this.mount.querySelector("[data-scene-activate]");
+    if (!button) return;
+    this.addListen(button, "click", () => {
+      if (this.state !== "idle") return;
+      button.disabled = true;
+      this.setState("loading");
+      this.ensureModule().then(
+        () => this.start(),
+        () => {
+          /* rejection already routed to fail() by ensureModule */
+        },
+      );
+    });
+  }
+
+  /** Full teardown (P6): every listener, observer, and the host map entry.
+      Not part of the MPA page lifecycle (NG-6) — exposed for embedders and
+      for the leak/chaos battery to hold the runtime to. */
+  destroy() {
+    this.fail(new Error("destroyed"), { silent: true });
+    if (this.io) {
+      this.io.disconnect();
+      this.io = null;
+    }
+    this.boundListeners.forEach(([target, type, fn, options]) => {
+      target.removeEventListener(type, fn, options);
+    });
+    this.boundListeners = [];
+    hosts.delete(this.mount);
   }
 
   /** Schedule the one-time scene-module fetch after load + idle (FR-13).
@@ -340,10 +392,10 @@ export class Host {
     }
   }
 
-  fail(error) {
+  fail(error, { silent = false } = {}) {
     if (this.state === "error") return;
     this.setState("error");
-    logWarn(this.id, error && error.message ? error.message : error);
+    if (!silent) logWarn(this.id, error && error.message ? error.message : error);
     if (this.instance) {
       try {
         if (typeof this.instance.dispose === "function") this.instance.dispose();

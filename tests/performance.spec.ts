@@ -9,6 +9,13 @@
 import { expect, test } from "@playwright/test";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { gzipSync } from "node:zlib";
+import {
+  CSS_BUDGET_HARD_BYTES,
+  CSS_BUDGET_MINIFIED_BYTES,
+  JS_CORE_BUDGET_BYTES,
+  MOTION_BUDGET_GZIP_BYTES,
+  MOTION_BUDGET_RAW_BYTES,
+} from "./helpers/budgets";
 import { join } from "node:path";
 
 const REPO_ROOT = join(__dirname, "..");
@@ -34,7 +41,7 @@ test.describe("performance benchmarks", () => {
       //   Re-based to 112/120 with ~10 KB headroom for reveal-text and
       //   adapter CSS. If this ceiling is hit again, trim or split before
       //   raising.
-      expect(sizeBytes).toBeLessThan(112 * 1024);
+      expect(sizeBytes).toBeLessThan(CSS_BUDGET_MINIFIED_BYTES);
     });
 
     test("CSS size regression check (< 120 KB minified)", () => {
@@ -43,7 +50,7 @@ test.describe("performance benchmarks", () => {
       const sizeBytes = Buffer.byteLength(css, "utf-8");
 
       // Hard-fail margin above the 112 KB target (SYM-MOT-001 D2 re-base).
-      expect(sizeBytes).toBeLessThan(120 * 1024);
+      expect(sizeBytes).toBeLessThan(CSS_BUDGET_HARD_BYTES);
     });
 
     test("input.css imports all required CSS files", () => {
@@ -348,7 +355,7 @@ test.describe("performance benchmarks", () => {
 
       // Target: core bundle < 20 KB minified (README Non-Goals). Optional
       // subsystems (the motion runtime) carry separate budgets below.
-      expect(totalSize).toBeLessThan(20 * 1024);
+      expect(totalSize).toBeLessThan(JS_CORE_BUDGET_BYTES);
 
       console.log(`JS bundle size: ${(totalSize / 1024).toFixed(1)} KB`);
     });
@@ -393,8 +400,8 @@ test.describe("performance benchmarks", () => {
       console.log(
         `Motion chunk: ${(raw / 1024).toFixed(1)} KB raw, ${(gzipped / 1024).toFixed(1)} KB gzip`,
       );
-      expect(raw).toBeLessThan(780 * 1024);
-      expect(gzipped).toBeLessThan(220 * 1024);
+      expect(raw).toBeLessThan(MOTION_BUDGET_RAW_BYTES);
+      expect(gzipped).toBeLessThan(MOTION_BUDGET_GZIP_BYTES);
     });
   });
 

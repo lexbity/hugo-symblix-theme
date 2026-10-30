@@ -113,3 +113,61 @@
     pointer-events: auto;
   }
 }
+
+/* ---- Build-time text reveals (P5, Q11): word spans split at build time
+   by the reveal-text shortcode, scrubbed by scroll. Reuses the shared
+   docs-rise keyframe — no new keyframes. Words are inline-block so the
+   rise transform applies (transforms do nothing on inline boxes). The
+   per-word range start steps by --docs-reveal-step; clamp() keeps a
+   usable window for long sentences (a zero-length window would leave
+   late words permanently invisible). No view() support or reduced
+   motion → static, fully visible text. ---- */
+@layer components {
+  /* Real-text node for assistive tech (the aria-label alternative: aria-
+     label is prohibited ARIA on generic roles). Same pattern as the
+     skip-link; scoped here rather than relying on scanner-emitted
+     utilities. */
+  .docs-reveal__sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .docs-reveal .docs-reveal__word {
+    display: inline-block;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .docs-reveal .docs-reveal__word {
+        animation: docs-rise linear both;
+        animation-timeline: view();
+        animation-range: entry clamp(0%, calc(var(--i) * var(--docs-reveal-step, 4%)), 32%) entry 55%;
+      }
+    }
+  }
+}
+
+/* ---- Click strategy (P6): the activate button reuses the docs-button
+   component (de-dup — no new button styles); motion.css only positions it
+   and governs state visibility. Shown ONLY while idle: once loading (or
+   live, or errored — one-strike means no retry), the poster/canvas takes
+   over. Without JS the noscript rule in head.html hides it entirely. ---- */
+@layer components {
+  .docs-scene__activate {
+    position: absolute;
+    top: 50%;
+    inset-inline-start: 50%;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+  }
+
+  .docs-scene[data-scene-load="click"]:not([data-scene-state="idle"]) .docs-scene__activate {
+    display: none;
+  }
+}
