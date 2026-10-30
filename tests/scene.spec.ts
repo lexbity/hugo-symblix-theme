@@ -13,6 +13,65 @@ const SCENES_PAGE = "/en/docs/latest/components/scenes/";
 const FIXTURE_PAGE = "/en/docs/latest/components/scene-failures/";
 const DEMO_TITLE = "Orbit — the reference demo scene";
 
+interface BuildResult {
+  code: number;
+  stderr: string;
+  html?: string;
+}
+
+function buildMiniSite(body: string, extraConfig = ""): BuildResult {
+  const dir = mkdtempSync(join(tmpdir(), "scene-validation-"));
+  try {
+    mkdirSync(join(dir, "content"), { recursive: true });
+    mkdirSync(join(dir, "assets", "js", "scenes"), { recursive: true });
+    mkdirSync(join(dir, "assets", "images"), { recursive: true });
+    writeFileSync(
+      join(dir, "hugo.toml"),
+      [
+        "title = \"scene-validation\"",
+        "baseURL = \"http://localhost/\"",
+        "theme = \"hugo-theme-symblix\"",
+        `themesDir = ${JSON.stringify(join(REPO_ROOT, "exampleSite", "themes"))}`,
+        "defaultContentLanguage = \"en\"",
+        "disableKinds = [\"taxonomy\", \"term\", \"RSS\", \"sitemap\"]",
+        extraConfig,
+        "",
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    );
+    cpSync(join(REPO_ROOT, "exampleSite", "assets", "js", "scenes", "orbit.js"), join(dir, "assets", "js", "scenes", "orbit.js"));
+    cpSync(join(REPO_ROOT, "exampleSite", "assets", "images", "scene-orbit-poster.svg"), join(dir, "assets", "images", "scene-orbit-poster.svg"));
+    writeFileSync(
+      join(dir, "content", "note.md"),
+      `+++\ntitle = "Note"\n+++\n\n${body}\n`,
+    );
+
+    let code = 0;
+    let stderr = "";
+    try {
+      execFileSync("hugo", ["--source", dir, "--destination", join(dir, "public")], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+    } catch (error: any) {
+      code = error.status ?? 1;
+      stderr = `${error.stdout || ""}\n${error.stderr || ""}`;
+    }
+
+    let html: string | undefined;
+    const built = join(dir, "public", "note", "index.html");
+    try {
+      html = readFileSync(built, "utf8");
+    } catch {
+      /* failed builds render nothing */
+    }
+    return { code, stderr, html };
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 test.describe("scene mount contract", () => {
   test("renders the full static attribute contract", async ({ page }) => {
     await page.goto(SCENES_PAGE);
@@ -199,66 +258,27 @@ test.describe("reveal-text (P5)", () => {
   });
 })
 
+test.describe("view transitions (P7)", () => {
+  test("emits the opt-in at-rule when configured, omits it when not", () => {
+    const on = buildMiniSite(
+      "{{< reveal-text >}}X{{< /reveal-text >}}",
+      '[params.docs.motion]\nviewTransitions = true',
+    );
+    expect(on.code).toBe(0);
+    expect(on.html).toContain("@view-transition{navigation:auto}");
+
+    const off = buildMiniSite("{{< reveal-text >}}X{{< /reveal-text >}}");
+    expect(off.code).toBe(0);
+    // Default MUST be off (FR-24): no at-rule without the config flag.
+    expect(off.html).not.toContain("@view-transition");
+  });
+});
+
 test.describe("build-time validation", () => {
   // Hugo errorf fails the build without halting template execution, so these
   // run in throwaway mini-sites (theme linked via absolute themesDir) and
   // assert the exit code plus the *clean* scene shortcode error — never the
   // secondary nil-resource crash the gate exists to prevent.
-  interface BuildResult {
-    code: number;
-    stderr: string;
-    html?: string;
-  }
-
-  function buildMiniSite(body: string): BuildResult {
-    const dir = mkdtempSync(join(tmpdir(), "scene-validation-"));
-    try {
-      mkdirSync(join(dir, "content"), { recursive: true });
-      mkdirSync(join(dir, "assets", "js", "scenes"), { recursive: true });
-      mkdirSync(join(dir, "assets", "images"), { recursive: true });
-      writeFileSync(
-        join(dir, "hugo.toml"),
-        [
-          "title = \"scene-validation\"",
-          "baseURL = \"http://localhost/\"",
-          "theme = \"hugo-theme-symblix\"",
-          `themesDir = ${JSON.stringify(join(REPO_ROOT, "exampleSite", "themes"))}`,
-          "defaultContentLanguage = \"en\"",
-          "disableKinds = [\"taxonomy\", \"term\", \"RSS\", \"sitemap\"]",
-          "",
-        ].join("\n"),
-      );
-      cpSync(join(REPO_ROOT, "exampleSite", "assets", "js", "scenes", "orbit.js"), join(dir, "assets", "js", "scenes", "orbit.js"));
-      cpSync(join(REPO_ROOT, "exampleSite", "assets", "images", "scene-orbit-poster.svg"), join(dir, "assets", "images", "scene-orbit-poster.svg"));
-      writeFileSync(
-        join(dir, "content", "note.md"),
-        `+++\ntitle = "Note"\n+++\n\n${body}\n`,
-      );
-
-      let code = 0;
-      let stderr = "";
-      try {
-        execFileSync("hugo", ["--source", dir, "--destination", join(dir, "public")], {
-          encoding: "utf8",
-          stdio: ["ignore", "pipe", "pipe"],
-        });
-      } catch (error: any) {
-        code = error.status ?? 1;
-        stderr = `${error.stdout || ""}\n${error.stderr || ""}`;
-      }
-
-      let html: string | undefined;
-      const built = join(dir, "public", "note", "index.html");
-      try {
-        html = readFileSync(built, "utf8");
-      } catch {
-        /* failed builds render nothing */
-      }
-      return { code, stderr, html };
-    } finally {
-      rmSync(dir, { recursive: true, force: true });
-    }
-  }
 
   test("a valid minimal scene builds and renders the contract", () => {
     const result = buildMiniSite(

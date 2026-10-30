@@ -506,6 +506,18 @@ test.describe("signals (P4)", () => {
   });
 });
 
+test.describe("view transitions (P7)", () => {
+  test("the example site emits the opt-in at-rule (config-on)", async ({ page }) => {
+    await page.goto("/en/");
+    const styles = await page.evaluate(() =>
+      [...document.querySelectorAll("style")].map((el) => el.textContent || "").join("\n"),
+    );
+    expect(styles).toContain("@view-transition{navigation:auto}");
+    // Cross-document VT is same-origin only and leaves no-JS pages
+    // structurally unchanged — the no-js suite holds that regression gate.
+  });
+});
+
 test.describe("palette bridge", () => {
   // Preset tokens from data/docs_presets.yaml — the bridge must deliver
   // exactly these values as frozen snapshots.

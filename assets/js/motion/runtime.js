@@ -38,7 +38,7 @@ export function registerAll(three) {
   observePalette(broadcastPalette);
 }
 
-/** Palette bridge (Q6, P3): one recompute per mutation batch, then every
+/** Palette bridge (Q6): one recompute per mutation batch, then every
     host with a live instance re-tints and every registered mount mirrors
     the preset for observability — including hosts that never started
     (reduced motion), which keeps the mirror a truthful page-wide signal. */
@@ -140,7 +140,7 @@ export class Host {
     }
   }
 
-  /** Pointer signal (P4/Q7): opt-in attribute AND fine pointer. The
+  /** Pointer signal (Q7): opt-in attribute AND fine pointer. The
       decision is cached at init; a pointer attached mid-session does not
       re-arm. */
   armPointer() {
@@ -168,7 +168,7 @@ export class Host {
     });
   }
 
-  /** Click strategy (P6/Q3): arm the activate button. Fetching starts only
+  /** Click strategy (Q3): arm the activate button. Fetching starts only
       on press; tryStart's visible-strategy intersection gate does not
       apply (the visitor is looking at the mount by definition). */
   armActivate() {
@@ -188,7 +188,7 @@ export class Host {
     });
   }
 
-  /** Full teardown (P6): every listener, observer, and the host map entry.
+  /** Full teardown: every listener, observer, and the host map entry.
       Not part of the MPA page lifecycle (NG-6) — exposed for embedders and
       for the leak/chaos battery to hold the runtime to. */
   destroy() {
@@ -228,7 +228,7 @@ export class Host {
   }
 
   /** Init gate (Q3): visible strategy requires intersection; the click
-      strategy (P6) calls this directly after arming. */
+      strategy calls this directly after arming. */
   tryStart() {
     if (this.state !== "idle" || !this.modulePromise) return;
     if (this.load === "visible" && !this.intersecting) return;

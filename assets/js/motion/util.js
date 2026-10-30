@@ -46,6 +46,14 @@ export function logWarn(...args) {
   console.warn(TAG, ...args);
 }
 
+/** Verbose timings (fetch, init, first frame) — params.docs.motion.debug,
+    injected at build time. Errors are always logged regardless. */
+let debug = false;
+
+export function setDebug(value) {
+  debug = value === true;
+}
+
 export function logInfo(...args) {
-  console.info(TAG, ...args);
+  if (debug) console.info(TAG, ...args);
 }

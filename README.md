@@ -16,6 +16,7 @@ A Hugo documentation theme for structured, navigable, versioned, multilingual te
 - **Project front page:** `release`, `install`, and `downloads` shortcodes compose a software landing page — release badge, copyable install commands, and binary downloads — complete without JavaScript. Platform detection annotates the right download row as a JavaScript enhancement only. Two developer-selected chrome layouts: the header bar, or a Material-style icon rail — on narrow screens both collapse into a dropdown menu built on a no-JS `<details>` element.
 - **Bento blocks:** `feature-grid` renders equal text tiles, media tiles (image or themed glyph bands), or an asymmetric 1+2 lead band; `video` embeds self-hosted clips natively and YouTube through a click-to-load facade — no third-party request until the visitor presses play.
 - **Project chrome:** default SVG favicon (drop in your own to override), an expanded multi-column footer driven by Hugo menus (brand column, social icons, translated column titles), license line, and copyright — configured entirely from `hugo.toml`.
+- **Scene scaffolding:** poster-first 3D/motion mounts (`{{</* scene */>}}`) on a vendored, version-pinned three.js runtime — the theme ships the stage, sites ship the scenes. Live preset re-theming, scroll/pointer signals, click-gated loads, and per-scene error isolation where a broken scene returns to its poster without touching the page. Zero external requests; the runtime loads lazily, only on pages that use it. See the [Scene scaffolding](#scene-scaffolding) section.
 - **CSS-only front-page motion:** eight hero glow variants (`pixel`, `aurora`, `scanline`, `pulse`, `beam`, `ripple`, `ripplebounce`, `synth`), glyph stroke-draw, staggered hero entrance, scroll-driven reveals, and an opt-in 3D hover tilt — all pure CSS, all collapsing to their final static state under `prefers-reduced-motion` and in print. See the [Motion](#front-page-motion) section.
 
 ## Requirements
@@ -71,6 +72,9 @@ Start with these pages:
 - [Video](/en/docs/latest/components/video/)
 - [Customization](/en/docs/latest/customization/)
 - [Presets System](/en/docs/latest/components/presets/)
+- [Motion](/en/docs/latest/components/motion/)
+- [Scenes](/en/docs/latest/components/scenes/)
+- [Scene Failure Fixtures](/en/docs/latest/components/scene-failures/)
 
 ## Presets (Visual Identity)
 
@@ -164,6 +168,25 @@ Front-page life is CSS-only: no JavaScript, no network requests beyond the style
 
 Hard guarantees, enforced in CSS and by the test suite: `prefers-reduced-motion: reduce` collapses every animation and transition to its final state instantly (scroll-driven choreography is not applied at all, so no content hides); the print stylesheet suppresses motion entirely; and all choreography animates `transform`/`opacity` only, preserving the zero-layout-shift behavior. See the Motion page in the example site for live demos.
 
+## Scene scaffolding
+
+The `{{< scene >}}` shortcode mounts an interactive WebGL scene that is
+a complete, static piece of content without JavaScript: a sized figure with
+your poster image, real overlay text, and a labeled, keyboard-accessible
+structure. The theme ships **the stage** — a lazy-loaded runtime with a
+vendored, sha256-pinned three.js — and your site ships the scenes: small,
+dependency-free ES modules in `assets/js/scenes/`.
+
+- **Live preset re-theming** — scenes receive the active preset's tokens and re-render when the visitor switches presets or light/dark mode.
+- **Signals** — native scroll progress/velocity and opt-in pointer position (fine-pointer devices only), delivered per frame; no scroll hijacking, ever.
+- **Load strategies** — `visible` (default) starts when the mount enters the viewport; `click` defers fetch and start behind an activate button that is removed entirely without JavaScript.
+- **Error isolation** — a throwing scene, a missing WebGL2 context, or a lost GPU context resolves to the poster; one automatic re-init after context restore, then terminal. Sibling scenes and the page are never affected.
+- **Budgets (SYM-MOT-001):** core bundle ≤ 20 KB; motion runtime ≤ 780 KB raw / ≤ 220 KB gzip, fetched after page load, scene pages only; compiled CSS ≤ 112 KB target. Scene modules are site content (guidance ≤ 50 KB each).
+
+See the [Scenes](/en/docs/latest/components/scenes/) page for the full
+authoring contract, and the [Scene Failure Fixtures](/en/docs/latest/components/scene-failures/)
+page for every degradation path, live.
+
 ## Video
 
 The `video` shortcode embeds videos that play inside the page:
@@ -202,7 +225,7 @@ Omit `description` and `columns` to keep the original slim footer.
 
 The theme intentionally omits the following. They are not bugs; they are design boundaries.
 
-1. **No client-side dependency additions.** No search library, no font loader, no framework. The core bundle budget stays under ~20 KB minified JS; any future optional subsystem (for example an opt-in motion/3D runtime) carries its own separate budget and must load lazily, never render-blocking.
+1. **No client-side dependency additions.** No search library, no font loader, no framework. The core bundle budget stays under ~20 KB minified JS. The one recorded exception (SYM-MOT-001): a vendored, version-pinned three.js runtime behind the scene scaffolding — its own budget (≤ 780 KB raw / ≤ 220 KB gzip), fetched lazily after page load only on pages using the `scene` shortcode, never render-blocking, poster-first without JavaScript. Any future optional subsystem follows the same shape: own budget, lazy-only, complete static fallback.
 2. **No fuzzy/typo-tolerant search.** The hand-rolled exact-token matcher stays. Revisit only with evidence.
 3. **No "edit on GitHub", analytics bundling, or feedback widgets.** The `custom-head.html` hook is the sanctioned extension point; the theme ships none of them.
 4. **Self-hosted fonts only.** The theme bundles Inter and JetBrains Mono fonts locally. Font configuration accepts stack declarations with bundled fonts as the first choice, followed by system fallbacks.

@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { settleAnimations } from "./helpers/motion";
 
 async function analyzePage(page: Page) {
   const results = await new AxeBuilder({ page })
@@ -9,21 +10,6 @@ async function analyzePage(page: Page) {
 
   return results.violations.filter((violation) => {
     return violation.impact === "critical" || violation.impact === "serious";
-  });
-}
-
-// Jump every animation to its final state before analysis. WCAG contrast
-// applies to the settled page; sampling mid-entrance (semi-transparent
-// buttons over the hero background) produces false violations.
-async function settleAnimations(page: Page) {
-  await page.evaluate(() => {
-    document.getAnimations().forEach((a) => {
-      try {
-        a.finish();
-      } catch {
-        /* infinite animations cannot finish; leave them running */
-      }
-    });
   });
 }
 
@@ -63,6 +49,9 @@ test.describe("preset accessibility", () => {
     "high-contrast",
   ];
 
+  // P7 close-out: the battery runs per preset over BOTH the docs shell and
+  // the scenes page (live 3D + click-gated mounts + scrims) — one loop,
+  // parameterized, instead of a cloned scenes-only battery.
   for (const preset of PRESETS) {
     test(`accessibility passes on ${preset} preset`, async ({ page }) => {
       await page.goto("/en/docs/latest/");
@@ -74,6 +63,10 @@ test.describe("preset accessibility", () => {
       await page.waitForTimeout(100);
 
       // Run accessibility analysis
+      expect(await analyzePage(page)).toEqual([]);
+
+      await page.goto("/en/docs/latest/components/scenes/");
+      await settleAnimations(page);
       expect(await analyzePage(page)).toEqual([]);
     });
   }

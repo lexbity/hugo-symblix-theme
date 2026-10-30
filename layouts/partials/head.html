@@ -112,6 +112,14 @@
      poster is the whole content either way. */}}
   <noscript><style>[data-preset-switcher]{display:none !important}[data-scene-load="click"] .docs-scene__activate{display:none !important}</style></noscript>
 {{ end }}
+{{/* View Transitions (SYM-MOT-001 P7): opt-in cross-document morphs,
+   progressive by platform (inert where unsupported). Deliberately OUTSIDE
+   the themeSwitcher feature block — view transitions are independent of
+   the preset system. Sites with strict style-src CSP hash-allowlist this
+   inline style like the two inline bootstrap scripts. */}}
+{{ if site.Params.docs.motion.viewTransitions }}
+<style>@view-transition{navigation:auto}</style>
+{{ end }}
 {{ $derived := partialCached "docs/helpers/versions.html" . .Site.Language.Lang }}
 {{ $currentVersion := partial "docs/helpers/current-version.html" . | strings.TrimSpace }}
 {{ $noindexArchived := site.Params.docs.versions.noindexArchived | default false }}

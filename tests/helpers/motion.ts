@@ -40,3 +40,39 @@ export function firstHost(page: Page) {
     };
   });
 }
+
+/** Jump every animation to its final state so captures and analysis see the
+    settled page, never a mid-entrance frame or a pre-reveal word. Infinite
+    animations cannot finish and are left running. Shared by the a11y and
+    screenshot suites (P7 dedup: one implementation, two former copies). */
+export async function settleAnimations(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    document.getAnimations().forEach((a) => {
+      try {
+        a.finish();
+      } catch {
+        /* infinite */
+      }
+    });
+  });
+  // Cross-document view transitions (P7) run after load as pseudo-element
+  // animations that finish() cannot settle — analysis or capture mid-fade
+  // samples semi-transparent content. Wait them out; tolerate absence.
+  await page
+    .waitForFunction(
+      () =>
+        !document
+          .getAnimations()
+          .some((a) =>
+            String(
+              (a as unknown as { effect?: { pseudoElement?: string } }).effect
+                ?.pseudoElement || "",
+            ).startsWith("::view-transition"),
+          ),
+      null,
+      { timeout: 3000 },
+    )
+    .catch(() => {
+      /* no VT ran, or it already ended */
+    });
+}

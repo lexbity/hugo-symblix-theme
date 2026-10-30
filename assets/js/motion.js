@@ -8,8 +8,13 @@
 // js/motion.min.<hash>.js — the name the motion budget test pins.
 
 import * as THREE from "./vendor/three/three.module.min.js";
-import { SCENE_API } from "./motion/util.js";
+import { SCENE_API, setDebug } from "./motion/util.js";
 import { destroyHost, hosts, registerAll } from "./motion/runtime.js";
+
+// Site config flag (params.docs.motion.debug), injected at build time via
+// esbuild define (§4.11). The typeof guard keeps the module loadable if a
+// build path ever omits the define.
+setDebug(typeof __MOTION_DEBUG__ !== "undefined" && __MOTION_DEBUG__ === true);
 
 try {
   registerAll(THREE);

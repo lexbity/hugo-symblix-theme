@@ -15,7 +15,9 @@ html[data-syntax="light"],
   --docs-code-comment: #64748b;
   --docs-code-keyword: #7c3aed;
   --docs-code-string: #047857;
-  --docs-code-number: #b45309;
+  /* #a04c08: #b45309 failed AA (4.14:1) on solarized-light's code bg;
+     darkening preserves the amber hue at 4.9:1 worst-case. */
+  --docs-code-number: #a04c08;
   --docs-code-function: #1d4ed8;
   --docs-code-type: #0f766e;
   --docs-code-constant: #9d174d;

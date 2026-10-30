@@ -147,9 +147,54 @@ demonstrates the isolation live with deliberately broken scenes.
 | Scene throws / fails to load | `state=error`, poster + overlay, other scenes unaffected |
 | Print | Canvas hidden, poster printed |
 
+## Type hints for scene authors
+
+`THREE` arrives as a function argument, so editors do not type it
+automatically. Drop this `scenes.d.ts` next to your scenes to restore
+editor hints (the shape mirrors the contract table above):
+
+```ts
+declare namespace scene {
+  export interface Color { css: string; r: number | null; g: number | null; b: number | null }
+  export interface Palette {
+    preset: string;
+    mode: "light" | "dark";
+    accent: Color; bg: Color; surface: Color; surface2: Color;
+    text: Color; muted: Color; border: Color;
+  }
+  export interface Context {
+    api: 1;
+    THREE: object;
+    gl: WebGL2RenderingContext;
+    canvas: HTMLCanvasElement;
+    width: number; height: number; dpr: number;
+    mount: HTMLElement;
+    palette: Palette;
+  }
+  export interface Signals {
+    scroll: { progress: number; velocity: number };
+    pointer: { x: number; y: number; active: boolean };
+  }
+}
+declare function createScene(ctx: scene.Context): {
+  frame(t: number, dt: number, s: scene.Signals): void;
+  onResize?(w: number, h: number, dpr: number): void;
+  onPaletteChange?(p: scene.Palette): void;
+  dispose?(): void;
+};
+```
+
+## Troubleshooting
+
+Set `params.docs.motion.debug = true` in your site config for verbose
+`[symblix-motion]` console timings (module fetch, init, first frame). The
+`data-scene-state` attribute on the mount and `window.SymblixMotion.hosts`
+are always available for inspection.
+
 ## Budgets
 
 The motion runtime (theme-maintained, three.js included) is a separately
 budgeted chunk fetched after page load, only on pages that use the
-shortcode. See the README for the exact numbers; scene modules are site
-content — keep each under ~50 KB and posters under ~200 KB.
+shortcode: ≤ 780 KB raw, ≤ 220 KB gzip (enforced by the theme's own suite).
+Scene modules are site content — keep each under ~50 KB and posters under
+~200 KB. See the README for the full budget policy.

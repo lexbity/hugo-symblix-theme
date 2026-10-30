@@ -106,12 +106,16 @@
     padding: 0.25rem 0.6rem;
     border: 1px solid var(--docs-border);
     background: var(--docs-surface);
-    color: var(--docs-muted);
+    /* Muted-leaning but AA-safe on every preset: a straight muted token
+       fails on solarized-light at this size (4.31:1), and opacity blends
+       made the failure per-preset unpredictable (computed #6b7b7e on
+       #eee8d5, 3.6:1). color-mix with the text token keeps the muted look
+       and lands ≥4.5 on the worst-case light preset. */
+    color: color-mix(in srgb, var(--docs-muted) 55%, var(--docs-text));
     font: inherit;
     font-size: 0.78rem;
     line-height: 1.2;
     cursor: pointer;
-    opacity: 0.85;
   }
 
   .docs-copy-button:hover,

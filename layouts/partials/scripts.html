@@ -20,6 +20,11 @@
      emission contract). type="module" defers execution; the chunk is never
      render-blocking. */}}
 {{ if .Page.Store.Get "symblixMotion" }}
-  {{ $motion := resources.Get "js/motion.js" | js.Build (dict "target" "es2020" "format" "esm") | minify | fingerprint }}
+  {{ $motionDebug := site.Params.docs.motion.debug | default false }}
+  {{ $motion := resources.Get "js/motion.js" | js.Build (dict
+      "target" "es2020"
+      "format" "esm"
+      "define" (dict "__MOTION_DEBUG__" (printf "%v" $motionDebug))
+    ) | minify | fingerprint }}
   <script type="module" src="{{ $motion.RelPermalink }}" integrity="{{ $motion.Data.Integrity }}"></script>
 {{ end }}
