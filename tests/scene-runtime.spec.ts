@@ -1,38 +1,27 @@
-// Scene runtime battery (SYM-MOT-001 P2): lifecycle to live, fetch gating,
-// error isolation, reduced-motion contract, same-origin delivery.
+// Scene runtime battery (SYM-MOT-001 P2–P4): lifecycle to live, fetch
+// gating, error isolation, reduced-motion contract, same-origin delivery,
+// palette bridge, and scroll/pointer signals.
 //
 // Contract-of-record assertions read the observable surface only:
 // data-scene-state, request URLs, DOM presence, window.SymblixMotion.
 // WebGL tests run on SwiftShader in CI; they assert the contract, never
 // pixels, and carry the no-WebGL degradation path as a first-class branch.
 import { expect, test } from "@playwright/test";
-
-const SCENES_PAGE = "/en/docs/latest/components/scenes/";
-const FIXTURE_PAGE = "/en/docs/latest/components/scene-failures/";
+import {
+  FIXTURE_PAGE,
+  SCENES_PAGE,
+  firstHost,
+  hasWebGL2,
+  sceneLive,
+} from "./helpers/motion";
 
 test.describe("lifecycle", () => {
   test("demo scene reaches live with a sized canvas and the poster cross-fades", async ({
     page,
   }) => {
-    const hasWebGL2 = await page.evaluate(() => {
-      try {
-        return !!document.createElement("canvas").getContext("webgl2");
-      } catch {
-        return false;
-      }
-    });
-    test.skip(!hasWebGL2, "no WebGL2 on this runner — covered by the degradation-path test");
-
-    await page.goto(SCENES_PAGE);
-    // The demo mount sits below the fold; the visible init strategy (Q3)
-    // correctly holds the scene in idle until it scrolls into view.
-    await page.locator("[data-scene]").evaluate((el) => el.scrollIntoView({ block: "center" }));
+    test.skip(!(await hasWebGL2(page)), "no WebGL2 on this runner — covered by the degradation-path test");
+    await sceneLive(page);
     const mount = page.locator("[data-scene]");
-
-    // NFR-6: conditions-met → live ≤ 3s in the test environment.
-    await expect
-      .poll(() => mount.getAttribute("data-scene-state"), { timeout: 3000 })
-      .toBe("live");
 
     const canvas = mount.locator(".docs-scene__canvas");
     await expect(canvas).toHaveCount(1);
@@ -56,14 +45,7 @@ test.describe("lifecycle", () => {
   test("lifecycle is honest when WebGL2 is unavailable (dual-path contract)", async ({
     page,
   }) => {
-    const hasWebGL2 = await page.evaluate(() => {
-      try {
-        return !!document.createElement("canvas").getContext("webgl2");
-      } catch {
-        return false;
-      }
-    });
-    test.skip(hasWebGL2, "covered by the live-path test on this runner");
+    test.skip(await hasWebGL2(page), "covered by the live-path test on this runner");
     // On a runner without WebGL2 the graceful path IS the contract.
     await page.goto(SCENES_PAGE);
     await expect
@@ -166,7 +148,7 @@ test.describe("reduced motion", () => {
 
 test.describe("same-origin delivery", () => {
   test("zero off-origin requests on a scene page (NFR-5)", async ({ page }) => {
-    await page.goto(SCENES_PAGE);
+    await sceneLive(page);
     const origin = new URL(page.url()).origin;
 
     // Attached after navigation so the origin is real; the runtime's own
@@ -175,9 +157,6 @@ test.describe("same-origin delivery", () => {
     page.on("request", (req) => {
       if (new URL(req.url()).origin !== origin) offOrigin.push(req.url());
     });
-
-    await page.locator("[data-scene]").evaluate((el) => el.scrollIntoView({ block: "center" }));
-    await page.waitForLoadState("load");
     await page.waitForTimeout(1500);
 
     expect(offOrigin).toEqual([]);
@@ -186,13 +165,7 @@ test.describe("same-origin delivery", () => {
 
 test.describe("registration idempotency", () => {
   test("hosts map stays stable across reflows and repeated checks", async ({ page }) => {
-    await page.goto(SCENES_PAGE);
-    await page.locator("[data-scene]").evaluate((el) => el.scrollIntoView({ block: "center" }));
-    await expect
-      .poll(() => page.locator("[data-scene]").getAttribute("data-scene-state"), {
-        timeout: 3000,
-      })
-      .toBe("live");
+    await sceneLive(page);
 
     const before = await page.evaluate(() => window.SymblixMotion.hosts.size);
     await page.evaluate(() => {
@@ -202,6 +175,113 @@ test.describe("registration idempotency", () => {
     const after = await page.evaluate(() => window.SymblixMotion.hosts.size);
     expect(after).toBe(before);
     expect(after).toBe(1);
+  });
+});
+
+test.describe("signals (P4)", () => {
+  test("pointer signal arms, normalizes, and deactivates on leave", async ({ page }) => {
+    await sceneLive(page);
+
+    const box = await page.locator("[data-scene]").boundingBox();
+    expect(box).not.toBeNull();
+
+    // Center of the mount → ~(0, 0).
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await expect
+      .poll(() => firstHost(page).then((h) => h.pointer.active))
+      .toBe(true);
+    const centered = await firstHost(page);
+    expect(Math.abs(centered.pointer.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(centered.pointer.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(centered.pointer.x)).toBeLessThan(0.35);
+    expect(Math.abs(centered.pointer.y)).toBeLessThan(0.35);
+
+    // Off the mount (top-left page corner) → pointerleave → inactive.
+    await page.mouse.move(2, 2);
+    await expect
+      .poll(() => firstHost(page).then((h) => h.pointer.active))
+      .toBe(false);
+
+    // Mirror attribute tracks the armed state.
+    const mirror = await page
+      .locator("[data-scene]")
+      .getAttribute("data-scene-pointer-active");
+    expect(mirror).toBe("false");
+  });
+
+  test("pointer signal is never armed without pointer=on", async ({ page }) => {
+    // The failures page's healthy control mounts pointer="off" (default):
+    // host registers, pointer listeners are never attached (Q7).
+    await page.goto(FIXTURE_PAGE);
+    const mounts = page.locator("[data-scene]");
+    await expect(mounts).toHaveCount(3);
+    const control = mounts.nth(1); // orbit, pointer="off"
+    await control.evaluate((el) => el.scrollIntoView({ block: "center" }));
+    await expect
+      .poll(() => control.getAttribute("data-scene-state"), { timeout: 3000 })
+      .toBe("live");
+
+    const box = await control.boundingBox();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.waitForTimeout(300);
+
+    const host = await page.evaluate(() => {
+      const hosts = [...window.SymblixMotion.hosts.values()];
+      const controlHost = hosts.find((h) => h.mount.dataset.scenePointer === "off");
+      return {
+        armed: controlHost.pointerArmed,
+        active: controlHost.signals.pointer.active,
+        mirror: controlHost.mount.hasAttribute("data-scene-pointer-active"),
+      };
+    });
+    expect(host.armed).toBe(false);
+    expect(host.active).toBe(false);
+    expect(host.mirror).toBe(false);
+  });
+
+  test("scroll progress clamps to [0,1] and velocity stays finite", async ({ page }) => {
+    await sceneLive(page);
+
+    // Scroll to the mount's own transit midpoint (progress ≈ 0.5 there —
+    // a page fraction is wrong because the mount sits below a long page).
+    const target = await page.locator("[data-scene]").evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return Math.max(0, window.scrollY + r.top + r.height / 2 - window.innerHeight / 2);
+    });
+    await page.evaluate((y) => window.scrollTo(0, y), Math.floor(target));
+    await expect
+      .poll(() => firstHost(page).then((h) => h.scroll.progress), { timeout: 2000 })
+      .toBeGreaterThan(0.2);
+
+    const mid = await firstHost(page);
+    expect(mid.scroll.progress).toBeLessThan(0.8);
+    expect(Number.isFinite(mid.scroll.velocity)).toBe(true);
+
+    const mount = page.locator("[data-scene]");
+    const mirror = parseFloat(await mount.getAttribute("data-scene-scroll"));
+    expect(Math.abs(mirror - mid.scroll.progress)).toBeLessThan(0.002);
+
+    // At rest (still live at the midpoint), velocity decays to zero.
+    await page.waitForTimeout(300);
+    const rest = await firstHost(page);
+    expect(Math.abs(rest.scroll.velocity)).toBeLessThan(0.001);
+
+    // Scrolling to the top exits the mount through the bottom of the
+    // viewport: the last computed progress is 0.000 (exit boundary).
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect
+      .poll(() => mount.getAttribute("data-scene-scroll"), { timeout: 2000 })
+      .toBe("0.000");
+
+    // Scrolling far past the mount pauses it (FR-14, battery design): the
+    // host leaves the loop and signals freeze — progress 1 exists only at
+    // the exact pause boundary, so the honest assertion is the pause.
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await expect
+      .poll(() => mount.getAttribute("data-scene-state"), { timeout: 2000 })
+      .toBe("paused");
+    const frozen = await firstHost(page);
+    expect(Number.isFinite(frozen.scroll.progress)).toBe(true);
   });
 });
 
@@ -226,16 +306,6 @@ test.describe("palette bridge", () => {
     if (!m) return h.trim().toLowerCase();
     const [r, g, b] = m[1].split("");
     return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
-  }
-
-  async function sceneLive(page) {
-    await page.goto(SCENES_PAGE);
-    await page.locator("[data-scene]").evaluate((el) => el.scrollIntoView({ block: "center" }));
-    await expect
-      .poll(() => page.locator("[data-scene]").getAttribute("data-scene-state"), {
-        timeout: 3000,
-      })
-      .toBe("live");
   }
 
   test("preset switch re-themes the live scene and flips the mirror", async ({ page }) => {

@@ -270,15 +270,24 @@ export class Host {
     }
   }
 
+  /** Guarded scene-callback invocation (Q5): the one-strike rule applies
+      uniformly to every author callback (frame, onResize, onPaletteChange)
+      — a throw disposes the scene exactly once, here. */
+  guard(fn) {
+    try {
+      fn();
+      return true;
+    } catch (error) {
+      this.fail(error);
+      return false;
+    }
+  }
+
   onResize() {
     if (this.state !== "live") return;
     this.measure();
     if (this.instance && typeof this.instance.onResize === "function") {
-      try {
-        this.instance.onResize(this.width, this.height, this.dpr);
-      } catch (error) {
-        this.fail(error);
-      }
+      this.guard(() => this.instance.onResize(this.width, this.height, this.dpr));
     }
   }
 
@@ -290,11 +299,7 @@ export class Host {
     this.palette = snapshot;
     this.mount.dataset.scenePreset = snapshot.preset;
     if (this.instance && typeof this.instance.onPaletteChange === "function") {
-      try {
-        this.instance.onPaletteChange(snapshot);
-      } catch (error) {
-        this.fail(error);
-      }
+      this.guard(() => this.instance.onPaletteChange(snapshot));
     }
   }
 
@@ -309,15 +314,11 @@ export class Host {
   }
 
   frame(t, dt) {
-    try {
-      this.updateSignals(t, dt);
-      this.instance.frame(t, dt, this.signals);
-      if (this.firstFrame) {
-        this.firstFrame = false;
-        this.setState("live");
-      }
-    } catch (error) {
-      this.fail(error);
+    this.updateSignals(t, dt);
+    const framed = this.guard(() => this.instance.frame(t, dt, this.signals));
+    if (framed && this.firstFrame) {
+      this.firstFrame = false;
+      this.setState("live");
     }
   }
 
@@ -385,11 +386,16 @@ function tick(t) {
   }
 }
 
+/** Whether any host currently needs the loop (live or awaiting first frame).
+    tick() keeps its own fused pass (it frames while checking — a host may
+    fail mid-frame); this predicate serves the re-arm path only. */
+function hasFramableHost() {
+  for (const host of hosts.values()) {
+    if (host.state === "live" || host.state === "loading") return true;
+  }
+  return false;
+}
+
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) return;
-  let anyFramed = false;
-  hosts.forEach((host) => {
-    if (host.state === "live" || host.state === "loading") anyFramed = true;
-  });
-  if (anyFramed) ensureLoop();
+  if (!document.hidden && hasFramableHost()) ensureLoop();
 });

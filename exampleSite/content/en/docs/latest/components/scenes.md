@@ -33,11 +33,12 @@ crawlable, and never rendered into the canvas.
 {{</* /scene */>}}
 ```
 
-{{< scene src="js/scenes/orbit.js" poster="/images/scene-orbit-poster.svg" title="Orbit — the reference demo scene" >}}
+{{< scene src="js/scenes/orbit.js" poster="/images/scene-orbit-poster.svg" title="Orbit — the reference demo scene" pointer="on" >}}
 **Real text above the scene.** This overlay is ordinary HTML. The wireframe
 icosahedron uses the active preset's accent color — switch presets in the
 sidebar and watch it re-theme live. Scroll the page and the scene tilts
-with scroll progress.
+with scroll progress; move your cursor over the mount and the camera leans
+toward it (the demo mounts `pointer="on"`).
 {{< /scene >}}
 
 ## Parameters
@@ -124,7 +125,7 @@ Contract rules:
 | Signal | Shape | Notes |
 |---|---|---|
 | `signals.scroll` | `{ progress, velocity }` | Native scroll of the mount through the viewport, 0→1. Raw values — smooth them in your scene if you want. |
-| `signals.pointer` | `{ x, y, active }` | `−1..1` from the mount's center; only armed with `pointer="on"` and on fine-pointer devices. |
+| `signals.pointer` | `{ x, y, active }` | `−1..1` from the mount's center; only armed with `pointer="on"` and on fine-pointer devices. Raw values — ease them in your scene, as the demo does. |
 
 ### Lifecycle
 

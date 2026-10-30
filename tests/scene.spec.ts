@@ -34,7 +34,7 @@ test.describe("scene mount contract", () => {
     expect(attrs.runtime).toBe("three");
     expect(attrs.state).toBe("idle");
     expect(attrs.load).toBe("visible");
-    expect(attrs.pointer).toBe("off");
+    expect(attrs.pointer).toBe("on");
     // Fingerprinted site asset, same origin by construction.
     expect(attrs.src).toMatch(/^\/js\/scenes\/orbit\.min\.[a-f0-9]+\.js$/);
     expect(attrs.id).toBe("scene-0");
