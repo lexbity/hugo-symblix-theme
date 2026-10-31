@@ -1,2 +1,32 @@
 .docs-article--showcase .docs-scene { margin: 2rem 0; }
 .docs-article--showcase h2 { margin-top: 2.5rem; }
+
+.docs-scene__viewer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  margin: 0.75rem 0 1.5rem 0;
+}
+
+.docs-scene__viewer-btn {
+  appearance: none;
+  border: 1px solid var(--docs-border, #d0d7de);
+  background: var(--docs-surface, #f6f8fa);
+  color: var(--docs-text, #24292f);
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.docs-scene__viewer-btn:focus-visible {
+  outline: 2px solid var(--docs-accent, #0969da);
+  outline-offset: 2px;
+}
+
+.docs-scene__viewer-status {
+  min-height: 1.25rem;
+  color: var(--docs-text-muted, #57606a);
+  font-size: 0.875rem;
+}

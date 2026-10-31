@@ -8,8 +8,10 @@ defaultContentLanguageInSubdir = true
 tag = "tags"
 topic = "topics"
 
-# unsafe = true removed — theme does not require raw HTML in markdown.
-# Extend via shortcodes instead.
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
 
 # Optional: build CSS from Tailwind source instead of the committed pre-built CSS.
 # Enable together with `npm run dev` (which sets HUGO_PARAMS_DOCS_TAILWINDSOURCE=true).

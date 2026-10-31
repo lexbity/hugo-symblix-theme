@@ -40,6 +40,8 @@ export default function createScene(ctx) {
   const roles = new Map([["core", "accent"], ["frame", "text"], ["dial", "muted"], ["ring", "surface2"]]);
   let model = null;
   let ring = null;
+  let targetRotationY = 0;
+  let baseRotationY = 0;
 
   function applyPalette(p) {
     if (!model) return;
@@ -50,6 +52,27 @@ export default function createScene(ctx) {
     });
   }
   applyPalette(palette);
+
+  // DOM controls (keyboard accessible) - S8
+  const controls = ctx.mount.parentElement?.querySelector('[data-scene-viewer-controls]') || document.querySelector('[data-scene-viewer-controls]');
+  const statusEl = controls?.querySelector('[data-scene-viewer-status]') || null;
+  const btnLeft = controls?.querySelector('[data-action="rotate-left"]') || null;
+  const btnRight = controls?.querySelector('[data-action="rotate-right"]') || null;
+  const btnReset = controls?.querySelector('[data-action="reset"]') || null;
+
+  function announce(msg) {
+    if (statusEl) {
+      statusEl.textContent = msg;
+    }
+  }
+
+  const onLeft = () => { targetRotationY -= Math.PI / 12; announce('Rotated left'); };
+  const onRight = () => { targetRotationY += Math.PI / 12; announce('Rotated right'); };
+  const onReset = () => { targetRotationY = baseRotationY; announce('Reset view'); };
+
+  if (btnLeft) { btnLeft.addEventListener('click', onLeft); ctx.onDispose(() => btnLeft.removeEventListener('click', onLeft)); }
+  if (btnRight) { btnRight.addEventListener('click', onRight); ctx.onDispose(() => btnRight.removeEventListener('click', onRight)); }
+  if (btnReset) { btnReset.addEventListener('click', onReset); ctx.onDispose(() => btnReset.removeEventListener('click', onReset)); }
 
   const ready = ctx.fetchAsset("model")
     .then((response) => response.json())
@@ -80,7 +103,10 @@ export default function createScene(ctx) {
     ready,
     frame(t, dt) {
       if (ring) ring.rotation.z += dt * 0.6;
-      if (model) model.rotation.y = Math.sin(t * 0.0002) * 0.4;
+      if (model) {
+        baseRotationY = Math.sin(t * 0.0002) * 0.4;
+        model.rotation.y = baseRotationY + targetRotationY;
+      }
       renderer.render(scene, camera);
     },
     onPaletteChange(p) {

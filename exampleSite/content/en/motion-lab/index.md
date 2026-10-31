@@ -38,6 +38,13 @@ Real narrative content follows in the document flow. The track reserves space fo
 **Local instrument viewer.** Loads a small local JSON model via `ctx.fetchAsset` with `instance.ready`. Use the DOM controls below or the static specifications; keyboard and screen readers work without canvas hit-testing.
 {{< /scene >}}
 
+<div class="docs-scene__viewer-controls" data-scene-viewer-controls>
+  <button type="button" class="docs-scene__viewer-btn" data-action="rotate-left" aria-label="Rotate left">Rotate left</button>
+  <button type="button" class="docs-scene__viewer-btn" data-action="rotate-right" aria-label="Rotate right">Rotate right</button>
+  <button type="button" class="docs-scene__viewer-btn" data-action="reset" aria-label="Reset view">Reset</button>
+  <span class="docs-scene__viewer-status" aria-live="polite" aria-atomic="true" data-scene-viewer-status></span>
+</div>
+
 ### Static specifications
 - Parts: 6 meshes, 2 lights (local ObjectLoader JSON)
 - Roles: frame/dial/core/ring with palette-aware materials

@@ -26,5 +26,33 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
+    {
+      name: "firefox-smoke",
+      use: { ...devices["Desktop Firefox"] },
+      testMatch: [
+        /scene-loader\.spec\.ts/,
+        /scene-presentation\.spec\.ts/,
+        /scene-runtime\.spec\.ts/,
+        /scene-lifecycle\.spec\.ts/,
+        /scene-assets\.spec\.ts/,
+        /no-js\.spec\.ts/,
+        /print\.spec\.ts/,
+        /accessibility\.spec\.ts/,
+      ],
+    },
+    {
+      name: "webkit-smoke",
+      use: { ...devices["Desktop Safari"] },
+      testMatch: [
+        /scene-loader\.spec\.ts/,
+        /scene-presentation\.spec\.ts/,
+        /scene-runtime\.spec\.ts/,
+        /scene-lifecycle\.spec\.ts/,
+        /scene-assets\.spec\.ts/,
+        /no-js\.spec\.ts/,
+        /print\.spec\.ts/,
+        /accessibility\.spec\.ts/,
+      ],
+    },
   ],
 });
