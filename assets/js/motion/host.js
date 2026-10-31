@@ -19,6 +19,7 @@ export class Host {
     this.mount = mount;
     this.id = mount.dataset.sceneId || "scene";
     this.load = mount.dataset.sceneLoad || "visible";
+    this.progressMode = mount.dataset.sceneProgress || "mount";
     this.THREE = THREE;
     this.scheduler = scheduler;
     this.remove = remove;
@@ -58,6 +59,9 @@ export class Host {
     this.lifetime = this.scope();
     this.canvasScope = null;
     this.gpuScope = null;
+    this.timings = { requested: null, moduleResolved: null, created: null, ready: null, firstFrame: null, cpuMs: null };
+    this._cpuSamples = [];
+    this._cpuSampleStart = null;
   }
 
   scope() {
@@ -67,14 +71,21 @@ export class Host {
   get terminal() { return this.state === "error" || this.state === "disposed"; }
 
   setState(next, stage = null) {
+    const prev = this.state;
     this.state = next;
     this.stage = stage;
     this.mount.dataset.sceneState = next;
+    try {
+      import("./runtime.js").then((m) => { if (m.record) m.record("state", this, { from: prev, to: next, stage }); }).catch(() => {});
+    } catch {}
   }
 
   register() {
     this.setState("idle");
     this.mount.dataset.scenePreset = this.palette.preset;
+    this.track = null;
+    try { this.validateTrack(); }
+    catch (error) { this.fail("scene-track", error); return; }
     // Admission is rechecked before requests/construction, not just here.
     if (!motionAllowed() || typeof IntersectionObserver !== "function" ||
         typeof ResizeObserver !== "function") return;
@@ -129,6 +140,21 @@ export class Host {
       this.tryStart();
     });
     this.mount.dataset.sceneActivatable = "true";
+  }
+
+  validateTrack() {
+    if (this.progressMode !== "track") return;
+    const track = this.mount.closest("[data-scene-track]");
+    if (!track) {
+      this.fail("scene-track", new Error("progress=track requires a containing [data-scene-track]"));
+      return;
+    }
+    const scenes = track.querySelectorAll(":scope > [data-scene]");
+    if (scenes.length !== 1 || scenes[0] !== this.mount) {
+      this.fail("scene-track", new Error("each scene-track supports exactly one direct scene mount"));
+      return;
+    }
+    this.track = track;
   }
 
   ensureModule() {
@@ -214,6 +240,7 @@ export class Host {
       try { this.assets = this.parseAssets(); }
       catch (error) { this.fail("scene-assets", error); return; }
     }
+    if (this.timings.requested == null) this.timings.requested = performance.now();
     const promise = this.ensureModule();
     if (promise && !this.terminal) this.start(promise);
   }
@@ -226,6 +253,7 @@ export class Host {
     try { mod = await modulePromise; }
     catch (error) { this.fail("scene-import", error); return; }
     if (generation !== this.generation || this.terminal || !motionAllowed()) return;
+    if (this.timings.moduleResolved == null) this.timings.moduleResolved = performance.now();
     // Do not allocate GPU resources for a visible-strategy mount that left
     // the viewport while its module was on the network.
     if (document.hidden || (this.load === "visible" && !this.intersecting)) {
@@ -242,6 +270,7 @@ export class Host {
       }
       this.setState("loading", "create");
       this.prepareCanvas();
+      if (this.timings.created == null) this.timings.created = performance.now();
       const authorScope = this.gpuScope;
       const controller = this.controller;
       const ctx = Object.freeze({
@@ -296,6 +325,7 @@ export class Host {
       if (failed) { this.fail("scene-ready", reason); return; }
     }
     this.clearDeadline();
+    if (this.timings.ready == null) this.timings.ready = performance.now();
     this.instanceReady = true;
     this.reconcile();
   }
@@ -409,9 +439,16 @@ export class Host {
   frame(t, dt) {
     this.flushChanges();
     if (!this.canFrame()) return;
-    const rect = this.mount.getBoundingClientRect();
-    const vh = window.innerHeight || document.documentElement.clientHeight;
-    const progress = clamp((vh - rect.top) / Math.max(vh + rect.height, 1), 0, 1);
+    let progress;
+    if (this.progressMode === "track" && this.track) {
+      const trackRect = this.track.getBoundingClientRect();
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      progress = clamp(-trackRect.top / Math.max(trackRect.height - vh, 1), 0, 1);
+    } else {
+      const rect = this.mount.getBoundingClientRect();
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      progress = clamp((vh - rect.top) / Math.max(vh + rect.height, 1), 0, 1);
+    }
     const velocity = this.lastProgress === null || dt <= 0 ? 0 : (progress - this.lastProgress) / dt;
     this.signals = Object.freeze({
       scroll: Object.freeze({ progress, velocity }),
@@ -420,8 +457,17 @@ export class Host {
     const previous = Number(this.mount.dataset.sceneScroll || 0);
     if (Math.abs(progress - previous) > 0.001) this.mount.dataset.sceneScroll = progress.toFixed(3);
     const generation = this.generation;
-    if (!this.guard("scene-frame", () => this.callbacks.frame.call(this.instance, t, dt, this.signals)) ||
-        this.terminal || generation !== this.generation) return;
+    const debug = typeof document !== "undefined" && document.documentElement && document.documentElement.dataset.motionDebug === "true";
+    const start = debug && typeof performance !== "undefined" ? performance.now() : 0;
+    const ok = this.guard("scene-frame", () => this.callbacks.frame.call(this.instance, t, dt, this.signals));
+    if (debug && typeof performance !== "undefined") {
+      const ms = performance.now() - start;
+      this._cpuSamples.push(ms);
+      if (this._cpuSamples.length > 120) this._cpuSamples.shift();
+      this.timings.cpuMs = this._cpuSamples.reduce((a,b)=>a+b,0)/this._cpuSamples.length;
+    }
+    if (!ok || this.terminal || generation !== this.generation) return;
+    if (this.timings.firstFrame == null) this.timings.firstFrame = performance.now();
     this.frameCount++;
     this.lastFrameTime = t;
     this.lastProgress = progress;

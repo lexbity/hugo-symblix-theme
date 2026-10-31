@@ -21,6 +21,8 @@
                   fingerprints, and emits the JSON map into data-scene-assets;
                   the runtime exposes it as ctx.assets and ctx.fetchAsset
                   (SYM-MOT-002 Q11).
+         progress (default "mount") "track" reads progress from a containing
+                  {{< scene-track >}} wrapper (SYM-MOT-002 Q10).
          ratio    (default "16/9") aspect ratio; mutually exclusive with height.
          height   preferred positive CSS length; static copy may grow taller.
          class    extra classes.
@@ -41,6 +43,7 @@
 {{- $runtime := .Get "runtime" | default "three" -}}
 {{- $load := .Get "load" | default "visible" -}}
 {{- $pointer := .Get "pointer" | default "off" -}}
+{{- $progress := .Get "progress" | default "mount" -}}
 {{- $ratioRaw := .Get "ratio" -}}
 {{- $height := .Get "height" -}}
 {{- $class := .Get "class" -}}
@@ -90,6 +93,10 @@
 {{- end -}}
 {{- if and (ne $pointer "off") (ne $pointer "on") -}}
   {{- errorf "scene shortcode (%s): pointer must be \"off\" or \"on\", got %q" $where $pointer -}}
+  {{- $failed = true -}}
+{{- end -}}
+{{- if and (ne $progress "mount") (ne $progress "track") -}}
+  {{- errorf "scene shortcode (%s): progress must be \"mount\" or \"track\", got %q" $where $progress -}}
   {{- $failed = true -}}
 {{- end -}}
 
@@ -169,6 +176,7 @@
         data-scene-state="idle"
         data-scene-load="{{ $load }}"
         data-scene-pointer="{{ $pointer }}"
+        data-scene-progress="{{ $progress }}"
         data-scene-src="{{ $sceneJs.RelPermalink }}"
         {{- if $assetsId }} data-scene-assets="{{ $assetsJson }}"{{ end }}
         data-scene-id="scene-{{ .Ordinal }}"

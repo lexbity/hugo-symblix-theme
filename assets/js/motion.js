@@ -19,12 +19,14 @@ try {
   console.warn("[symblix-motion] registration failed", error);
 }
 
-// Compatibility support surface. Mutation is unsupported; SYM-MOT-002 S6
-// replaces raw hosts with an immutable diagnostics facade.
+// Diagnostics facade (SYM-MOT-002 S6). Mutation is unsupported.
+import { diagnostics } from "./motion/runtime.js";
+
 window.SymblixMotion = Object.freeze({
   SCENE_API,
   register,
   hosts,
+  diagnostics,
   destroyHost,
   suppress: suppressAll,
 });

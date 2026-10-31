@@ -51,6 +51,28 @@
    JS adds only absolutely positioned canvases, preserving reserved layout;
    the runtime cross-fades poster → canvas by flipping data-scene-state. */
 @layer components {
+  .docs-scene-track {
+    position: relative;
+    width: 100%;
+    --docs-scene-track-length: 240vh;
+    height: var(--docs-scene-track-length);
+  }
+
+  .docs-scene-track [data-scene] {
+    position: sticky;
+    top: max(0px, calc((100vh - min(70vh, 720px)) / 2));
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .docs-scene-track {
+      --docs-scene-track-length: 200vh;
+    }
+    .docs-scene-track [data-scene] {
+      top: max(0px, calc((100vh - min(60vh, 560px)) / 2));
+    }
+  }
+
   :root {
     /* Opaque by default: arbitrary artwork cannot reduce text contrast.
        Authors overriding this token also own its contrast verification. */

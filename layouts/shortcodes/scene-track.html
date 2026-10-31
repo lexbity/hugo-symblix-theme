@@ -1,0 +1,37 @@
+{{- /* Native scroll track wrapper (SYM-MOT-002 S5, Q10).
+       Reserves scroll distance for a sticky scene so progress is driven by
+       document scroll, not by the mount's intersection alone. Each track may
+       contain exactly ONE direct {{< scene >}} mount; the runtime validates
+       that relationship and no scroll listeners are attached by this theme.
+
+       Params:
+         length (default "240vh") positive viewport/block length reserved by
+                the track. Mobile styles prefer shorter tracks.
+         class  extra classes.
+
+       Static HTML remains complete; JS marks enhancement after admission. */ -}}
+{{- $length := .Get "length" | default "240vh" -}}
+{{- $class := .Get "class" -}}
+{{- $where := .Page.Title -}}
+{{- with .Page.File -}}{{ $where = printf "%s (%s)" $where .Filename }}{{ end -}}
+
+{{- $failed := false -}}
+{{- if not (findRE `^[0-9]{1,6}(\.[0-9]{1,6})?(vh|vw|svh|lvh|dvh|rem|em|px)$` $length) -}}
+  {{- errorf "scene-track shortcode (%s): length %q must be a positive definite CSS length" $where $length -}}
+  {{- $failed = true -}}
+{{- else if le (float (replaceRE `[a-z]+$` "" $length)) 0 -}}
+  {{- errorf "scene-track shortcode (%s): length %q must be positive" $where $length -}}
+  {{- $failed = true -}}
+{{- end -}}
+{{- if $failed -}}{{ return }}{{ end -}}
+
+{{- .Page.Store.Set "symblixMotion" true -}}
+
+{{- $classes := partial "docs/helpers/classname.html" (dict
+    "Base" (slice "docs-scene-track")
+    "Modifiers" (slice)
+    "Extra" $class)
+-}}
+<div class="{{ $classes }}" data-scene-track style="--docs-scene-track-length: {{ $length | safeCSS }};">
+  {{ .InnerDeindent | safeHTML }}
+</div>
