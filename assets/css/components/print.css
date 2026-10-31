@@ -80,7 +80,13 @@
 
   /* Scene mounts (SYM-MOT-001): the poster is the printed face; the live
      canvas never prints. */
-  [data-scene] canvas {
+  [data-scene] .docs-scene__poster {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  [data-scene] canvas,
+  [data-scene] [data-scene-activate] {
     display: none !important;
   }
 }

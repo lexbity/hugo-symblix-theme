@@ -79,8 +79,8 @@ data = "docs_nav"
 
 # Visual identity: color presets and typography
 # See: data/docs_presets.yaml for available presets
-# Motion subsystem (SYM-MOT-001). debug enables verbose [symblix-motion]
-# console timings (fetch, init, first frame); viewTransitions opts the site
+# Motion subsystem (SYM-MOT-002). debug reserves verbose diagnostics; measured
+# startup/CPU timings are delivered in its diagnostics slice. viewTransitions opts the site
 # into cross-document view transitions (Chromium-class browsers; inert
 # elsewhere, no-JS behavior unchanged).
 [params.docs.motion]

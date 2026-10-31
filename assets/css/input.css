@@ -8,6 +8,9 @@
    minified identifiers collide with utility names, and every runtime upgrade
    would silently churn the compiled stylesheet. */
 @source not "../js/vendor";
+/* Motion internals use hand-written component rules, never Tailwind utilities.
+   Event names such as resize are not stylesheet candidates. */
+@source not "../js/motion";
 
 @import "./theme.css";
 @import "./presets.css";

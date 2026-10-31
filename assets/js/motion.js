@@ -1,6 +1,6 @@
 // Motion runtime entry (SYM-MOT-001).
 //
-// Loaded as a deferred module, only on pages containing {{< scene >}}
+// Admitted by the small policy bootstrap, only on pages containing {{< scene >}}
 // mounts (scripts.html keys the emission on the shortcode's Page.Store
 // flag). Static import of the vendored three keeps exactly one copy of
 // three per site (Q1): scene modules receive it via ctx, they never
@@ -8,24 +8,23 @@
 // js/motion.min.<hash>.js — the name the motion budget test pins.
 
 import * as THREE from "./vendor/three/three.module.min.js";
-import { SCENE_API, setDebug } from "./motion/util.js";
-import { destroyHost, hosts, registerAll } from "./motion/runtime.js";
+import { SCENE_API } from "./motion/util.js";
+import { destroyHost, hosts, registerAll, suppressAll } from "./motion/runtime.js";
 
-// Site config flag (params.docs.motion.debug), injected at build time via
-// esbuild define (§4.11). The typeof guard keeps the module loadable if a
-// build path ever omits the define.
-setDebug(typeof __MOTION_DEBUG__ !== "undefined" && __MOTION_DEBUG__ === true);
+export function register() { registerAll(THREE); }
 
 try {
-  registerAll(THREE);
+  register();
 } catch (error) {
   console.warn("[symblix-motion] registration failed", error);
 }
 
-// Read-only support/debug surface (§4.11). Tests and live debugging use
-// this instead of reaching into internals.
+// Compatibility support surface. Mutation is unsupported; SYM-MOT-002 S6
+// replaces raw hosts with an immutable diagnostics facade.
 window.SymblixMotion = Object.freeze({
   SCENE_API,
+  register,
   hosts,
   destroyHost,
+  suppress: suppressAll,
 });

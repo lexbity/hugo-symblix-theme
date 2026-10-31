@@ -15,3 +15,6 @@ export const JS_CORE_BUDGET_BYTES = 20 * 1024;
 /** Motion runtime chunk (motion.min.*, runtime + vendored three), in bytes. */
 export const MOTION_BUDGET_RAW_BYTES = 780 * 1024;
 export const MOTION_BUDGET_GZIP_BYTES = 220 * 1024;
+
+/** Small policy bootstrap; downloaded even when reduced motion suppresses WebGL. */
+export const MOTION_LOADER_BUDGET_BYTES = 4 * 1024;

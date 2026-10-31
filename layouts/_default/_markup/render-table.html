@@ -1,8 +1,9 @@
 {{- /* Wrap Markdown tables in a horizontal-scroll container so wide tables
      (min-width: 40rem in tables.css) cannot stretch narrow viewports.
+     tabindex preserves native keyboard scrolling, including without JS.
      Table render hooks replace the default <table> output and have no
      .Inner passthrough, so GFM structure is rebuilt from the context. */ -}}
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0">
   <table>
     <thead>
       {{- range .THead }}

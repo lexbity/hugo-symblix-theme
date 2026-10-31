@@ -17,7 +17,7 @@
                   init until the visitor presses the activate button.
          pointer  (default "off") "on" arms pointer signal delivery.
          ratio    (default "16/9") aspect ratio; mutually exclusive with height.
-         height   fixed CSS length; mutually exclusive with ratio.
+         height   preferred positive CSS length; static copy may grow taller.
          class    extra classes.
 
        Hugo's errorf fails the build but does not halt template execution,
@@ -87,16 +87,22 @@
 {{- $ratio := "16 / 9" -}}
 {{- $fixedHeight := "" -}}
 {{- if and (not $failed) $height -}}
-  {{- if not (findRE `^[0-9]+(\.[0-9]+)?(rem|em|px|vh|vw|svh|lvh|%)$` $height) -}}
-    {{- errorf "scene shortcode (%s): height %q is not a plain CSS length" $where $height -}}
+  {{- if not (findRE `^[0-9]{1,6}(\.[0-9]{1,6})?(rem|em|px|vh|vw|svh|lvh|dvh)$` $height) -}}
+    {{- errorf "scene shortcode (%s): height %q must be a positive definite CSS length" $where $height -}}
+    {{- $failed = true -}}
+  {{- else if le (float (replaceRE `[a-z]+$` "" $height)) 0 -}}
+    {{- errorf "scene shortcode (%s): height %q must be positive" $where $height -}}
     {{- $failed = true -}}
   {{- else -}}
     {{- $fixedHeight = $height -}}
   {{- end -}}
 {{- else if and (not $failed) $ratioRaw -}}
-  {{- $normalized := replace $ratioRaw " " "" -}}
-  {{- if not (findRE `^[0-9]+(\.[0-9]+)?/[0-9]+(\.[0-9]+)?$` $normalized) -}}
+  {{- $normalized := replaceRE `\s+` "" $ratioRaw -}}
+  {{- if not (findRE `^[0-9]{1,6}(\.[0-9]{1,6})?/[0-9]{1,6}(\.[0-9]{1,6})?$` $normalized) -}}
     {{- errorf "scene shortcode (%s): ratio %q must look like 16/9" $where $ratioRaw -}}
+    {{- $failed = true -}}
+  {{- else if or (le (float (index (split $normalized "/") 0)) 0) (le (float (index (split $normalized "/") 1)) 0) -}}
+    {{- errorf "scene shortcode (%s): ratio %q requires two positive numbers" $where $ratioRaw -}}
     {{- $failed = true -}}
   {{- else -}}
     {{- $ratio = delimit (split $normalized "/") " / " -}}
@@ -140,7 +146,7 @@
         data-scene-src="{{ $sceneJs.RelPermalink }}"
         data-scene-id="scene-{{ .Ordinal }}"
         aria-label="{{ $title }}"
-        {{- if $fixedHeight }} style="height: {{ $fixedHeight | safeCSS }};"
+        {{- if $fixedHeight }} style="--docs-scene-height: {{ $fixedHeight | safeCSS }};"
         {{- else }} style="--docs-scene-aspect: {{ $ratio | safeCSS }};"{{ end -}}
 >
   <img class="docs-scene__poster" src="{{ $posterRes.RelPermalink }}" alt="{{ $title }}" loading="lazy" decoding="async">

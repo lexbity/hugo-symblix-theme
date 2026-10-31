@@ -98,7 +98,7 @@ test.describe("scene mount contract", () => {
     expect(attrs.src).toMatch(/^\/js\/scenes\/orbit\.min\.[a-f0-9]+\.js$/);
     expect(attrs.id).toBe("scene-0");
     expect(attrs.label).toBe(DEMO_TITLE);
-    expect(attrs.style).toContain("--docs-scene-aspect: 16 / 9");
+    expect(attrs.style).toContain("--docs-scene-height: 24rem");
   });
 
   test("overlay is real HTML and the poster is named", async ({ page }) => {
@@ -113,10 +113,10 @@ test.describe("scene mount contract", () => {
   test("geometry is CSS-owned before any script exists", async ({ page }) => {
     await page.goto(SCENES_PAGE);
     const box = await page.locator("[data-scene]").evaluate((el) => {
-      const s = getComputedStyle(el);
-      return { aspectRatio: s.aspectRatio, height: el.getBoundingClientRect().height };
+      const s = getComputedStyle(el, "::before");
+      return { height: el.getBoundingClientRect().height, reservedHeight: parseFloat(s.height) };
     });
-    expect(box.aspectRatio).toMatch(/16\s*\/\s*9/);
+    expect(box.reservedHeight).toBeGreaterThanOrEqual(380);
     expect(box.height).toBeGreaterThan(50);
   });
 
@@ -136,13 +136,12 @@ test.describe("scene mount contract", () => {
   // invariant across page kinds.
   test("runtime script is emitted once on scene pages, never elsewhere", async ({ page }) => {
     await page.goto(SCENES_PAGE);
-    expect(await page.locator('script[type="module"][src*="motion.min."]').count()).toBe(1);
+    expect(await page.locator('script[data-motion-runtime][src*="motion-loader.min."]').count()).toBe(1);
 
-    await page.goto("/en/docs/latest/getting-started/");
-    expect(await page.locator('script[type="module"][src*="motion.min."]').count()).toBe(0);
-
-    await page.goto("/en/docs/latest/search/");
-    expect(await page.locator('script[type="module"][src*="motion.min."]').count()).toBe(0);
+    for (const url of ["/en/", "/en/docs/latest/getting-started/", "/en/docs/latest/search/", "/en/404.html"]) {
+      await page.goto(url);
+      expect(await page.locator('script[data-motion-runtime],script[src*="motion.min."]').count()).toBe(0);
+    }
   });
 });
 
@@ -160,16 +159,11 @@ test.describe("scene degradation", () => {
         "Real text above the scene",
       );
       // Nothing may fetch the scene module or runtime without JS.
-      expect(requested.filter((u) => /motion\.min|orbit\.min/.test(u))).toEqual([]);
+      expect(requested.filter((u) => /motion(?:-loader)?\.min|orbit\.min/.test(u))).toEqual([]);
     });
   });
 
-  test("print keeps the poster face", async ({ page }) => {
-    await page.emulateMedia({ media: "print" });
-    await page.goto(SCENES_PAGE);
-    await expect(page.locator("[data-scene] .docs-scene__poster")).toBeVisible();
-    await expect(page.locator("[data-scene] .docs-scene__overlay")).toBeVisible();
-  });
+  // Print after activation is verified in scene-presentation.spec.ts.
 
   test("scene page holds CLS at zero", async ({ page }) => {
     await page.goto(SCENES_PAGE);
@@ -289,6 +283,14 @@ test.describe("build-time validation", () => {
     expect(result.html).toMatch(/data-scene-src="\/js\/scenes\/orbit\.min\.[a-f0-9]+\.js"/);
   });
 
+  test("fractional ratios and definite dynamic viewport heights build", () => {
+    for (const param of ['ratio="1.5/1"','height="60dvh"']) {
+      const result=buildMiniSite(`{{< scene src="js/scenes/orbit.js" poster="images/scene-orbit-poster.svg" title="T" ${param} >}}Static copy.{{< /scene >}}`);
+      expect(result.code,result.stderr).toBe(0);
+      expect(result.html).toContain(param.startsWith('ratio')?'1.5 / 1':'60dvh');
+    }
+  });
+
   test("a valid reveal-text builds the full span contract", () => {
     const result = buildMiniSite('{{< reveal-text tag="h2" >}}Ship scenes, not spinners.{{< /reveal-text >}}');
     expect(result.code).toBe(0);
@@ -306,6 +308,10 @@ test.describe("build-time validation", () => {
     ["protocol-relative poster", '{{< scene src="js/scenes/orbit.js" poster="//evil.example.com/p.svg" title="T" >}}{{< /scene >}}', /must not be protocol-relative/],
     ["ratio and height together", '{{< scene src="js/scenes/orbit.js" poster="images/scene-orbit-poster.svg" title="T" ratio="16/9" height="20rem" >}}{{< /scene >}}', /mutually exclusive/],
     ["unknown load strategy", '{{< scene src="js/scenes/orbit.js" poster="images/scene-orbit-poster.svg" title="T" load="eager" >}}{{< /scene >}}', /unknown load/],
+    ["zero ratio numerator", '{{< scene src="js/scenes/orbit.js" poster="images/scene-orbit-poster.svg" title="T" ratio="0/9" >}}{{< /scene >}}', /ratio.*positive/],
+    ["zero ratio denominator", '{{< scene src="js/scenes/orbit.js" poster="images/scene-orbit-poster.svg" title="T" ratio="16/0" >}}{{< /scene >}}', /ratio.*positive/],
+    ["zero height", '{{< scene src="js/scenes/orbit.js" poster="images/scene-orbit-poster.svg" title="T" height="0rem" >}}{{< /scene >}}', /height.*positive/],
+    ["indefinite percentage height", '{{< scene src="js/scenes/orbit.js" poster="images/scene-orbit-poster.svg" title="T" height="50%" >}}{{< /scene >}}', /height.*positive definite/],
     ["unresolvable src", '{{< scene src="js/scenes/missing.js" poster="images/scene-orbit-poster.svg" title="T" >}}{{< /scene >}}', /not found in assets/],
     ["disallowed reveal tag", '{{< reveal-text tag="script" >}}X{{< /reveal-text >}}', /not allowed/],
     ["bad reveal stagger", '{{< reveal-text stagger="fast" >}}X{{< /reveal-text >}}', /percentage step/],

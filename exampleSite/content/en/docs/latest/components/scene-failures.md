@@ -43,8 +43,9 @@ mismatch is refused up front.
 ## Click-gated loads
 
 With `load="click"`, both the module fetch and the scene start wait for the
-visitor to press the button. Without JavaScript the button is removed from
-the markup (noscript rule) and the poster is the whole content.
+visitor to press the button. Without JavaScript or under reduced motion, activation controls are hidden and
+the poster is the whole content. A click-only page also defers the heavy runtime;
+on this mixed page, the visible control can admit the shared runtime first.
 
 {{< scene src="js/scenes/__broken.js" poster="/images/scene-orbit-poster.svg" title="Fixture — click-gated createScene throw" load="click" >}}
 Press the button: the scene fetches, starts, and throws — one strike, and

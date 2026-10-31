@@ -46,30 +46,40 @@
   }
 }
 
-/* ---- Scene mounts (SYM-MOT-001): poster-first 3D/motion stages ----
-   The figure owns its geometry in CSS (aspect-ratio or fixed height), so
-   scene loading can never shift layout. Poster and canvas stack absolutely;
+/* ---- Scene mounts (SYM-MOT-002): poster-first 3D/motion stages ----
+   A CSS grid spacer reserves art geometry; static copy supplies a minimum.
+   JS adds only absolutely positioned canvases, preserving reserved layout;
    the runtime cross-fades poster → canvas by flipping data-scene-state. */
 @layer components {
   :root {
-    /* Derived scrim: overlay text sits on this translucent band over any
-       moving art. color-mix from existing preset tokens — no per-preset
-       data changes, re-themes with all presets automatically. */
-    --docs-scene-scrim: color-mix(in srgb, var(--docs-bg) 62%, transparent);
+    /* Opaque by default: arbitrary artwork cannot reduce text contrast.
+       Authors overriding this token also own its contrast verification. */
+    --docs-scene-scrim: var(--docs-bg);
   }
 
   .docs-scene {
     position: relative;
     overflow: hidden;
-    aspect-ratio: var(--docs-scene-aspect, 16 / 9);
+    display: grid;
     margin: calc(var(--docs-density-component-gap) * 1.15) 0;
     border: 1px solid var(--docs-border);
     border-radius: var(--docs-component-radius);
-    background: var(--docs-surface2);
+    background: var(--docs-surface-2);
     box-shadow: var(--docs-shadow);
   }
 
-  .docs-scene--fixed-height {
+  /* A normal-flow grid spacer reserves art geometry before JS. Unlike a
+     fixed height on the figure, its row can also fit arbitrarily long copy. */
+  .docs-scene::before {
+    content: "";
+    grid-area: 1 / 1;
+    width: 100%;
+    aspect-ratio: var(--docs-scene-aspect, 16 / 9);
+    height: var(--docs-scene-height, auto);
+    pointer-events: none;
+  }
+
+  .docs-scene--fixed-height::before {
     aspect-ratio: auto;
   }
 
@@ -93,24 +103,23 @@
     opacity: 0;
   }
 
-  .docs-scene[data-scene-state="live"] .docs-scene__poster {
+  .docs-scene:is([data-scene-state="live"], [data-scene-state="paused"]) .docs-scene__poster {
     opacity: 0;
   }
 
-  .docs-scene[data-scene-state="live"] .docs-scene__canvas {
+  .docs-scene:is([data-scene-state="live"], [data-scene-state="paused"]) .docs-scene__canvas {
     opacity: 1;
   }
 
   .docs-scene__overlay {
+    grid-area: 1 / 1;
+    align-self: start;
     position: relative;
     z-index: 1;
     padding: var(--docs-density-component-padding);
     background: var(--docs-scene-scrim);
-    pointer-events: none;
-  }
-
-  .docs-scene__overlay :is(a, button, summary, input, textarea, select) {
     pointer-events: auto;
+    user-select: text;
   }
 }
 
@@ -160,11 +169,20 @@
    over. Without JS the noscript rule in head.html hides it entirely. ---- */
 @layer components {
   .docs-scene__activate {
+    display: none;
     position: absolute;
     top: 50%;
     inset-inline-start: 50%;
     z-index: 2;
     transform: translate(-50%, -50%);
+  }
+
+  .docs-scene[data-scene-activatable="true"][data-scene-state="idle"] .docs-scene__activate {
+    display: inline-flex;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .docs-scene .docs-scene__activate { display: none !important; }
   }
 
   .docs-scene[data-scene-load="click"]:not([data-scene-state="idle"]) .docs-scene__activate {

@@ -5,17 +5,11 @@
 // data/docs_presets.yaml; unparseable formats degrade to css-only with null
 // floats (scenes must null-check — documented contract).
 
-import { logWarn } from "./util.js";
-
-const TOKENS = [
-  "--docs-accent",
-  "--docs-bg",
-  "--docs-surface",
-  "--docs-surface2",
-  "--docs-text",
-  "--docs-muted",
-  "--docs-border",
-];
+const TOKENS = {
+  accent: "--docs-accent", bg: "--docs-bg", surface: "--docs-surface",
+  surface2: "--docs-surface-2", text: "--docs-text", muted: "--docs-muted",
+  border: "--docs-border",
+};
 
 const HEX3 = /^#([0-9a-f]{3})$/i;
 const HEX6 = /^#([0-9a-f]{6})$/i;
@@ -49,8 +43,7 @@ export function readPalette() {
     preset: documentElement.getAttribute("data-preset") || "",
     mode: documentElement.getAttribute("data-syntax") === "dark" ? "dark" : "light",
   };
-  for (const token of TOKENS) {
-    const key = token.slice("--docs-".length);
+  for (const [key, token] of Object.entries(TOKENS)) {
     snapshot[key] = parseColor(styles.getPropertyValue(token).trim());
   }
   return freezePalette(snapshot);
@@ -66,19 +59,25 @@ export function freezePalette(snapshot) {
   return Object.freeze(snapshot);
 }
 
-// Singleton observer (Q6): the preset system expresses theme changes as
-// html[data-preset] / html[data-syntax] attribute writes, so one observer
-// serves every host on the page. Attribute mutations arrive batched per
-// microtask — one recompute per callback, never per host, never per frame.
+// Explicit subscription ownership: the final coordinator unsubscribe releases
+// the singleton observer, including on pages whose scenes all failed.
 let observer = null;
-
-/** Start watching preset/mode flips; onChange fires at most once per
-    mutation batch. Idempotent; inert where MutationObserver is missing. */
+const subscribers = new Set();
 export function observePalette(onChange) {
-  if (observer || typeof MutationObserver !== "function") return;
-  observer = new MutationObserver(() => onChange());
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["data-preset", "data-syntax"],
-  });
+  subscribers.add(onChange);
+  if (!observer && typeof MutationObserver === "function") {
+    observer = new MutationObserver(() => {
+      for (const subscriber of subscribers) subscriber();
+    });
+    observer.observe(document.documentElement, {
+      attributes: true, attributeFilter: ["data-preset", "data-syntax"],
+    });
+  }
+  return () => {
+    subscribers.delete(onChange);
+    if (subscribers.size === 0 && observer) {
+      observer.disconnect();
+      observer = null;
+    }
+  };
 }

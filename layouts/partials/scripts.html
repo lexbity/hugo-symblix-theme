@@ -11,20 +11,20 @@
 </script>
 {{ $js := resources.Get "js/main.js" | js.Build | minify | fingerprint }}
 <script defer src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
-{{/* Motion runtime (SYM-MOT-001): emitted exactly once per page, only when
-     a {{< scene >}} shortcode ran (the shortcode sets the page-scoped store
-     flag). This relies on a structural invariant of the theme: every
-     template calls scripts.html AFTER .Content has rendered, so the flag
-     is always set by the time we get here (verified across index.html,
-     docs/baseof.html, and the 404 template — tests/scene.spec.ts holds the
-     emission contract). type="module" defers execution; the chunk is never
-     render-blocking. */}}
+{{/* Motion admission (SYM-MOT-002). The shortcode sets Page.Store while
+     .Content renders; every caller MUST invoke this partial after content.
+     Emit only the small classic deferred bootstrap. It admits the heavy ESM
+     with SRI after load + idle + preference + foreground + visible/click intent.
+     Do not add a preload or direct heavy script: reduced motion stays static. */}}
 {{ if .Page.Store.Get "symblixMotion" }}
-  {{ $motionDebug := site.Params.docs.motion.debug | default false }}
   {{ $motion := resources.Get "js/motion.js" | js.Build (dict
       "target" "es2020"
       "format" "esm"
-      "define" (dict "__MOTION_DEBUG__" (printf "%v" $motionDebug))
     ) | minify | fingerprint }}
-  <script type="module" src="{{ $motion.RelPermalink }}" integrity="{{ $motion.Data.Integrity }}"></script>
+  {{ $loader := resources.Get "js/motion/loader.js" | js.Build (dict
+      "target" "es2020" "format" "iife" "targetPath" "js/motion-loader.js"
+    ) | minify | fingerprint }}
+  <script defer src="{{ $loader.RelPermalink }}" integrity="{{ $loader.Data.Integrity }}"
+          data-motion-runtime="{{ $motion.RelPermalink }}"
+          data-motion-integrity="{{ $motion.Data.Integrity }}"></script>
 {{ end }}

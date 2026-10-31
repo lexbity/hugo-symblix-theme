@@ -16,7 +16,7 @@ A Hugo documentation theme for structured, navigable, versioned, multilingual te
 - **Project front page:** `release`, `install`, and `downloads` shortcodes compose a software landing page — release badge, copyable install commands, and binary downloads — complete without JavaScript. Platform detection annotates the right download row as a JavaScript enhancement only. Two developer-selected chrome layouts: the header bar, or a Material-style icon rail — on narrow screens both collapse into a dropdown menu built on a no-JS `<details>` element.
 - **Bento blocks:** `feature-grid` renders equal text tiles, media tiles (image or themed glyph bands), or an asymmetric 1+2 lead band; `video` embeds self-hosted clips natively and YouTube through a click-to-load facade — no third-party request until the visitor presses play.
 - **Project chrome:** default SVG favicon (drop in your own to override), an expanded multi-column footer driven by Hugo menus (brand column, social icons, translated column titles), license line, and copyright — configured entirely from `hugo.toml`.
-- **Scene scaffolding:** poster-first 3D/motion mounts (`{{</* scene */>}}`) on a vendored, version-pinned three.js runtime — the theme ships the stage, sites ship the scenes. Live preset re-theming, scroll/pointer signals, click-gated loads, and per-scene error isolation where a broken scene returns to its poster without touching the page. Zero external requests; the runtime loads lazily, only on pages that use it. See the [Scene scaffolding](#scene-scaffolding) section.
+- **Scene scaffolding:** poster-first 3D/motion mounts (`{{</* scene */>}}`) on a vendored, version-pinned three.js runtime — the theme ships the stage, sites ship the scenes. Live preset re-theming, scroll/pointer signals, click-gated loads, and per-scene error isolation where a broken scene returns to its poster without touching the page. Zero external requests; a small policy bootstrap admits the runtime after load and idle, only for visible or activated scenes. See the [Scene scaffolding](#scene-scaffolding) section.
 - **CSS-only front-page motion:** eight hero glow variants (`pixel`, `aurora`, `scanline`, `pulse`, `beam`, `ripple`, `ripplebounce`, `synth`), glyph stroke-draw, staggered hero entrance, scroll-driven reveals, and an opt-in 3D hover tilt — all pure CSS, all collapsing to their final static state under `prefers-reduced-motion` and in print. See the [Motion](#front-page-motion) section.
 
 ## Requirements
@@ -38,6 +38,8 @@ npm run build      # production build using the committed pre-built CSS
 npm run check      # build with --panicOnWarning (CI mode)
 npm test           # Playwright suite (needs `npm run test:install` once)
 npm run build:css  # regenerate assets/css/compiled/theme.css after CSS edits
+npm run lint:motion      # development-only motion lint (ESLint 10)
+npm run test:motion:unit # scheduler/resource ownership tests
 ```
 
 A plain `hugo` build works without npm: the theme loads `assets/css/compiled/theme.css` by default. Building from the Tailwind source layers instead requires the Tailwind CLI allowed in Hugo's security policy (see the example site's `hugo.toml`).
@@ -173,15 +175,17 @@ Hard guarantees, enforced in CSS and by the test suite: `prefers-reduced-motion:
 The `{{< scene >}}` shortcode mounts an interactive WebGL scene that is
 a complete, static piece of content without JavaScript: a sized figure with
 your poster image, real overlay text, and a labeled, keyboard-accessible
-structure. The theme ships **the stage** — a lazy-loaded runtime with a
+structure. A CSS grid spacer reserves the art dimensions while allowing longer
+static copy to fit. The default opaque copy panel preserves contrast over art;
+overriding its scrim token makes contrast verification the author's responsibility. The theme ships **the stage** — a lazy-loaded runtime with a
 vendored, sha256-pinned three.js — and your site ships the scenes: small,
 dependency-free ES modules in `assets/js/scenes/`.
 
 - **Live preset re-theming** — scenes receive the active preset's tokens and re-render when the visitor switches presets or light/dark mode.
 - **Signals** — native scroll progress/velocity and opt-in pointer position (fine-pointer devices only), delivered per frame; no scroll hijacking, ever.
-- **Load strategies** — `visible` (default) starts when the mount enters the viewport; `click` defers fetch and start behind an activate button that is removed entirely without JavaScript.
+- **Load strategies** — a small bootstrap waits for page load, idle time, foreground visibility, and motion permission. `visible` admits the heavy runtime when a mount enters view; a click-only page waits for activation. On mixed pages, click scenes still defer their own module import. Activation controls are hidden until bound, without JavaScript, and under reduced motion.
 - **Error isolation** — a throwing scene, a missing WebGL2 context, or a lost GPU context resolves to the poster; one automatic re-init after context restore, then terminal. Sibling scenes and the page are never affected.
-- **Budgets (SYM-MOT-001):** core bundle ≤ 20 KB; motion runtime ≤ 780 KB raw / ≤ 220 KB gzip, fetched after page load, scene pages only; compiled CSS ≤ 112 KB target. Scene modules are site content (guidance ≤ 50 KB each).
+- **Budgets (SYM-MOT-002):** core bundle ≤ 20 KiB; policy bootstrap ≤ 4 KiB raw; motion runtime ≤ 780 KiB raw / ≤ 220 KiB gzip, admitted after page load, scene pages only; compiled CSS ≤ 112 KiB target. Scene modules are site content (guidance ≤ 50 KB each).
 
 See the [Scenes](/en/docs/latest/components/scenes/) page for the full
 authoring contract, and the [Scene Failure Fixtures](/en/docs/latest/components/scene-failures/)
@@ -225,7 +229,7 @@ Omit `description` and `columns` to keep the original slim footer.
 
 The theme intentionally omits the following. They are not bugs; they are design boundaries.
 
-1. **No client-side dependency additions.** No search library, no font loader, no framework. The core bundle budget stays under ~20 KB minified JS. The one recorded exception (SYM-MOT-001): a vendored, version-pinned three.js runtime behind the scene scaffolding — its own budget (≤ 780 KB raw / ≤ 220 KB gzip), fetched lazily after page load only on pages using the `scene` shortcode, never render-blocking, poster-first without JavaScript. Any future optional subsystem follows the same shape: own budget, lazy-only, complete static fallback.
+1. **No client-side dependency additions.** No search library, no font loader, no framework. The core bundle budget stays under ~20 KB minified JS. The one recorded exception (SYM-MOT-001): a vendored, version-pinned three.js runtime behind the scene scaffolding — its own budget (≤ 780 KB raw / ≤ 220 KB gzip), admitted by a ≤ 4 KiB same-origin bootstrap after load and idle only for visible or activated scenes, never render-blocking, poster-first without JavaScript. Reduced motion prevents heavy runtime and scene requests; revocation retires scenes for the document lifetime. Any future optional subsystem follows the same shape: own budget, lazy-only, complete static fallback.
 2. **No fuzzy/typo-tolerant search.** The hand-rolled exact-token matcher stays. Revisit only with evidence.
 3. **No "edit on GitHub", analytics bundling, or feedback widgets.** The `custom-head.html` hook is the sanctioned extension point; the theme ships none of them.
 4. **Self-hosted fonts only.** The theme bundles Inter and JetBrains Mono fonts locally. Font configuration accepts stack declarations with bundled fonts as the first choice, followed by system fallbacks.
@@ -252,6 +256,8 @@ The theme emits exactly two inline bootstrap scripts (both wrapped in try/catch,
 1. Theme preference restore in `head.html` (existing).
 2. Sidebar pre-paint opener in `scripts.html` (D-09).
 
-Everything else is deferred via `main.js`. Strict-CSP sites must hash-allowlist the two snippets (hashes change when edited — documented as a maintenance note) or relax to `'unsafe-inline'` for bootstrap only.
+Other enhancements use deferred external scripts. Scene pages additionally emit
+a small deferred motion bootstrap, which injects the fingerprinted heavy module
+with SRI only after admission. No inline JavaScript is added for scenes. Strict-CSP sites must hash-allowlist the two snippets (hashes change when edited — documented as a maintenance note) or relax to `'unsafe-inline'` for bootstrap only.
 
 

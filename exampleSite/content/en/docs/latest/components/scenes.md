@@ -27,19 +27,24 @@ Three guarantees come first:
 ```
 {{</* scene src="js/scenes/orbit.js"
            poster="/images/scene-orbit-poster.svg"
-           title="Orbit — the reference demo scene" */>}}
+           title="Orbit — the reference demo scene" height="24rem" pointer="on" */>}}
 **Real text above the scene.** The overlay is ordinary HTML — readable,
 crawlable, and never rendered into the canvas.
 {{</* /scene */>}}
 ```
 
-{{< scene src="js/scenes/orbit.js" poster="/images/scene-orbit-poster.svg" title="Orbit — the reference demo scene" pointer="on" >}}
-**Real text above the scene.** This overlay is ordinary HTML. The wireframe
-icosahedron uses the active preset's accent color — switch presets in the
-sidebar and watch it re-theme live. Scroll the page and the scene tilts
-with scroll progress; move your cursor over the mount and the camera leans
-toward it (the demo mounts `pointer="on"`).
+{{< scene src="js/scenes/orbit.js" poster="/images/scene-orbit-poster.svg" title="Orbit — the reference demo scene" height="24rem" pointer="on" >}}
+**Real text above the scene.** A live orbit, colored by your active preset.
 {{< /scene >}}
+
+Switch presets in the sidebar to re-theme the wireframe. Scroll to tilt it,
+or move your cursor over the art to lean the camera (`pointer="on"`).
+The reference uses `height="24rem"` so the copy panel leaves substantial art
+space on narrow screens; the shortcode default remains `ratio="16/9"`.
+The copy panel has an opaque backing so arbitrary artwork cannot reduce text
+contrast. Text remains selectable. If you override `--docs-scene-scrim`, verify
+contrast for your entire artwork range in every supported preset.
+
 
 ## Parameters
 
@@ -49,10 +54,10 @@ toward it (the demo mounts `pointer="on"`).
 | `poster` | — required | Site asset path of the static frame shown without JS, under reduced motion, in print, and on scene failure. |
 | `title` | — required | Accessible name — becomes the figure's `aria-label` and the poster's `alt`. |
 | `runtime` | `three` | Adapter id. v1 ships `three`. |
-| `load` | `visible` | Init strategy. `visible`: start when the mount scrolls into view. `click`: defer both fetch and start until the visitor presses the activate button (removed entirely without JavaScript). |
+| `load` | `visible` | Init strategy. `visible`: start when the mount scrolls into view. `click`: defer scene fetch and start until activation. A click-only page also defers the heavy runtime. Controls are hidden until bound, without JavaScript, and under reduced motion. |
 | `pointer` | `off` | `on` delivers normalized pointer position to the scene (fine-pointer devices only). |
-| `ratio` | `16/9` | Aspect ratio of the mount. Mutually exclusive with `height`. |
-| `height` | — | Fixed CSS length instead of a ratio. |
+| `ratio` | `16/9` | Positive aspect ratio of the mount. Static text supplies an intrinsic minimum to prevent clipping. Mutually exclusive with `height`. |
+| `height` | — | Positive definite CSS length instead of a ratio (for example `28rem` or `60dvh`); percentages and zero are rejected. Static text may require a larger intrinsic minimum. |
 | `class` | — | Extra classes on the mount. |
 
 Invalid parameters are build errors, not silent fallbacks.
@@ -61,8 +66,8 @@ Invalid parameters are build errors, not silent fallbacks.
 
 A scene is a dependency-free ES module in your site's `assets/js/scenes/`.
 The runtime calls its default export once with a frozen context and expects
-a small instance back. This is the entire API surface — the `orbit` demo
-above is this exact code:
+a small instance back. This minimal scene shows the synchronous contract;
+the shipped orbit adds pointer easing:
 
 ```js
 export default function createScene(ctx) {
@@ -130,9 +135,11 @@ Contract rules:
 ### Lifecycle
 
 `data-scene-state` on the mount walks `idle → loading → live`, with `paused`
-when scrolled away or the tab hides, and `error` when anything fails (a
+when scrolled away or the tab hides. Returning resumes actual frames and flushes
+any size changes before rendering. `recovering` denotes the first lost GPU
+context; `error` is terminal when anything else fails (a
 throwing scene, missing WebGL2, a lost GPU context that cannot recover).
-Errors are logged with the `[symblix-motion]` tag. A lost GPU context gets
+Explicit teardown sets `disposed`. Errors are logged with the `[symblix-motion]` tag and a stable reason code. A lost GPU context gets
 exactly one automatic re-init; a second loss is permanent. The
 [Scene Failure Fixtures](/en/docs/latest/components/scene-failures/) page
 demonstrates the isolation live with deliberately broken scenes.
@@ -184,17 +191,33 @@ declare function createScene(ctx: scene.Context): {
 };
 ```
 
+## Resource ownership
+
+Factories are synchronous. `ctx.signal` aborts when a scene generation retires.
+Use `ctx.onDispose(cleanup)` to register resources before construction can throw;
+the runtime invokes each registered cleanup once, including after partial failure.
+The returned instance's `dispose()` is a separate once-only callback: avoid
+registering the same resource disposal in both places.
+
+`frame(t, dt, signals)` receives a millisecond performance timestamp and seconds
+since the previous active frame. The first frame after a pause receives `dt=0`
+and zero scroll velocity. Accumulate `dt` for simulations that should stop in
+the background.
+
 ## Troubleshooting
 
-Set `params.docs.motion.debug = true` in your site config for verbose
-`[symblix-motion]` console timings (module fetch, init, first frame). The
+The debug setting reserves verbose diagnostics; measured startup and CPU timing
+will be delivered with the diagnostics slice of SYM-MOT-002. The
 `data-scene-state` attribute on the mount and `window.SymblixMotion.hosts`
 are always available for inspection.
 
 ## Budgets
 
-The motion runtime (theme-maintained, three.js included) is a separately
-budgeted chunk fetched after page load, only on pages that use the
-shortcode: ≤ 780 KB raw, ≤ 220 KB gzip (enforced by the theme's own suite).
+Scene pages download a small same-origin bootstrap (≤ 4 KiB raw). It waits for
+page load, idle time, foreground visibility, motion permission, and visible or
+click intent before downloading the heavy runtime (three.js included, ≤ 780 KiB
+raw / ≤ 220 KiB gzip). Reduced motion prevents heavy runtime and scene requests.
+If motion is revoked after activation, scenes retire to their posters until the
+next navigation or reload.
 Scene modules are site content — keep each under ~50 KB and posters under
 ~200 KB. See the README for the full budget policy.

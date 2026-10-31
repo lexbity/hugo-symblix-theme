@@ -1,13 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-const BASE = "http://127.0.0.1:1313";
-const SAME_HOST = new Set(["127.0.0.1:1313", "localhost:1313"]);
-
 test.setTimeout(120_000);
 
 function extractLocs(xml: string): string[] {
   return Array.from(xml.matchAll(/<loc>([^<]+)<\/loc>/g), (match) => {
-    return new URL(match[1], BASE).pathname;
+    return new URL(match[1]).pathname;
   });
 }
 
@@ -20,6 +17,8 @@ async function mapInBatches<T, R>(items: T[], size: number, fn: (item: T) => Pro
 }
 
 test("every internal link on every sitemap page resolves", async ({ request }) => {
+  const base = new URL(test.info().project.use.baseURL!);
+  const sameHost = new Set([base.host, `localhost:${base.port}`]);
   test.info().annotations.push({ type: "note", description: "Crawls all languages" });
 
   const indexResponse = await request.get("/sitemap.xml");
@@ -49,8 +48,8 @@ test("every internal link on every sitemap page resolves", async ({ request }) =
       if (!raw || raw.startsWith("#") || /^(mailto|tel|javascript|data):/.test(raw)) {
         continue;
       }
-      const url = new URL(raw, BASE + pagePath);
-      if (!SAME_HOST.has(url.host)) {
+      const url = new URL(raw, new URL(pagePath, base));
+      if (!sameHost.has(url.host)) {
         continue;
       }
       const target = url.pathname + url.search;

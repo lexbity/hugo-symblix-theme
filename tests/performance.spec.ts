@@ -3,7 +3,7 @@
 // - FCP < 900ms on 3G Fast (baseline + 100ms)
 // - LCP < 1200ms on 3G Fast (baseline + 100ms)
 // - CLS < 0.1 (font swap doesn't cause layout shift)
-// - CSS size < 88 KB minified
+// - CSS size <=112 KiB target, <=120 KiB hard (shared budget policy)
 // - Font payload < 1.2 MB
 
 import { expect, test } from "@playwright/test";
@@ -15,6 +15,7 @@ import {
   JS_CORE_BUDGET_BYTES,
   MOTION_BUDGET_GZIP_BYTES,
   MOTION_BUDGET_RAW_BYTES,
+  MOTION_LOADER_BUDGET_BYTES,
 } from "./helpers/budgets";
 import { join } from "node:path";
 
@@ -376,21 +377,17 @@ test.describe("performance benchmarks", () => {
         "scenes",
         "index.html",
       );
-      if (!existsSync(scenesPage)) {
-        console.log("Skipping motion budget test - scenes page not built");
-        return;
-      }
+      expect(existsSync(scenesPage), "mandatory scene budget page exists").toBe(true);
+      const html = readFileSync(scenesPage, "utf-8");
+      const match = html.match(/data-motion-runtime="([^"]*motion\.min\.[^"]+\.js)"/);
+      const loader = html.match(/src="([^"]*motion-loader\.min\.[^"]+\.js)"/);
+      expect(match, "mandatory heavy runtime reference exists").not.toBeNull();
+      expect(loader, "mandatory bootstrap reference exists").not.toBeNull();
+      const loaderPath = join(REPO_ROOT,"exampleSite","public",new URL(loader![1],"http://x/").pathname.replace(/^\//,""));
+      expect(statSync(loaderPath).size).toBeLessThanOrEqual(MOTION_LOADER_BUDGET_BYTES);
 
-      const match = readFileSync(scenesPage, "utf-8").match(
-        /src="([^"]*motion\.min\.[^"]+\.js)"/,
-      );
-      if (!match) {
-        console.log("Skipping motion budget test - no motion chunk referenced");
-        return;
-      }
-
-      const chunkPath = join(REPO_ROOT, "exampleSite", "public", new URL(match[1], "http://x/").pathname.replace(/^\//, ""));
-      expect(existsSync(chunkPath), `referenced chunk exists: ${match[1]}`).toBe(true);
+      const chunkPath = join(REPO_ROOT, "exampleSite", "public", new URL(match![1], "http://x/").pathname.replace(/^\//, ""));
+      expect(existsSync(chunkPath), `referenced chunk exists: ${match![1]}`).toBe(true);
 
       // SYM-MOT-001 NFR-2: runtime + vendored three, raw ≤ 780 KB,
       // gzip ≤ 220 KB. Enforced on the emitted (post-js.Build) artifact.

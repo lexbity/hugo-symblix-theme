@@ -36,7 +36,8 @@ export function sameOriginOrThrow(url) {
   } catch {
     throw new Error(`invalid scene src: ${JSON.stringify(url)}`);
   }
-  if (resolved.origin !== window.location.origin) {
+  if (!/^https?:$/.test(resolved.protocol) || resolved.username || resolved.password ||
+      resolved.origin !== window.location.origin) {
     throw new Error(`refusing cross-origin scene src: ${url}`);
   }
   return resolved;
@@ -44,16 +45,4 @@ export function sameOriginOrThrow(url) {
 
 export function logWarn(...args) {
   console.warn(TAG, ...args);
-}
-
-/** Verbose timings (fetch, init, first frame) — params.docs.motion.debug,
-    injected at build time. Errors are always logged regardless. */
-let debug = false;
-
-export function setDebug(value) {
-  debug = value === true;
-}
-
-export function logInfo(...args) {
-  if (debug) console.info(TAG, ...args);
 }

@@ -11,13 +11,24 @@
     "build:css": "tailwindcss -i assets/css/input.css -o assets/css/compiled/theme.css --minify",
     "test": "playwright test",
     "test:install": "playwright install --with-deps chromium",
-    "screenshots": "playwright test tests/screenshots.spec.ts"
+    "screenshots": "playwright test tests/screenshots.spec.ts",
+    "lint:motion": "eslint assets/js/motion.js assets/js/motion exampleSite/assets/js/scenes",
+    "test:motion:unit": "node tests/unit/motion-scheduler.test.mjs && node tests/unit/motion-scope.test.mjs"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.3.0",
-    "tailwindcss": "^4.3.0",
     "@axe-core/playwright": "^4.11.4",
     "@mermaid-js/mermaid-cli": "^11.0.0",
-    "@playwright/test": "^1.60.0"
+    "@playwright/test": "^1.60.0",
+    "@tailwindcss/cli": "^4.3.0",
+    "eslint": "10.14.0",
+    "tailwindcss": "^4.3.0"
+  },
+  "overrides": {
+    "eslint": {
+      "minimatch": "11.0.1",
+      "@eslint/config-array": {
+        "minimatch": "11.0.1"
+      }
+    }
   }
 }

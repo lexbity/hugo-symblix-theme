@@ -42,18 +42,19 @@ test.describe("lifecycle", () => {
       .toBe("0");
   });
 
-  test("lifecycle is honest when WebGL2 is unavailable (dual-path contract)", async ({
-    page,
-  }) => {
-    test.skip(await hasWebGL2(page), "covered by the live-path test on this runner");
-    // On a runner without WebGL2 the graceful path IS the contract.
+  test("missing WebGL2 is forced and preserves the poster", async ({ page }) => {
+    await page.addInitScript(() => {
+      const original = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function(type, ...args) {
+        if (type === "webgl2") return null;
+        return original.call(this, type, ...args);
+      };
+    });
     await page.goto(SCENES_PAGE);
-    await expect
-      .poll(() => page.locator("[data-scene]").getAttribute("data-scene-state"), {
-        timeout: 3000,
-      })
-      .toBe("error");
-    await expect(page.locator("[data-scene] .docs-scene__poster")).toBeVisible();
+    await page.locator("[data-scene]").evaluate(el => el.scrollIntoView({block:"center",behavior:"instant"}));
+    await expect(page.locator("[data-scene]")).toHaveAttribute("data-scene-state","error");
+    await expect(page.locator("[data-scene] canvas")).toHaveCount(0);
+    expect(await page.locator(".docs-scene__poster").evaluate(el => getComputedStyle(el).opacity)).toBe("1");
   });
 });
 
@@ -69,12 +70,11 @@ test.describe("fetch gating", () => {
     requested.length = 0;
     await page.goto(SCENES_PAGE);
     await page.waitForLoadState("load");
-    // The runtime chunk is a build-emitted module script; the scene module
-    // is fetched by the runtime after load+idle (FR-13).
-    expect(requested.filter((u) => /motion\.min/.test(u)).length).toBe(1);
-    await expect
-      .poll(() => requested.filter((u) => /orbit\.min/.test(u)).length, { timeout: 3000 })
-      .toBe(1);
+    expect(requested.filter((u) => /motion-loader\.min/.test(u)).length).toBe(1);
+    expect(requested.filter((u) => /motion\.min|orbit\.min/.test(u))).toEqual([]);
+    await page.locator("[data-scene]").evaluate(el => el.scrollIntoView({block:"center",behavior:"instant"}));
+    await expect.poll(() => requested.filter((u) => /motion\.min/.test(u)).length).toBe(1);
+    await expect.poll(() => requested.filter((u) => /orbit\.min/.test(u)).length).toBe(1);
   });
 });
 
@@ -192,154 +192,10 @@ test.describe("click degradation (P6)", () => {
   });
 });
 
-test.describe("chaos (P6)", () => {
-  test("context loss recovers exactly once; the second loss is terminal", async ({ page }) => {
-    test.skip(!(await hasWebGL2(page)), "context-loss choreography needs WebGL2");
-    await page.goto(FIXTURE_PAGE);
-    const control = page.locator('[data-scene][aria-label="Healthy control"]');
-    await control.evaluate((el) => el.scrollIntoView({ block: "center" }));
-    await expect
-      .poll(() => control.getAttribute("data-scene-state"), { timeout: 3000 })
-      .toBe("live");
-
-    // Retain the extension on window at live state: after loss, Chromium
-    // returns null for a fresh getExtension lookup on the lost context,
-    // but the retained object stays callable (that is its purpose).
-    // Functions do not survive evaluate serialization — lose/restore run
-    // page-side.
-    async function loseAndRestore() {
-      await control.locator(".docs-scene__canvas").evaluate((el) => {
-        const ext = el.getContext("webgl2").getExtension("WEBGL_lose_context");
-        if (!ext) throw new Error("WEBGL_lose_context unavailable");
-        window.__loseExt = ext;
-        ext.loseContext();
-      });
-      await expect
-        .poll(() => control.getAttribute("data-scene-state"), { timeout: 3000 })
-        .toBe("error");
-      await control.locator(".docs-scene__canvas").evaluate((el) => {
-        window.__loseExt.restoreContext();
-      });
-    }
-
-    // First loss: exactly one automatic re-init back to live.
-    await loseAndRestore();
-    await expect
-      .poll(() => control.getAttribute("data-scene-state"), { timeout: 4000 })
-      .toBe("live");
-
-    // Second loss: terminal — restore fires but the host stays error.
-    await loseAndRestore();
-    await control.locator(".docs-scene__canvas").evaluate((el) => {
-      el.getContext("webgl2").getExtension("WEBGL_lose_context").restoreContext();
-    });
-    await page.waitForTimeout(800);
-    expect(await control.getAttribute("data-scene-state")).toBe("error");
-    // Poster stands after the terminal loss.
-    await expect(control.locator(".docs-scene__poster")).toBeVisible();
-  });
-
-  test("failure cycles do not leak canvases or listeners; destroy() releases a host", async ({
-    page,
-  }) => {
-    test.skip(!(await hasWebGL2(page)), "listener accounting needs a live host");
-    // Count addEventListener calls per element from the very first script.
-    await page.addInitScript(() => {
-      window.__listenerAdds = new Map();
-      const orig = EventTarget.prototype.addEventListener;
-      EventTarget.prototype.addEventListener = function (type, fn, opts) {
-        const map = window.__listenerAdds;
-        map.set(this, (map.get(this) || 0) + 1);
-        return orig.call(this, type, fn, opts);
-      };
-    });
-
-    await page.goto(FIXTURE_PAGE);
-    const control = page.locator('[data-scene][aria-label="Healthy control"]');
-    await control.evaluate((el) => el.scrollIntoView({ block: "center" }));
-    await expect
-      .poll(() => control.getAttribute("data-scene-state"), { timeout: 3000 })
-      .toBe("live");
-
-    const canvasesBefore = await page.locator("[data-scene] canvas").count();
-
-    // Cycle 1: loss → the single designed re-init (Q5) → live on a fresh
-    // canvas — no accumulation, bounded listeners. The extension is
-    // retained at live state (post-loss getExtension lookups return null).
-    await control.locator(".docs-scene__canvas").evaluate((el) => {
-      const e = el.getContext("webgl2").getExtension("WEBGL_lose_context");
-      if (!e) throw new Error("WEBGL_lose_context unavailable");
-      window.__loseExt = e;
-      e.loseContext();
-    });
-    await expect
-      .poll(() => control.getAttribute("data-scene-state"), { timeout: 3000 })
-      .toBe("error");
-    await control.locator(".docs-scene__canvas").evaluate((el) => {
-      window.__loseExt.restoreContext();
-    });
-    await expect
-      .poll(() => control.getAttribute("data-scene-state"), { timeout: 4000 })
-      .toBe("live");
-
-    // Cycle 2: terminal by design — restore fires, the host stays error.
-    await control.locator(".docs-scene__canvas").evaluate((el) => {
-      const e = el.getContext("webgl2").getExtension("WEBGL_lose_context");
-      if (!e) throw new Error("WEBGL_lose_context unavailable");
-      window.__loseExt = e;
-      e.loseContext();
-    });
-    await expect
-      .poll(() => control.getAttribute("data-scene-state"), { timeout: 3000 })
-      .toBe("error");
-    await control.locator(".docs-scene__canvas").evaluate((el) => {
-      window.__loseExt.restoreContext();
-    });
-    await page.waitForTimeout(800);
-    expect(await control.getAttribute("data-scene-state")).toBe("error");
-
-    // Canvas replaced wholesale on re-init, never accumulated.
-    expect(await page.locator("[data-scene] canvas").count()).toBe(canvasesBefore);
-
-    // The canvas carries exactly its bounded listener set: 2 runtime
-    // (contextlost/restored) + 3 three.js WebGLRenderer context handlers —
-    // the same count a fresh canvas gets, so re-init added nothing.
-    const canvasListeners = await control.locator(".docs-scene__canvas").evaluate((el) => {
-      const map = window.__listenerAdds;
-      let total = 0;
-      map.forEach((v, k) => {
-        if (k === el) total = v;
-      });
-      return total;
-    });
-    expect(canvasListeners).toBe(5);
-
-    // destroy() releases the host completely: map entry gone, listeners
-    // removed (a later pointermove adds nothing), poster stays standing.
-    const hostsBefore = await page.evaluate(() => window.SymblixMotion.hosts.size);
-    await page.evaluate(() => {
-      const mount = document.querySelector('[aria-label="Fixture — createScene throws"]');
-      window.SymblixMotion.destroyHost(mount);
-    });
-    expect(await page.evaluate(() => window.SymblixMotion.hosts.size)).toBe(hostsBefore - 1);
-    // Count adds scoped to the destroyed mount element (a page-wide sum
-    // would race with injected tooling like livereload).
-    const addsOnDestroyed = () =>
-      page.evaluate(() => {
-        const map = window.__listenerAdds;
-        return map.get(document.querySelector('[aria-label="Fixture — createScene throws"]')) || 0;
-      });
-    const addsBefore = await addsOnDestroyed();
-    await page
-      .locator('[aria-label="Fixture — createScene throws"]')
-      .evaluate((el) => el.dispatchEvent(new PointerEvent("pointermove", { bubbles: true })));
-    const addsAfter = await addsOnDestroyed();
-    expect(addsAfter).toBe(addsBefore);
-  });
-});
+// Recovery and teardown use behavioral oracles in scene-lifecycle.spec.ts.
 
 test.describe("reduced motion", () => {
-  test("runtime registers but never starts: no scene fetch, no canvas, no context", async ({
+  test("bootstrap suppresses heavy runtime and all scene construction", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
@@ -354,13 +210,8 @@ test.describe("reduced motion", () => {
     expect(await page.locator("[data-scene]").getAttribute("data-scene-state")).toBe("idle");
     expect(requested.filter((u) => /orbit\.min/.test(u))).toEqual([]);
 
-    // Host registered (observable), never scheduled.
-    const registered = await page.evaluate(() => ({
-      hosts: window.SymblixMotion.hosts.size,
-      api: window.SymblixMotion.SCENE_API,
-    }));
-    expect(registered.hosts).toBe(1);
-    expect(registered.api).toBe(1);
+    expect(requested.filter((u) => /motion\.min/.test(u))).toEqual([]);
+    expect(await page.evaluate(() => typeof window.SymblixMotion)).toBe("undefined");
 
     // The poster is the reduced-motion face, fully visible.
     await expect(page.locator("[data-scene] .docs-scene__poster")).toBeVisible();
@@ -369,29 +220,26 @@ test.describe("reduced motion", () => {
 
 test.describe("same-origin delivery", () => {
   test("zero off-origin requests on a scene page (NFR-5)", async ({ page }) => {
-    await sceneLive(page);
-    const origin = new URL(page.url()).origin;
-
-    // Attached after navigation so the origin is real; the runtime's own
-    // fetches (scene module) happen after load and are all captured.
     const offOrigin: string[] = [];
+    const origin = new URL(test.info().project.use.baseURL || "http://127.0.0.1:1313").origin;
     page.on("request", (req) => {
       if (new URL(req.url()).origin !== origin) offOrigin.push(req.url());
     });
-    await page.waitForTimeout(1500);
+    await sceneLive(page);
+    await page.waitForTimeout(200);
 
     expect(offOrigin).toEqual([]);
   });
 });
 
 test.describe("registration idempotency", () => {
-  test("hosts map stays stable across reflows and repeated checks", async ({ page }) => {
+  test("actual repeated registration is idempotent", async ({ page }) => {
     await sceneLive(page);
 
     const before = await page.evaluate(() => window.SymblixMotion.hosts.size);
     await page.evaluate(() => {
-      window.dispatchEvent(new Event("resize"));
-      window.dispatchEvent(new Event("load"));
+      window.SymblixMotion.register();
+      window.SymblixMotion.register();
     });
     const after = await page.evaluate(() => window.SymblixMotion.hosts.size);
     expect(after).toBe(before);
@@ -592,22 +440,14 @@ test.describe("palette bridge", () => {
     }
   });
 
-  test("reduced motion: mirror still tracks presets though the scene never starts", async ({
-    page,
-  }) => {
+  test("reduced motion leaves static content following CSS preset tokens", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(SCENES_PAGE);
-    await page.waitForLoadState("load");
-
-    // The mirror is a page-wide observability signal, independent of scene
-    // lifecycle (P3 decision): the host registers, never starts, but the
-    // mount still reports the live preset truthfully.
+    const before=await page.locator("[data-scene]").evaluate(el=>getComputedStyle(el).getPropertyValue("--docs-bg"));
     await page.evaluate(() => window.SymblixTheme.setPreset("sunset-dark"));
-    await expect
-      .poll(() => page.locator("[data-scene]").getAttribute("data-scene-preset"))
-      .toBe("sunset-dark");
-
-    expect(await page.locator("[data-scene]").getAttribute("data-scene-state")).toBe("idle");
-    expect(await page.locator("[data-scene] .docs-scene__canvas").count()).toBe(0);
+    await expect.poll(()=>page.locator("[data-scene]").evaluate(el=>getComputedStyle(el).getPropertyValue("--docs-bg"))).not.toBe(before);
+    await expect(page.locator("[data-scene]")).toHaveAttribute("data-scene-state","idle");
+    await expect(page.locator("[data-scene] canvas")).toHaveCount(0);
+    expect(await page.evaluate(()=>typeof window.SymblixMotion)).toBe("undefined");
   });
 });
