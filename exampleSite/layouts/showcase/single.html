@@ -1,0 +1,11 @@
+{{ define "main" }}
+<article class="docs-article docs-article--showcase">
+  <header class="docs-article__header">
+    <h1 class="docs-article__title">{{ .Title }}</h1>
+    {{ with .Description }}<p class="docs-article__description">{{ . }}</p>{{ end }}
+  </header>
+  <div class="docs-content">
+    {{ .Content }}
+  </div>
+</article>
+{{ end }}

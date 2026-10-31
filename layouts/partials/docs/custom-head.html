@@ -1,20 +1,8 @@
-{{- /* docs/custom-head.html
-   Extension point for site owners to inject arbitrary <head> content.
-   The theme ships this partial empty. To use it, create a file at:
-     layouts/partials/docs/custom-head.html
-   in your site (shadows this partial). It is invoked at the end of head.html,
-   AFTER the stylesheet link and the generated palette override block, so a site
-   can override even the palette if needed.
-
-   Common uses:
-   - Analytics / tracking scripts
-   - Verification meta tags (Google Search Console, etc.)
-   - Webfont <link preload> or <link rel="stylesheet"> for self-hosted fonts
-   - Additional stylesheets
-   - CSP nonces (if not using the inline bootstrap snippets)
-
-   Example:
-   <link rel="preconnect" href="https://fonts.example.com">
-   <link rel="preload" as="style" href="/fonts/my-font.css">
-   <meta name="verification" content="abc123">
-*/ -}}
+{{- /* docs/custom-head.html (extension hook) */ -}}
+{{- if eq .Type "showcase" -}}
+{{- $css := resources.Get "css/motion-lab.css" -}}
+{{- if $css -}}
+{{- $css = $css | minify | fingerprint -}}
+<link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
+{{- end -}}
+{{- end -}}
