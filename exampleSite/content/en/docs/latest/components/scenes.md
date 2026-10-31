@@ -56,6 +56,7 @@ contrast for your entire artwork range in every supported preset.
 | `runtime` | `three` | Adapter id. v1 ships `three`. |
 | `load` | `visible` | Init strategy. `visible`: start when the mount scrolls into view. `click`: defer scene fetch and start until activation. A click-only page also defers the heavy runtime. Controls are hidden until bound, without JavaScript, and under reduced motion. |
 | `pointer` | `off` | `on` delivers normalized pointer position to the scene (fine-pointer devices only). |
+| `assets` | — | Manifest id: `data/scenes/<id>.yaml`, a flat map of safe names to site asset paths. Hugo validates, fingerprints, and emits the URL map; the scene reads it through `ctx.assets` / `ctx.fetchAsset`. See [Asset-backed scenes](#asset-backed-scenes). |
 | `ratio` | `16/9` | Positive aspect ratio of the mount. Static text supplies an intrinsic minimum to prevent clipping. Mutually exclusive with `height`. |
 | `height` | — | Positive definite CSS length instead of a ratio (for example `28rem` or `60dvh`); percentages and zero are rejected. Static text may require a larger intrinsic minimum. |
 | `class` | — | Extra classes on the mount. |
@@ -140,7 +141,10 @@ any size changes before rendering. `recovering` denotes the first lost GPU
 context; `error` is terminal when anything else fails (a
 throwing scene, missing WebGL2, a lost GPU context that cannot recover).
 Explicit teardown sets `disposed`. Errors are logged with the `[symblix-motion]` tag and a stable reason code. A lost GPU context gets
-exactly one automatic re-init; a second loss is permanent. The
+exactly one automatic re-init; a second loss is permanent. An async scene
+stays in `loading` (internal stage `ready`) until its `ready` promise
+resolves and the first frame renders; rejection or the shared 10-second
+startup deadline is terminal. The
 [Scene Failure Fixtures](/en/docs/latest/components/scene-failures/) page
 demonstrates the isolation live with deliberately broken scenes.
 
@@ -152,6 +156,8 @@ demonstrates the isolation live with deliberately broken scenes.
 | `prefers-reduced-motion: reduce` | Runtime never starts — poster + overlay |
 | No WebGL2 | `state=error`, poster + overlay |
 | Scene throws / fails to load | `state=error`, poster + overlay, other scenes unaffected |
+| `ready` rejects or exceeds the 10 s deadline | `state=error`, poster + overlay, generation aborted |
+| Invalid asset manifest (hand-edited) | `state=error` before any request for that mount |
 | Print | Canvas hidden, poster printed |
 
 ## Type hints for scene authors
@@ -169,6 +175,10 @@ declare namespace scene {
     accent: Color; bg: Color; surface: Color; surface2: Color;
     text: Color; muted: Color; border: Color;
   }
+  export interface Signals {
+    scroll: { progress: number; velocity: number };
+    pointer: { x: number; y: number; active: boolean };
+  }
   export interface Context {
     api: 1;
     THREE: object;
@@ -177,19 +187,31 @@ declare namespace scene {
     width: number; height: number; dpr: number;
     mount: HTMLElement;
     palette: Palette;
-  }
-  export interface Signals {
-    scroll: { progress: number; velocity: number };
-    pointer: { x: number; y: number; active: boolean };
+    signal: AbortSignal;
+    onDispose(cleanup: () => void): void;
+    assets: Readonly<Record<string, string>>;
+    fetchAsset(name: string): Promise<Response>;
   }
 }
 declare function createScene(ctx: scene.Context): {
+  ready?: Promise<void>;
   frame(t: number, dt: number, s: scene.Signals): void;
   onResize?(w: number, h: number, dpr: number): void;
   onPaletteChange?(p: scene.Palette): void;
   dispose?(): void;
 };
 ```
+
+Context members beyond the synchronous basics:
+
+| Member | Contract |
+|---|---|
+| `ctx.signal` | `AbortSignal` that fires when this scene generation retires (failure, teardown, motion revocation, context loss). Check it after every await. |
+| `ctx.onDispose(fn)` | Registers cleanup for the current generation. Call it before an async continuation so partial construction cannot leak; the runtime runs each cleanup exactly once. |
+| `ctx.assets` | Frozen allowlisted map of manifest name → same-origin URL. Empty without `assets=`. |
+| `ctx.fetchAsset(name)` | Fetches the captured URL with the generation signal and `credentials: "same-origin"`; rejects for unknown names or non-OK responses. |
+| `instance.ready` | Optional thenable gating the first frame. The poster stays until it resolves; rejection or the shared 10 s startup deadline is terminal. An async factory is invalid, not silently adopted. |
+| `ctx.palette` | The initial snapshot only — later preset changes arrive through `onPaletteChange`. |
 
 ## Resource ownership
 
@@ -203,6 +225,81 @@ registering the same resource disposal in both places.
 since the previous active frame. The first frame after a pause receives `dt=0`
 and zero scroll velocity. Accumulate `dt` for simulations that should stop in
 the background.
+
+## Asset-backed scenes
+
+A scene that needs data — a model, a diagram, an authored JSON layout — does
+not hardcode URLs. The `assets` parameter selects `data/scenes/<id>.yaml`: a
+flat map of safe names to site asset paths, validated, resolved, and
+fingerprinted by Hugo at build time. The mount receives the map as a frozen
+`ctx.assets`, and `ctx.fetchAsset(name)` fetches the allowlisted URL with the
+generation's `AbortSignal` and `credentials: "same-origin"`. Every entry is
+re-validated at consumption — the runtime does not trust the attribute just
+because its own build wrote it. Names must match `^[a-z][a-z0-9_-]{0,63}$`
+(at most 64 entries, no nesting, no scheme, query, fragment, or `..` segment).
+
+Example `data/scenes/instrument.yaml`:
+
+```yaml
+model: models/instrument.json
+```
+
+The instance may declare an optional `ready: Promise<void>`. The host keeps
+the poster while readiness is pending, validates the thenable shape, then
+waits for it — and only a successful **first frame** marks the mount `live`.
+Module admission through readiness shares one 10,000 ms deadline; a rejection
+or timeout is terminal for that host (`scene-ready` / `scene-timeout`), the
+generation aborts, registered cleanups run once, and the poster stays.
+Asynchronous factories are invalid, not silently adopted — `createScene` must
+return synchronously and put its waiting in `ready`.
+
+Ownership example — register disposal **before** each async continuation, and
+abort-check after it:
+
+```js
+export default function createScene(ctx) {
+  const { THREE, gl, canvas } = ctx;
+  const renderer = new THREE.WebGLRenderer({ canvas, context: gl });
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  camera.position.z = 5;
+  ctx.onDispose(() => renderer.dispose());
+
+  let model = null;
+  const ready = ctx.fetchAsset("model")
+    .then((response) => response.json())
+    .then((json) => {
+      if (ctx.signal.aborted) return;
+      model = new THREE.ObjectLoader().parse(json);
+      ctx.onDispose(() => {
+        model.traverse((n) => { n.geometry?.dispose(); n.material?.dispose(); });
+      });
+      scene.add(model);
+      return undefined;
+    });
+
+  return {
+    ready,
+    frame() { renderer.render(scene, camera); },
+    onResize(w, h) { renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); },
+  };
+}
+```
+
+This mount demonstrates the full path with the shipped local model — the
+poster stands until the parsed instrument renders, and a withheld or failed
+asset leaves the poster with no dead canvas:
+
+{{< scene src="js/scenes/__asset.js" poster="/images/scene-asset-poster.svg" title="Instrument — the asset-backed readiness demo" height="26rem" assets="instrument" >}}
+**Loaded from `data/scenes/instrument.yaml`.** The JSON object is fetched
+through `ctx.fetchAsset`, parsed by three's `ObjectLoader`, and revealed only
+after readiness — ordinary Hugo asset handling, subpath-safe and same-origin.
+{{< /scene >}}
+
+The `ObjectLoader` JSON here is a plain core-three format: the theme ships no
+glTF/Draco/KTX2 addon support, and loading external model formats would be a
+separate pinned-dependency decision. Site scenes remain responsible for any
+requests their own code makes beyond the helper.
 
 ## Troubleshooting
 

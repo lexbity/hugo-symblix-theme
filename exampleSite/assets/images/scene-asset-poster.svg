@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Signal instrument poster">
+  <!-- Representative frame of the live scene in the light preset. The top
+       band is intentionally quiet: the mount's opaque copy panel shares the
+       media row, so readers see the art in the lower region. -->
+  <rect width="640" height="360" fill="#f4f6fa"/>
+  <g stroke="#dbe2ee" stroke-width="1">
+    <path d="M0 238 H640 M0 292 H640 M96 120 V360 M544 120 V360"/>
+  </g>
+  <text x="32" y="342" font-family="monospace" font-size="11" fill="#94a3b8">instrument.json — fetched via ctx.fetchAsset("model"), parsed by ObjectLoader</text>
+
+  <g transform="translate(320 240)">
+    <!-- key light cue -->
+    <circle cx="150" cy="-86" r="3" fill="#cbd5e1"/>
+    <!-- ring behind upper half -->
+    <ellipse cx="0" cy="-24" rx="52" ry="17" fill="none" stroke="#8fa3c9" stroke-width="5" transform="rotate(-14)"/>
+    <!-- core octahedron (accent) -->
+    <g transform="translate(0 -22)">
+      <polygon points="0,-26 22,0 0,26 -22,0" fill="#2563eb"/>
+      <polygon points="0,-26 22,0 0,0" fill="#1e4fc0"/>
+      <path d="M0,-26 L0,26 M-22,0 L22,0" stroke="#9dc0ff" stroke-width="1" opacity="0.7"/>
+    </g>
+    <!-- ring front lower arc over the core -->
+    <path d="M-52 -13 A52 17 -14 0 0 52 -35" fill="none" stroke="#b7c3da" stroke-width="5" opacity="0.9"/>
+    <!-- post + frame -->
+    <rect x="-5" y="-4" width="10" height="52" fill="#334155"/>
+    <polygon points="-150,66 150,66 118,44 -118,44" fill="#1e293b"/>
+    <!-- dials (muted) -->
+    <g fill="#64748b">
+      <path d="M-84 58 a22 22 0 0 1 44 0 z"/>
+      <path d="M40 58 a22 22 0 0 1 44 0 z"/>
+    </g>
+    <g fill="#94a3b8">
+      <ellipse cx="-62" cy="36" rx="22" ry="4"/>
+      <ellipse cx="62" cy="36" rx="22" ry="4"/>
+    </g>
+  </g>
+</svg>

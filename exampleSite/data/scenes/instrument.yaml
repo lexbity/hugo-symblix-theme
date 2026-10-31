@@ -1,0 +1,6 @@
+# Asset set for the scenes documentation mount (SYM-MOT-002 S4, Q11).
+# Flat map: safe name -> site-relative path under assets/. Hugo validates,
+# resolves, and fingerprints each row at build time; the scene receives the
+# fingerprinted URLs through ctx.assets / ctx.fetchAsset. No scheme, query,
+# fragment, or ".." segment is allowed; at most 64 entries.
+model: models/instrument.json

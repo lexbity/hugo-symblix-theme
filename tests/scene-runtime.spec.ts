@@ -9,6 +9,7 @@
 import { expect, test } from "@playwright/test";
 import {
   FIXTURE_PAGE,
+  ORBIT,
   SCENES_PAGE,
   firstHost,
   hasWebGL2,
@@ -21,7 +22,7 @@ test.describe("lifecycle", () => {
   }) => {
     test.skip(!(await hasWebGL2(page)), "no WebGL2 on this runner — covered by the degradation-path test");
     await sceneLive(page);
-    const mount = page.locator("[data-scene]");
+    const mount = page.locator(ORBIT);
 
     const canvas = mount.locator(".docs-scene__canvas");
     await expect(canvas).toHaveCount(1);
@@ -51,10 +52,11 @@ test.describe("lifecycle", () => {
       };
     });
     await page.goto(SCENES_PAGE);
-    await page.locator("[data-scene]").evaluate(el => el.scrollIntoView({block:"center",behavior:"instant"}));
-    await expect(page.locator("[data-scene]")).toHaveAttribute("data-scene-state","error");
-    await expect(page.locator("[data-scene] canvas")).toHaveCount(0);
-    expect(await page.locator(".docs-scene__poster").evaluate(el => getComputedStyle(el).opacity)).toBe("1");
+    const mount = page.locator(ORBIT);
+    await mount.evaluate(el => el.scrollIntoView({block:"center",behavior:"instant"}));
+    await expect(mount).toHaveAttribute("data-scene-state","error");
+    await expect(mount.locator("canvas")).toHaveCount(0);
+    await expect(mount.locator(".docs-scene__poster")).toHaveCSS("opacity", "1");
   });
 });
 
@@ -72,7 +74,7 @@ test.describe("fetch gating", () => {
     await page.waitForLoadState("load");
     expect(requested.filter((u) => /motion-loader\.min/.test(u)).length).toBe(1);
     expect(requested.filter((u) => /motion\.min|orbit\.min/.test(u))).toEqual([]);
-    await page.locator("[data-scene]").evaluate(el => el.scrollIntoView({block:"center",behavior:"instant"}));
+    await page.locator(ORBIT).evaluate(el => el.scrollIntoView({block:"center",behavior:"instant"}));
     await expect.poll(() => requested.filter((u) => /motion\.min/.test(u)).length).toBe(1);
     await expect.poll(() => requested.filter((u) => /orbit\.min/.test(u)).length).toBe(1);
   });
@@ -207,14 +209,16 @@ test.describe("reduced motion", () => {
     await page.waitForTimeout(1200); // idle-callback window in which a fetch would fire
 
     expect(await page.locator("[data-scene] .docs-scene__canvas").count()).toBe(0);
-    expect(await page.locator("[data-scene]").getAttribute("data-scene-state")).toBe("idle");
+    expect(await page.locator(ORBIT).getAttribute("data-scene-state")).toBe("idle");
     expect(requested.filter((u) => /orbit\.min/.test(u))).toEqual([]);
 
     expect(requested.filter((u) => /motion\.min/.test(u))).toEqual([]);
     expect(await page.evaluate(() => typeof window.SymblixMotion)).toBe("undefined");
 
-    // The poster is the reduced-motion face, fully visible.
-    await expect(page.locator("[data-scene] .docs-scene__poster")).toBeVisible();
+    // The posters are the reduced-motion face, fully visible.
+    const posters = page.locator("[data-scene] .docs-scene__poster");
+    expect(await posters.count()).toBeGreaterThan(0);
+    for (let i = 0; i < await posters.count(); i++) await expect(posters.nth(i)).toBeVisible();
   });
 });
 
@@ -243,7 +247,8 @@ test.describe("registration idempotency", () => {
     });
     const after = await page.evaluate(() => window.SymblixMotion.hosts.size);
     expect(after).toBe(before);
-    expect(after).toBe(1);
+    // scenes.md mounts two scenes (orbit + asset demo); both register once.
+    expect(after).toBe(2);
   });
 });
 
@@ -251,7 +256,7 @@ test.describe("signals (P4)", () => {
   test("pointer signal arms, normalizes, and deactivates on leave", async ({ page }) => {
     await sceneLive(page);
 
-    const box = await page.locator("[data-scene]").boundingBox();
+    const box = await page.locator(ORBIT).boundingBox();
     expect(box).not.toBeNull();
 
     // Center of the mount → ~(0, 0).
@@ -273,7 +278,7 @@ test.describe("signals (P4)", () => {
 
     // Mirror attribute tracks the armed state.
     const mirror = await page
-      .locator("[data-scene]")
+      .locator(ORBIT)
       .getAttribute("data-scene-pointer-active");
     expect(mirror).toBe("false");
   });
@@ -313,7 +318,7 @@ test.describe("signals (P4)", () => {
 
     // Scroll to the mount's own transit midpoint (progress ≈ 0.5 there —
     // a page fraction is wrong because the mount sits below a long page).
-    const target = await page.locator("[data-scene]").evaluate((el) => {
+    const target = await page.locator(ORBIT).evaluate((el) => {
       const r = el.getBoundingClientRect();
       return Math.max(0, window.scrollY + r.top + r.height / 2 - window.innerHeight / 2);
     });
@@ -326,7 +331,7 @@ test.describe("signals (P4)", () => {
     expect(mid.scroll.progress).toBeLessThan(0.8);
     expect(Number.isFinite(mid.scroll.velocity)).toBe(true);
 
-    const mount = page.locator("[data-scene]");
+    const mount = page.locator(ORBIT);
     const mirror = parseFloat(await mount.getAttribute("data-scene-scroll"));
     expect(Math.abs(mirror - mid.scroll.progress)).toBeLessThan(0.002);
 
@@ -404,7 +409,7 @@ test.describe("palette bridge", () => {
 
     await page.evaluate(() => window.SymblixTheme.setPreset("ocean-dark"));
     await expect
-      .poll(() => page.locator("[data-scene]").getAttribute("data-scene-preset"))
+      .poll(() => page.locator(ORBIT).getAttribute("data-scene-preset"))
       .toBe("ocean-dark");
 
     const after = await page.evaluate(() => {
@@ -427,7 +432,7 @@ test.describe("palette bridge", () => {
     for (const [preset, expected] of Object.entries(PRESET_ACCENTS)) {
       await page.evaluate((p) => window.SymblixTheme.setPreset(p), preset);
       await expect
-        .poll(() => page.locator("[data-scene]").getAttribute("data-scene-preset"), {
+        .poll(() => page.locator(ORBIT).getAttribute("data-scene-preset"), {
           timeout: 2000,
         })
         .toBe(preset);
@@ -443,10 +448,11 @@ test.describe("palette bridge", () => {
   test("reduced motion leaves static content following CSS preset tokens", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(SCENES_PAGE);
-    const before=await page.locator("[data-scene]").evaluate(el=>getComputedStyle(el).getPropertyValue("--docs-bg"));
+    const mount = page.locator(ORBIT);
+    const before=await mount.evaluate(el=>getComputedStyle(el).getPropertyValue("--docs-bg"));
     await page.evaluate(() => window.SymblixTheme.setPreset("sunset-dark"));
-    await expect.poll(()=>page.locator("[data-scene]").evaluate(el=>getComputedStyle(el).getPropertyValue("--docs-bg"))).not.toBe(before);
-    await expect(page.locator("[data-scene]")).toHaveAttribute("data-scene-state","idle");
+    await expect.poll(()=>mount.evaluate(el=>getComputedStyle(el).getPropertyValue("--docs-bg"))).not.toBe(before);
+    await expect(mount).toHaveAttribute("data-scene-state","idle");
     await expect(page.locator("[data-scene] canvas")).toHaveCount(0);
     expect(await page.evaluate(()=>typeof window.SymblixMotion)).toBe("undefined");
   });

@@ -1,0 +1,63 @@
+{
+  "metadata": { "generator": "Symblix authoring", "type": "Object", "version": 4.6 },
+  "geometries": [
+    { "type": "BoxGeometry", "uuid": "geo-frame", "width": 2.4, "height": 0.5, "depth": 0.9, "widthSegments": 2, "heightSegments": 1, "depthSegments": 1 },
+    { "type": "CylinderGeometry", "uuid": "geo-dial", "radiusTop": 0.34, "radiusBottom": 0.34, "height": 0.12, "radialSegments": 24, "heightSegments": 1, "openEnded": false },
+    { "type": "OctahedronGeometry", "uuid": "geo-core", "radius": 0.42, "detail": 0 },
+    { "type": "TorusGeometry", "uuid": "geo-ring", "radius": 0.62, "tube": 0.05, "radialSegments": 10, "tubularSegments": 40, "arc": 6.283185307179586 },
+    { "type": "CylinderGeometry", "uuid": "geo-post", "radiusTop": 0.05, "radiusBottom": 0.05, "height": 1.1, "radialSegments": 12, "heightSegments": 1, "openEnded": false }
+  ],
+  "materials": [
+    { "type": "MeshStandardMaterial", "uuid": "mat-frame", "name": "frame", "color": 4473924, "metalness": 0.55, "roughness": 0.45, "emissive": 0, "flatShading": false, "wireframe": false },
+    { "type": "MeshStandardMaterial", "uuid": "mat-dial", "name": "dial", "color": 15658749, "metalness": 0.2, "roughness": 0.6, "emissive": 0, "flatShading": false, "wireframe": false },
+    { "type": "MeshStandardMaterial", "uuid": "mat-core", "name": "core", "color": 2003198, "metalness": 0.1, "roughness": 0.35, "emissive": 0, "flatShading": true, "wireframe": false },
+    { "type": "MeshStandardMaterial", "uuid": "mat-ring", "name": "ring", "color": 13421772, "metalness": 0.8, "roughness": 0.25, "emissive": 0, "flatShading": false, "wireframe": false }
+  ],
+  "object": {
+    "uuid": "root-instrument",
+    "type": "Group",
+    "name": "signal-instrument",
+    "children": [
+      {
+        "uuid": "part-frame", "type": "Mesh", "name": "frame",
+        "geometry": "geo-frame", "material": "mat-frame",
+        "position": [0, -0.55, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]
+      },
+      {
+        "uuid": "part-post", "type": "Mesh", "name": "post",
+        "geometry": "geo-post", "material": "mat-frame",
+        "position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]
+      },
+      {
+        "uuid": "part-dial-left", "type": "Mesh", "name": "dial-left",
+        "geometry": "geo-dial", "material": "mat-dial",
+        "position": [-0.85, -0.25, 0.35], "rotation": [1.5707963267948966, 0, 0], "scale": [1, 1, 1]
+      },
+      {
+        "uuid": "part-dial-right", "type": "Mesh", "name": "dial-right",
+        "geometry": "geo-dial", "material": "mat-dial",
+        "position": [0.85, -0.25, 0.35], "rotation": [1.5707963267948966, 0, 0], "scale": [1, 1, 1]
+      },
+      {
+        "uuid": "part-core", "type": "Mesh", "name": "core",
+        "geometry": "geo-core", "material": "mat-core",
+        "position": [0, 0.45, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]
+      },
+      {
+        "uuid": "part-ring", "type": "Mesh", "name": "ring",
+        "geometry": "geo-ring", "material": "mat-ring",
+        "position": [0, 0.45, 0], "rotation": [1.1, 0, 0.3], "scale": [1, 1, 1]
+      },
+      {
+        "uuid": "light-key", "type": "DirectionalLight", "name": "key",
+        "color": 16777215, "intensity": 2.2,
+        "position": [2.5, 4, 3], "rotation": [0, 0, 0], "scale": [1, 1, 1]
+      },
+      {
+        "uuid": "light-fill", "type": "AmbientLight", "name": "fill",
+        "color": 6710886, "intensity": 1.4,
+        "position": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]
+      }
+    ]
+  }
+}

@@ -16,6 +16,11 @@
                   the mount scrolls into view; "click" defers fetch and
                   init until the visitor presses the activate button.
          pointer  (default "off") "on" arms pointer signal delivery.
+         assets   (optional) manifest id: data/scenes/<id>.yaml — a flat map
+                  of safe names to site asset paths. Hugo validates, resolves,
+                  fingerprints, and emits the JSON map into data-scene-assets;
+                  the runtime exposes it as ctx.assets and ctx.fetchAsset
+                  (SYM-MOT-002 Q11).
          ratio    (default "16/9") aspect ratio; mutually exclusive with height.
          height   preferred positive CSS length; static copy may grow taller.
          class    extra classes.
@@ -47,6 +52,14 @@
 {{- if not $src -}}{{ errorf "scene shortcode (%s): src is required" $where }}{{ $failed = true }}{{ end -}}
 {{- if not $poster -}}{{ errorf "scene shortcode (%s): poster is required" $where }}{{ $failed = true }}{{ end -}}
 {{- if not $title -}}{{ errorf "scene shortcode (%s): title is required (it becomes the accessible name)" $where }}{{ $failed = true }}{{ end -}}
+
+{{- /* Optional asset manifest: the id itself must be a safe name; entry
+       validation happens in the helper before any resource transform. */ -}}
+{{- $assetsId := .Get "assets" -}}
+{{- if and $assetsId (not (findRE `^[a-z][a-z0-9_-]{0,63}$` $assetsId)) -}}
+  {{- errorf "scene shortcode (%s): assets %q must be a manifest id matching ^[a-z][a-z0-9_-]{0,63}$ (data/scenes/<id>.yaml)" $where $assetsId -}}
+  {{- $failed = true -}}
+{{- end -}}
 
 {{- /* Asset paths must be site-relative: any scheme (https:, data:, …) or
        protocol-relative // would fetch from off-origin at runtime. */ -}}
@@ -111,6 +124,19 @@
 
 {{- if $failed -}}{{ return }}{{ end -}}
 
+{{- /* ---- asset manifest (optional data/scenes/<id>.yaml) ---- */ -}}
+{{- $assetsMap := dict -}}
+{{- if $assetsId -}}
+  {{- $resolved := partial "docs/helpers/scene-assets.html" (dict "Id" $assetsId "Where" $where) -}}
+  {{- if not $resolved -}}
+    {{- /* The helper already emitted the precise error; stop before any
+         resource transform so a bad manifest cannot half-render. */ -}}
+    {{- return -}}
+  {{- end -}}
+  {{- $assetsMap = $resolved -}}
+{{- end -}}
+{{- $assetsJson := printf "%s" ($assetsMap | jsonify) -}}
+
 {{- /* ---- asset resolution (site assets shadow theme assets) ---- */ -}}
 {{- $srcPath := strings.TrimPrefix "/" $src -}}
 {{- $sceneRes := resources.Get $srcPath -}}
@@ -144,6 +170,7 @@
         data-scene-load="{{ $load }}"
         data-scene-pointer="{{ $pointer }}"
         data-scene-src="{{ $sceneJs.RelPermalink }}"
+        {{- if $assetsId }} data-scene-assets="{{ $assetsJson }}"{{ end }}
         data-scene-id="scene-{{ .Ordinal }}"
         aria-label="{{ $title }}"
         {{- if $fixedHeight }} style="--docs-scene-height: {{ $fixedHeight | safeCSS }};"

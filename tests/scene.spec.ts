@@ -12,6 +12,7 @@ const REPO_ROOT = join(__dirname, "..");
 const SCENES_PAGE = "/en/docs/latest/components/scenes/";
 const FIXTURE_PAGE = "/en/docs/latest/components/scene-failures/";
 const DEMO_TITLE = "Orbit — the reference demo scene";
+const ORBIT = '[data-scene-id="scene-0"]';
 
 interface BuildResult {
   code: number;
@@ -75,8 +76,9 @@ function buildMiniSite(body: string, extraConfig = ""): BuildResult {
 test.describe("scene mount contract", () => {
   test("renders the full static attribute contract", async ({ page }) => {
     await page.goto(SCENES_PAGE);
-    const mount = page.locator("[data-scene]");
-    await expect(mount).toHaveCount(1);
+    // scenes.md carries orbit plus the asset-backed readiness demo.
+    await expect(page.locator("[data-scene]")).toHaveCount(2);
+    const mount = page.locator(ORBIT);
 
     const attrs = await mount.evaluate((el) => ({
       scene: el.hasAttribute("data-scene"),
@@ -103,7 +105,7 @@ test.describe("scene mount contract", () => {
 
   test("overlay is real HTML and the poster is named", async ({ page }) => {
     await page.goto(SCENES_PAGE);
-    const mount = page.locator("[data-scene]");
+    const mount = page.locator(ORBIT);
     await expect(mount.locator(".docs-scene__overlay")).toContainText("Real text above the scene");
     const poster = mount.locator(".docs-scene__poster");
     await expect(poster).toHaveAttribute("alt", DEMO_TITLE);
@@ -112,7 +114,7 @@ test.describe("scene mount contract", () => {
 
   test("geometry is CSS-owned before any script exists", async ({ page }) => {
     await page.goto(SCENES_PAGE);
-    const box = await page.locator("[data-scene]").evaluate((el) => {
+    const box = await page.locator(ORBIT).evaluate((el) => {
       const s = getComputedStyle(el, "::before");
       return { height: el.getBoundingClientRect().height, reservedHeight: parseFloat(s.height) };
     });
@@ -154,8 +156,10 @@ test.describe("scene degradation", () => {
       page.on("request", (req) => requested.push(req.url()));
       await page.goto(SCENES_PAGE);
 
-      await expect(page.locator("[data-scene] .docs-scene__poster")).toBeVisible();
-      await expect(page.locator("[data-scene] .docs-scene__overlay")).toContainText(
+      const posters = page.locator("[data-scene] .docs-scene__poster");
+      expect(await posters.count()).toBe(2);
+      for (let i = 0; i < 2; i++) await expect(posters.nth(i)).toBeVisible();
+      await expect(page.locator(ORBIT).locator(".docs-scene__overlay")).toContainText(
         "Real text above the scene",
       );
       // Nothing may fetch the scene module or runtime without JS.

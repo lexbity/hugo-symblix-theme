@@ -4,6 +4,11 @@ import { expect, type Page } from "@playwright/test";
 
 export const SCENES_PAGE = "/en/docs/latest/components/scenes/";
 export const FIXTURE_PAGE = "/en/docs/latest/components/scene-failures/";
+// scenes.md carries two mounts: orbit (scene-0) and the asset-backed
+// readiness demo (scene-1). SCENES_PAGE-scoped tests name their mount
+// explicitly instead of relying on the old single-mount strictness.
+export const ORBIT = '[data-scene-id="scene-0"]';
+export const ASSET_MOUNT = '[data-scene-id="scene-1"]';
 
 export async function hasWebGL2(page: Page): Promise<boolean> {
   return page.evaluate(() => {
@@ -15,14 +20,14 @@ export async function hasWebGL2(page: Page): Promise<boolean> {
   });
 }
 
-/** Navigate to the demo page and drive the mount to state=live: the demo
-    sits below the fold, and the visible init strategy (Q3) correctly holds
-    the scene in idle until it scrolls into view. */
-export async function sceneLive(page: Page): Promise<void> {
+/** Navigate to the demo page and drive the orbit mount to state=live: the
+    demo sits below the fold, and the visible init strategy (Q3) correctly
+    holds the scene in idle until it scrolls into view. */
+export async function sceneLive(page: Page, selector = ORBIT): Promise<void> {
   await page.goto(SCENES_PAGE);
-  await page.locator("[data-scene]").evaluate((el) => el.scrollIntoView({ block: "center" }));
+  await page.locator(selector).evaluate((el) => el.scrollIntoView({ block: "center" }));
   await expect
-    .poll(() => page.locator("[data-scene]").getAttribute("data-scene-state"), {
+    .poll(() => page.locator(selector).getAttribute("data-scene-state"), {
       timeout: 3000,
     })
     .toBe("live");

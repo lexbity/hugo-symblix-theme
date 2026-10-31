@@ -1,0 +1,79 @@
+{{- /* Asset-set resolver (SYM-MOT-002 S4, Q11).
+
+       Reads data/scenes/<id>.yaml — a flat map of safe asset names to
+       site-relative asset paths — validates every row, resolves each path
+       in the asset bundle, and fingerprints the retained bytes. Returns a
+       map of name → fingerprinted RelPermalink (or nil on failure); the
+       CALLER serializes it. A JSON string is never assembled here, so a
+       path can never break out of its data attribute.
+
+       Rules enforced at build time (the runtime re-validates at
+       consumption — this helper is not the trust boundary):
+         • at most 64 entries, no nesting;
+         • names match ^[a-z][a-z0-9_-]{0,63}$;
+         • values are plain strings: no scheme, protocol-relative prefix,
+           query, fragment, or ".." segment;
+         • every path resolves in resources (site assets shadow theme).
+
+       Params: Id (manifest id), Where (page context for the error). */ -}}
+{{- $id := .Id -}}
+{{- $where := .Where -}}
+{{- $failed := false -}}
+{{- $NAME := `^[a-z][a-z0-9_-]{0,63}$` -}}
+
+{{- if not (findRE $NAME $id) -}}
+  {{- errorf "scene assets (%s): manifest id %q must match ^[a-z][a-z0-9_-]{0,63}$" $where $id -}}
+  {{- $failed = true -}}
+{{- end -}}
+
+{{- $set := false -}}
+{{- if and (not $failed) hugo.Data.scenes -}}
+  {{- $set = index hugo.Data.scenes $id -}}
+{{- end -}}
+{{- if and (not $failed) (not $set) -}}
+  {{- errorf "scene assets (%s): manifest %q not found in data/scenes/%s.yaml" $where $id $id -}}
+  {{- $failed = true -}}
+{{- end -}}
+{{- if and (not $failed) (not (reflect.IsMap $set)) -}}
+  {{- errorf "scene assets (%s): manifest %q must be a flat map of name to asset path" $where $id -}}
+  {{- $failed = true -}}
+{{- end -}}
+{{- if and (not $failed) (gt (len $set) 64) -}}
+  {{- errorf "scene assets (%s): manifest %q has %d entries; the contract allows at most 64" $where $id (len $set) -}}
+  {{- $failed = true -}}
+{{- end -}}
+
+{{- $out := dict -}}
+{{- if not $failed -}}
+  {{- range $name, $path := $set -}}
+    {{- if not $failed -}}
+      {{- if not (findRE $NAME $name) -}}
+        {{- errorf "scene assets (%s): manifest %q name %q must match ^[a-z][a-z0-9_-]{0,63}$" $where $id $name -}}
+        {{- $failed = true -}}
+      {{- else if ne (printf "%T" $path) "string" -}}
+        {{- errorf "scene assets (%s): manifest %q entry %q must be an asset path string, not %v" $where $id $name $path -}}
+        {{- $failed = true -}}
+      {{- else if or (findRE `^[a-zA-Z][a-zA-Z0-9+.-]*:` $path) (findRE `^//` $path) -}}
+        {{- errorf "scene assets (%s): manifest %q entry %q %q must be a site-relative asset path, not a URL" $where $id $name $path -}}
+        {{- $failed = true -}}
+      {{- else if or (strings.Contains $path "?") (strings.Contains $path "#") -}}
+        {{- errorf "scene assets (%s): manifest %q entry %q %q must not carry a query or fragment" $where $id $name $path -}}
+        {{- $failed = true -}}
+      {{- else if findRE `(^|/)\.\.(/|$)` $path -}}
+        {{- errorf "scene assets (%s): manifest %q entry %q %q must not contain a %q segment" $where $id $name $path "../" -}}
+        {{- $failed = true -}}
+      {{- else -}}
+        {{- $res := resources.Get (strings.TrimPrefix "/" $path) -}}
+        {{- if not $res -}}
+          {{- errorf "scene assets (%s): manifest %q entry %q %q not found in assets" $where $id $name $path -}}
+          {{- $failed = true -}}
+        {{- else -}}
+          {{- $out = merge $out (dict $name ($res | fingerprint).RelPermalink) -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if $failed -}}{{ return nil }}{{ end -}}
+{{- return $out -}}

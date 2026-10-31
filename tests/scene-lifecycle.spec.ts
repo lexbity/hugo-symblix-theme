@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { fixture, live, mount, probe, PROBE_MODULE } from './helpers/scene-fixture';
-import { sceneLive } from './helpers/motion';
+import { ORBIT, sceneLive } from './helpers/motion';
 
 test('last scene pauses and resumes real callbacks three times', async ({ page }) => {
   await fixture(page, `${mount('control')}<div class="spacer"></div>`);
@@ -197,7 +197,7 @@ test('a throwing dispose getter cannot interrupt cleanup or sibling frames',asyn
 
 test('the real vendored THREE renderer recovers once on a fresh canvas',async({page})=>{
   await sceneLive(page);
-  const stage=page.locator('[data-scene]');
+  const stage=page.locator(ORBIT);
   const oldCanvas=await stage.locator('canvas').elementHandle();
   async function lose(){
     await stage.locator('canvas').evaluate((el:HTMLCanvasElement)=>{

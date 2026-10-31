@@ -6,6 +6,14 @@ import { ResourceScope } from "./scope.js";
 const INTERACTIVE = "a,button,input,select,textarea,summary,[data-scene-interactive]";
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
+// Q11: bounded, allowlisted manifest. Names match the build-side schema;
+// values must be plain same-origin paths — no scheme, query, fragment,
+// traversal, backslash, or protocol-relative prefix survives validation.
+const ASSET_NAME = /^[a-z][a-z0-9_-]{0,63}$/;
+const ASSET_UNSAFE = /^\/\/|^[?#]|[?#\\]|(^|[/\\])\.\.([/?\\]|$)/;
+// Q12: one wall-clock deadline covers module admission through readiness.
+const STARTUP_DEADLINE_MS = 10_000;
+
 export class Host {
   constructor(mount, { THREE, scheduler, remove }) {
     this.mount = mount;
@@ -20,6 +28,8 @@ export class Host {
     this.instance = null;
     this.callbacks = null;
     this.instanceReady = false;
+    this.assets = undefined;
+    this.deadline = null;
     this.canvas = null;
     this.gl = null;
     this.modulePromise = null;
@@ -137,10 +147,73 @@ export class Host {
     return this.modulePromise;
   }
 
+  /** Q11: validate the captured manifest at consumption, even though Hugo
+      produced it — shape, bounded names, and same-origin paths — BEFORE any
+      network request. Failure is terminal for this host only. */
+  parseAssets() {
+    const raw = this.mount.dataset.sceneAssets;
+    if (!raw) return Object.freeze({});
+    let parsed;
+    try { parsed = JSON.parse(raw); }
+    catch { throw new Error("data-scene-assets is not valid JSON"); }
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error("data-scene-assets must be a flat JSON object");
+    }
+    const names = Object.keys(parsed);
+    if (names.length > 64) throw new Error("asset manifest exceeds 64 entries");
+    const assets = {};
+    for (const name of names) {
+      const value = parsed[name];
+      if (!ASSET_NAME.test(name)) throw new Error(`asset name "${name}" is invalid`);
+      if (typeof value !== "string" || ASSET_UNSAFE.test(value)) {
+        throw new Error(`asset "${name}" must be a plain site-relative path`);
+      }
+      sameOriginOrThrow(value); // Q7: HTTP(S), current origin, no credentials
+      assets[name] = value;
+    }
+    return Object.freeze(assets);
+  }
+
+  fetchAsset(generation, controller, name) {
+    const url = typeof name === "string" ? this.assets[name] : undefined;
+    if (!url) return Promise.reject(new TypeError(`asset "${name}" is not allowlisted`));
+    if (generation !== this.generation || this.terminal || controller.signal.aborted) {
+      return Promise.reject(new Error("scene generation retired"));
+    }
+    // The captured allowlisted URL was validated at parse; the generation's
+    // signal cancels this request when the host retires.
+    return fetch(url, { signal: controller.signal, credentials: "same-origin" })
+      .then((response) => {
+        if (!response.ok) throw new Error(`asset "${name}" responded ${response.status}`);
+        return response;
+      });
+  }
+
+  armDeadline(generation) {
+    this.clearDeadline();
+    this.deadline = setTimeout(() => {
+      this.deadline = null;
+      if (generation === this.generation) {
+        this.fail("scene-timeout", new Error("startup deadline exceeded"));
+      }
+    }, STARTUP_DEADLINE_MS);
+  }
+
+  clearDeadline() {
+    if (this.deadline !== null) {
+      clearTimeout(this.deadline);
+      this.deadline = null;
+    }
+  }
+
   tryStart() {
     if (this.terminal || this.instance || this.state === "loading" ||
         this.state === "recovering" || document.hidden || !motionAllowed()) return;
     if (this.load === "click" ? !this.activated : !this.initVisible) return;
+    if (this.assets === undefined) {
+      try { this.assets = this.parseAssets(); }
+      catch (error) { this.fail("scene-assets", error); return; }
+    }
     const promise = this.ensureModule();
     if (promise && !this.terminal) this.start(promise);
   }
@@ -148,6 +221,7 @@ export class Host {
   async start(modulePromise) {
     const generation = ++this.generation;
     this.setState("loading", "module");
+    this.armDeadline(generation);
     let mod;
     try { mod = await modulePromise; }
     catch (error) { this.fail("scene-import", error); return; }
@@ -155,9 +229,11 @@ export class Host {
     // Do not allocate GPU resources for a visible-strategy mount that left
     // the viewport while its module was on the network.
     if (document.hidden || (this.load === "visible" && !this.intersecting)) {
+      this.clearDeadline();
       this.setState("idle");
       return;
     }
+    let ready = null;
     try {
       if (typeof mod.default !== "function") throw new TypeError("default export must be a function");
       if (mod.default.api !== undefined && mod.default.api !== SCENE_API) {
@@ -167,11 +243,14 @@ export class Host {
       this.setState("loading", "create");
       this.prepareCanvas();
       const authorScope = this.gpuScope;
+      const controller = this.controller;
       const ctx = Object.freeze({
         api: SCENE_API, THREE: this.THREE, gl: this.gl, canvas: this.canvas,
         width: this.width, height: this.height, dpr: this.dpr, mount: this.mount,
-        palette: this.palette, signal: this.controller.signal,
+        palette: this.palette, signal: controller.signal,
         onDispose: (cleanup) => authorScope.own(cleanup),
+        assets: this.assets,
+        fetchAsset: (name) => this.fetchAsset(generation, controller, name),
       });
       const instance = mod.default(ctx);
       if (generation !== this.generation || this.terminal) {
@@ -190,15 +269,35 @@ export class Host {
         }
         callbacks[key] = callback;
       }
+      if (instance.ready !== undefined) {
+        if (!instance.ready || typeof instance.ready.then !== "function") {
+          throw new TypeError("ready must be a thenable");
+        }
+        ready = instance.ready;
+      }
       // Capture validated references once. Later author mutation/getters cannot
       // move callback lookup outside the guarded invocation boundary.
       this.callbacks = callbacks;
-      this.instanceReady = true;
       this.hasRendered = false;
       this.resizeDirty = true;
       this.paletteDirty = true;
-      this.reconcile();
-    } catch (error) { this.fail("scene-create", error); }
+    } catch (error) { this.fail("scene-create", error); return; }
+    if (ready) {
+      // Q12: poster-first readiness. Dirty size/palette changes made during
+      // the wait stay queued and flush before the first useful frame. A late
+      // settle on a retired generation is observed and discarded — never a
+      // late instance or an unhandled rejection.
+      this.setState("loading", "ready");
+      let failed = false;
+      let reason = null;
+      try { await ready; }
+      catch (error) { failed = true; reason = error; }
+      if (generation !== this.generation || this.terminal || !motionAllowed()) return;
+      if (failed) { this.fail("scene-ready", reason); return; }
+    }
+    this.clearDeadline();
+    this.instanceReady = true;
+    this.reconcile();
   }
 
   prepareCanvas() {
@@ -337,6 +436,7 @@ export class Host {
 
   releaseInstance() {
     this.generation++;
+    this.clearDeadline();
     this.instanceReady = false;
     this.lastFrameTime = null;
     this.lastProgress = null;

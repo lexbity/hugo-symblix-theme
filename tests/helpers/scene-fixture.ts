@@ -5,6 +5,9 @@ export interface SceneProbe {
   creates: number; frames: number; disposes: number; cleanups: number;
   resizes: number; width: number; height: number; dpr: number;
   frameWidth: number; frameHeight: number; dt: number; velocity: number;
+  // S4 readiness fixture additions (scene-assets.spec.ts).
+  palettes?: number; aborts?: number; parts?: number; frozen?: boolean;
+  firstFrameResizes?: number; firstFramePalettes?: number;
 }
 declare global { interface Window { __motionProbe: Record<string, SceneProbe>; } }
 

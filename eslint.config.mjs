@@ -4,6 +4,7 @@ const browserGlobals = [
   "performance", "getComputedStyle", "IntersectionObserver", "ResizeObserver",
   "MutationObserver", "AbortController", "requestAnimationFrame", "cancelAnimationFrame",
   "requestIdleCallback", "cancelIdleCallback", "setTimeout", "clearTimeout",
+  "fetch", "AbortSignal", "DOMException",
   "__MOTION_DEBUG__",
 ];
 export default [{

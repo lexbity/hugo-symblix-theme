@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { fixture, live, mount, PROBE_MODULE } from './helpers/scene-fixture';
-import { sceneLive, settleAnimations } from './helpers/motion';
+import { ORBIT, sceneLive, settleAnimations } from './helpers/motion';
 
 const presets = ['symblix-light','symblix-dark','ocean-dark','forest-light','sunset-dark','solarized-light','high-contrast'];
 function channels(css:string) {
@@ -108,11 +108,12 @@ test('real scene documentation has no serious accessibility failures live or sta
   for(const width of [1440,390]){
     const before=await page.evaluate(()=>[...window.SymblixMotion.hosts.values()][0].frameCount);
     await page.setViewportSize({width,height:900});
-    await page.locator('[data-scene]').evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
-    await expect(page.locator('[data-scene]')).toHaveAttribute('data-scene-state','live');
+    const stage = page.locator(ORBIT);
+    await stage.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+    await expect(stage).toHaveAttribute('data-scene-state','live');
     await expect.poll(()=>page.evaluate(()=>[...window.SymblixMotion.hosts.values()][0].frameCount)).toBeGreaterThan(before+2);
     const path=testInfo.outputPath(`scene-${width}.png`);
-    await page.locator('[data-scene]').screenshot({path});
+    await stage.screenshot({path});
     await testInfo.attach(`scene-${width}`,{path,contentType:'image/png'});
   }
   const table=page.locator('.table-wrap').first();
