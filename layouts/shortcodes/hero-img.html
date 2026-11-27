@@ -1,0 +1,39 @@
+{{- /* Split hero with a partial screenshot (SYM-VIS-003).
+       A variant of `hero` that renders the media beside the text:
+       a 16/10-cropped, slightly tilted screenshot card (top-left crop),
+       stacking below the text on narrow screens.
+
+       Same params as `hero`, plus:
+         media   (required) screenshot src
+         mediaAlt        alt text for the screenshot
+*/ -}}
+{{- $title := .Get "title" | default .Page.Title -}}
+{{- $subtitle := .Get "subtitle" | default "" -}}
+{{- $eyebrow := .Get "eyebrow" | default "" -}}
+{{- $align := .Get "align" | default "start" -}}
+{{- $variant := .Get "variant" | default "default" -}}
+{{- $headingLevel := .Get "headingLevel" | default "1" -}}
+{{- $primaryHref := .Get "primaryHref" | default "" -}}
+{{- $primaryLabel := .Get "primaryLabel" | default "" -}}
+{{- $secondaryHref := .Get "secondaryHref" | default "" -}}
+{{- $secondaryLabel := .Get "secondaryLabel" | default "" -}}
+{{- $media := .Get "media" | default "" -}}
+{{- if not $media -}}
+  {{- warnf "hero-img shortcode on %s: media is required (use `hero` for a text-only hero)" .Page.Path -}}
+{{- end -}}
+{{- partial "docs/components/hero.html" (dict
+  "Title" $title
+  "Subtitle" $subtitle
+  "Eyebrow" $eyebrow
+  "Align" $align
+  "Variant" $variant
+  "HeadingLevel" $headingLevel
+  "PrimaryHref" $primaryHref
+  "PrimaryLabel" $primaryLabel
+  "SecondaryHref" $secondaryHref
+  "SecondaryLabel" $secondaryLabel
+  "Inner" .InnerDeindent
+  "Class" (.Get "class" | default "")
+  "Media" $media
+  "MediaAlt" (.Get "mediaAlt" | default "")
+) -}}

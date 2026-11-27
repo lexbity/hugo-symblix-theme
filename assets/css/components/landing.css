@@ -852,3 +852,81 @@
     }
   }
 }
+
+/* ============================================================================
+   Landing-page headings + split hero (SYM-VIS-003)
+   ----------------------------------------------------------------------------
+   The docs heading scale and the heading-anchor hiding live under
+   .docs-content, but landing pages render inside .docs-home — without these
+   rules the landing h2/h3 render at body size with a visible anchor glyph.
+   The split hero adds an optional partial-screenshot column next to the
+   hero text (see the hero-img shortcode); without media the hero is
+   unchanged.
+   ============================================================================ */
+
+.docs-home h2 {
+  margin: 2rem 0 1rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  scroll-margin-top: 4rem;
+}
+
+.docs-home h3 {
+  margin: 1.5rem 0 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.25;
+  scroll-margin-top: 4rem;
+}
+
+/* Heading anchors stay out of the reading flow until pointed at; the
+   space they reserve keeps the heading text from shifting. */
+.docs-home .docs-heading-anchor {
+  visibility: hidden;
+}
+
+.docs-home h2:hover .docs-heading-anchor,
+.docs-home h3:hover .docs-heading-anchor,
+.docs-home .docs-heading-anchor:focus-visible {
+  visibility: visible;
+}
+
+/* ── Split hero (hero-img): text + partial screenshot ──────────────────── */
+
+.docs-hero__media {
+  margin: 0;
+}
+
+.docs-hero--split .docs-hero__media {
+  overflow: hidden;
+  border: 1px solid var(--docs-border);
+  border-radius: var(--docs-component-radius, 12px);
+  box-shadow: 0 18px 42px rgb(0 0 0 / 0.28);
+  aspect-ratio: 16 / 10;
+  transform: rotate(-1.2deg);
+  background: var(--docs-surface-2);
+}
+
+.docs-hero__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+}
+
+@media (min-width: 60rem) {
+  .docs-hero--split {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
+    gap: 2.25rem;
+    align-items: center;
+  }
+}
+
+@media (max-width: 59.99rem) {
+  .docs-hero--split .docs-hero__media {
+    margin-top: 1.5rem;
+  }
+}
